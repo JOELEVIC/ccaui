@@ -120,7 +120,7 @@ export default function GamesPage() {
         as="form"
         onSubmit={handleCreateGame}
         p={6}
-        borderRadius="cca"
+        borderRadius="soft"
         bg="bgCard"
         borderWidth="1px"
         borderColor="goldDark"
@@ -199,11 +199,11 @@ export default function GamesPage() {
                 bg="bgCard"
                 borderColor="goldDark"
                 color="textPrimary"
-                borderRadius="cca"
+                borderRadius="soft"
               />
             </Box>
           </Box>
-          <Button type="submit" size="sm" bg="gold" color="black" borderRadius="cca" loading={creating} _hover={{ bg: "goldLight" }}>
+          <Button type="submit" size="sm" bg="gold" color="black" borderRadius="soft" loading={creating} _hover={{ bg: "goldLight" }}>
             Create game
           </Button>
         </VStack>
@@ -221,7 +221,7 @@ export default function GamesPage() {
               <Link key={g.id} href={`/game/${g.id}`}>
                 <Box
                   p={4}
-                  borderRadius="cca"
+                  borderRadius="soft"
                   bg="bgCard"
                   borderWidth="1px"
                   borderColor="goldDark"
@@ -248,7 +248,7 @@ export default function GamesPage() {
               <Link key={g.id} href={`/game/${g.id}`}>
                 <Box
                   p={4}
-                  borderRadius="cca"
+                  borderRadius="soft"
                   bg="bgCard"
                   borderWidth="1px"
                   borderColor="goldDark"

@@ -79,13 +79,15 @@ export function LandingRankingsPreview() {
               <Link key={user.id} href="/rankings">
                 <Box
                   p={4}
-                  borderRadius="cca"
+                  borderRadius="soft"
                   bg="bgSurface"
                   borderWidth="1px"
                   borderColor="goldDark"
+                  boxShadow="var(--shadow-card-soft)"
                   _hover={{
                     borderColor: "gold",
-                    boxShadow: "0 0 20px rgba(198, 167, 94, 0.1)",
+                    boxShadow: "var(--shadow-card-soft-hover)",
+                    transform: "scale(1.01)",
                   }}
                   transition="all 0.2s"
                   position="relative"
@@ -136,7 +138,7 @@ export function LandingRankingsPreview() {
                 variant="outline"
                 borderColor="gold"
                 color="gold"
-                borderRadius="cca"
+                borderRadius="soft"
                 _hover={{ bg: "whiteAlpha.05" }}
               >
                 View Full Rankings

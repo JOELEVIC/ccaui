@@ -19,9 +19,9 @@ export function LandingPlayCompete() {
               sx={{
                 aspectRatio: "1",
                 background: "linear-gradient(145deg, #2a2420 0%, #1a1510 100%)",
-                borderRadius: "cca",
+                borderRadius: "var(--radius-soft)",
                 border: "1px solid var(--chakra-colors-goldDark)",
-                boxShadow: "inset 0 0 40px rgba(0,0,0,0.4)",
+                boxShadow: "var(--shadow-card-soft)",
                 overflow: "hidden",
               }}
             >
@@ -86,8 +86,9 @@ export function LandingPlayCompete() {
                 color="black"
                 fontWeight="600"
                 px={8}
-                borderRadius="cca"
-                _hover={{ bg: "goldLight", boxShadow: "0 0 20px rgba(198, 167, 94, 0.2)" }}
+                borderRadius="soft"
+                boxShadow="var(--shadow-card-soft)"
+                _hover={{ bg: "goldLight", boxShadow: "0 0 24px rgba(201, 169, 110, 0.25)" }}
                 transition="all 0.2s"
               >
                 Start a Match

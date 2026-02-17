@@ -9,7 +9,9 @@ import { LandingNav } from "./LandingNav";
 import { LandingHero } from "./LandingHero";
 import { LandingRankingsPreview } from "./LandingRankingsPreview";
 import { LandingPlayCompete } from "./LandingPlayCompete";
+import { LandingSuperstars } from "./LandingSuperstars";
 import { LandingFeatures } from "./LandingFeatures";
+import { LandingCameroonChess } from "./LandingCameroonChess";
 import { LandingAcademy } from "./LandingAcademy";
 import { LandingCta } from "./LandingCta";
 import { LandingFooter } from "./LandingFooter";
@@ -151,7 +153,9 @@ export function HomeOverview() {
         <LandingHero />
         <LandingRankingsPreview />
         <LandingPlayCompete />
+        <LandingSuperstars />
         <LandingFeatures />
+        <LandingCameroonChess />
         <LandingAcademy />
         <LandingCta />
         <LandingFooter />

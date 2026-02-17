@@ -57,6 +57,16 @@ export function LandingAcademy() {
         filter="blur(80px)"
         pointerEvents="none"
       />
+      {/* Very subtle geometric pattern */}
+      <Box
+        position="absolute"
+        inset={0}
+        opacity={0.02}
+        sx={{
+          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 20px, var(--chakra-colors-gold) 20px, var(--chakra-colors-gold) 21px)`,
+          pointerEvents: "none",
+        }}
+      />
       <Container position="relative" zIndex={1} maxW="6xl">
         <VStack gap={12} align="stretch">
           <Heading
@@ -71,7 +81,7 @@ export function LandingAcademy() {
           </Heading>
           <SimpleGrid columns={{ base: 1, md: 3 }} gap={8} w="full">
             {PILLARS.map((pillar) => (
-              <VStack key={pillar.title} align="flex-start" gap={3} p={6} borderRadius="cca" bg="bgCard" borderWidth="1px" borderColor="goldDark">
+              <VStack key={pillar.title} align="flex-start" gap={3} p={6} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="goldDark" boxShadow="var(--shadow-card-soft)" _hover={{ boxShadow: "var(--shadow-card-soft-hover)" }} transition="all 0.2s">
                 <Box display="flex" alignItems="center" gap={2}>
                   <PillarIcon />
                   <Heading size="sm" color="gold" fontWeight="600">

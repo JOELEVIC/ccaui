@@ -119,7 +119,8 @@ export default function DashboardPage() {
           bg="bgCard"
           borderWidth="1px"
           borderColor="goldDark"
-          borderRadius="cca"
+          borderRadius="soft"
+          boxShadow="var(--shadow-card-soft)"
         >
           <Card.Body p={6}>
             <HStack gap={4} flexWrap="wrap">
@@ -163,8 +164,9 @@ export default function DashboardPage() {
         bg="bgCard"
         borderWidth="1px"
         borderColor="gold"
-        borderRadius="cca"
-        _hover={{ boxShadow: "0 0 20px rgba(198, 167, 94, 0.1)" }}
+        borderRadius="soft"
+        boxShadow="var(--shadow-card-soft)"
+        _hover={{ boxShadow: "var(--shadow-card-soft-hover)" }}
         transition="all 0.2s"
       >
         <Card.Body p={6}>
@@ -179,7 +181,7 @@ export default function DashboardPage() {
                     <Box
                       py={3}
                       px={4}
-                      borderRadius="cca"
+                      borderRadius="soft"
                       bg="whiteAlpha.05"
                       _hover={{ bg: "whiteAlpha.08" }}
                       color="gold"
@@ -190,7 +192,7 @@ export default function DashboardPage() {
                 ))}
               </VStack>
               <Link href="/games">
-                <Button size="sm" variant="outline" borderColor="gold" color="gold" borderRadius="cca">
+                <Button size="sm" variant="outline" borderColor="gold" color="gold" borderRadius="soft">
                   All games
                 </Button>
               </Link>
@@ -204,7 +206,7 @@ export default function DashboardPage() {
                 Create a new game and compete in the arena.
               </Text>
               <Link href="/games">
-                <Button size="md" bg="gold" color="black" borderRadius="cca" _hover={{ bg: "goldLight" }}>
+                <Button size="md" bg="gold" color="black" borderRadius="soft" _hover={{ bg: "goldLight" }}>
                   Start a Match
                 </Button>
               </Link>
@@ -214,7 +216,7 @@ export default function DashboardPage() {
       </Card.Root>
 
       <SimpleGrid columns={{ base: 1, md: 2 }} gap={6} w="full">
-        <Card.Root bg="bgCard" borderWidth="1px" borderColor="goldDark" borderRadius="cca">
+        <Card.Root bg="bgCard" borderWidth="1px" borderColor="goldDark" borderRadius="soft" boxShadow="var(--shadow-card-soft)">
           <Card.Header>
             <Heading size="sm" color="gold">
               Upcoming Tournaments
@@ -232,7 +234,7 @@ export default function DashboardPage() {
                     <Box
                       py={2}
                       px={3}
-                      borderRadius="cca"
+                      borderRadius="soft"
                       bg="whiteAlpha.05"
                       _hover={{ bg: "whiteAlpha.08" }}
                       color="textPrimary"
@@ -247,7 +249,7 @@ export default function DashboardPage() {
           </Card.Body>
         </Card.Root>
 
-        <Card.Root bg="bgCard" borderWidth="1px" borderColor="goldDark" borderRadius="cca">
+        <Card.Root bg="bgCard" borderWidth="1px" borderColor="goldDark" borderRadius="soft" boxShadow="var(--shadow-card-soft)">
           <Card.Header>
             <Heading size="sm" color="gold">
               Recent rating changes
@@ -262,14 +264,14 @@ export default function DashboardPage() {
       </SimpleGrid>
 
       {dailyPuzzle && (
-        <Card.Root bg="bgCard" borderWidth="1px" borderColor="goldDark" borderRadius="cca">
-          <Card.Body py={4}>
+<Card.Root bg="bgCard" borderWidth="1px" borderColor="goldDark" borderRadius="soft" boxShadow="var(--shadow-card-soft)">
+        <Card.Body py={4}>
             <HStack justify="space-between" flexWrap="wrap" gap={2}>
               <Text color="textSecondary" fontSize="sm">
                 Daily puzzle · Difficulty {dailyPuzzle.difficulty}
               </Text>
               <Link href="/learning">
-                <Button size="sm" variant="ghost" color="gold" borderRadius="cca">
+                <Button size="sm" variant="ghost" color="gold" borderRadius="soft">
                   Solve →
                 </Button>
               </Link>

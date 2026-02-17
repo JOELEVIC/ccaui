@@ -33,10 +33,11 @@ export function LandingCta() {
               color="gold"
               fontWeight="600"
               px={8}
-              borderRadius="cca"
+              borderRadius="soft"
+              boxShadow="var(--shadow-card-soft)"
               _hover={{
                 borderColor: "goldLight",
-                boxShadow: "0 0 20px rgba(198, 167, 94, 0.15)",
+                boxShadow: "0 0 24px rgba(201, 169, 110, 0.2)",
               }}
               transition="all 0.2s"
             >

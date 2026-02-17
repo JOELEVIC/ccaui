@@ -36,6 +36,7 @@ export function LandingNav() {
                 size="sm"
                 variant="ghost"
                 color="textSecondary"
+                borderRadius="soft"
                 _hover={{ color: "gold" }}
                 transition="color 0.2s"
               >
@@ -47,7 +48,7 @@ export function LandingNav() {
                 size="sm"
                 bg="gold"
                 color="black"
-                borderRadius="cca"
+                borderRadius="soft"
                 _hover={{ bg: "goldLight" }}
                 transition="all 0.2s"
               >
@@ -57,6 +58,12 @@ export function LandingNav() {
           </HStack>
         </HStack>
       </Container>
+      {/* Thin Cameroon stripe */}
+      <Box h="3px" display="flex" sx={{ gap: 0 }}>
+        <Box flex={1} bg="cameroonGreen" />
+        <Box flex={1} bg="gold" />
+        <Box flex={1} bg="cameroonRed" />
+      </Box>
     </Box>
   );
 }

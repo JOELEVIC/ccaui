@@ -108,17 +108,18 @@ export default function RankingsPage() {
             borderColor="goldDark"
             color="textPrimary"
             maxW="200px"
-            borderRadius="cca"
+            borderRadius="soft"
           />
         </Box>
       </HStack>
 
       <Box
         overflowX="auto"
-        borderRadius="cca"
+        borderRadius="soft"
         borderWidth="1px"
         borderColor="goldDark"
         bg="bgCard"
+        boxShadow="var(--shadow-card-soft)"
       >
         <Box as="table" w="full" borderCollapse="collapse">
           <thead>

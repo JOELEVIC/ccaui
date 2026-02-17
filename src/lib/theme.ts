@@ -13,27 +13,34 @@ const ccaTokens = defineTokens({
     body: { value: "var(--font-inter), system-ui, sans-serif" },
   },
   colors: {
-    // Backgrounds
-    bgPrimary: { value: "#0F1115" },
-    bgGradientStart: { value: "#12151C" },
-    bgSurface: { value: "#161A22" },
-    // Aliases so existing bgDark/bgCard keep working
-    bgDark: { value: "#0F1115" },
-    bgCard: { value: "#161A22" },
-    // Gold system (max 3 shades)
-    gold: { value: "#C6A75E" },
+    // Backgrounds (warmer darks)
+    bgPrimary: { value: "#111318" },
+    bgGradientStart: { value: "#13151A" },
+    bgSurface: { value: "#1A1E26" },
+    bgDark: { value: "#111318" },
+    bgCard: { value: "#1A1E26" },
+    // Gold system (slightly warmer primary)
+    gold: { value: "#C9A96E" },
     goldLight: { value: "#E8C77A" },
     goldDark: { value: "#8F793D" },
+    // Cameroon flag (sparing use)
+    cameroonGreen: { value: "#007A3D" },
+    cameroonRed: { value: "#CE1126" },
+    cameroonYellow: { value: "#FCD116" },
     // Text
     textPrimary: { value: "#EAEAEA" },
     textSecondary: { value: "#B8BDC7" },
     textMuted: { value: "#7E8795" },
-    // Status
     statusSuccess: { value: "#1F3B2D" },
     statusWarning: { value: "#5A1F1F" },
   },
   radii: {
     cca: { value: "6px" },
+    soft: { value: "10px" },
+  },
+  shadows: {
+    cardSoft: { value: "0 4px 24px rgba(0, 0, 0, 0.2)" },
+    cardSoftHover: { value: "0 8px 32px rgba(0, 0, 0, 0.25)" },
   },
 });
 

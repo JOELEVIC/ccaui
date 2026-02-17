@@ -73,10 +73,12 @@ export function LandingFeatures() {
                   bg="bgCard"
                   borderWidth="1px"
                   borderColor="goldDark"
-                  borderRadius="cca"
+                  borderRadius="soft"
+                  boxShadow="var(--shadow-card-soft)"
                   _hover={{
                     borderColor: "gold",
-                    boxShadow: "0 0 20px rgba(198, 167, 94, 0.08)",
+                    boxShadow: "var(--shadow-card-soft-hover)",
+                    transform: "scale(1.01)",
                   }}
                   transition="all 0.2s"
                   height="full"

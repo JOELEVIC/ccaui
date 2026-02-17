@@ -66,7 +66,7 @@ function PuzzleCard({
         gap={4}
         py={3}
         px={4}
-        borderRadius="cca"
+        borderRadius="soft"
         bg="bgCard"
         borderWidth="1px"
         borderColor="goldDark"
@@ -145,7 +145,7 @@ export default function LearningPage() {
         <Box
           py={6}
           px={4}
-          borderRadius="cca"
+          borderRadius="soft"
           bg="bgCard"
           borderWidth="1px"
           borderColor="goldDark"
@@ -166,7 +166,7 @@ export default function LearningPage() {
         <Box
           py={6}
           px={4}
-          borderRadius="cca"
+          borderRadius="soft"
           bg="bgCard"
           borderWidth="1px"
           borderColor="goldDark"

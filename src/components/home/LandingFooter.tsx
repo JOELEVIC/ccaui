@@ -45,24 +45,35 @@ export function LandingFooter() {
             </VStack>
           ))}
         </SimpleGrid>
-        <VStack gap={3} pt={6} borderTopWidth="1px" borderColor="whiteAlpha.08">
-          <Box
-            w="48px"
-            h="48px"
-            borderRadius="full"
-            borderWidth="1px"
-            borderColor="gold"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            color="gold"
-            fontSize="xl"
-            aria-hidden
-          >
-            ♔
+        <VStack gap={4} pt={8} borderTopWidth="1px" borderColor="whiteAlpha.08">
+          {/* Crest with Cameroon accent */}
+          <Box position="relative" display="flex" flexDir="column" alignItems="center" gap={2}>
+            <Box
+              w="56px"
+              h="56px"
+              borderRadius="full"
+              borderWidth="2px"
+              borderColor="gold"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              color="gold"
+              fontSize="2xl"
+              aria-hidden
+            >
+              ♔
+            </Box>
+            <Box h="3px" w="64px" display="flex" sx={{ gap: "2px" }} borderRadius="full" overflow="hidden">
+              <Box flex={1} bg="cameroonGreen" />
+              <Box flex={1} bg="gold" />
+              <Box flex={1} bg="cameroonRed" />
+            </Box>
           </Box>
           <Text color="textMuted" fontSize="sm" fontStyle="italic">
             Discipline. Strategy. Excellence.
+          </Text>
+          <Text color="textMuted" fontSize="xs">
+            Cameroon Chess Academy · Fédération Camerounaise des Échecs
           </Text>
           <Text color="textMuted" fontSize="xs">
             © Cameroon Chess Academy

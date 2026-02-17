@@ -143,13 +143,13 @@ export default function TournamentsPage() {
       {(isAdmin || user?.role === "COACH" || user?.role === "SCHOOL_ADMIN" || user?.role === "REGIONAL_ADMIN") && (
         <Box
           p={6}
-          borderRadius="cca"
+          borderRadius="soft"
           bg="bgCard"
           borderWidth="1px"
           borderColor="goldDark"
         >
           {!showCreate ? (
-            <Button size="sm" bg="gold" color="black" borderRadius="cca" onClick={() => setShowCreate(true)} _hover={{ bg: "goldLight" }}>
+            <Button size="sm" bg="gold" color="black" borderRadius="soft" onClick={() => setShowCreate(true)} _hover={{ bg: "goldLight" }}>
               Create tournament
             </Button>
           ) : (
@@ -160,7 +160,7 @@ export default function TournamentsPage() {
               <VStack align="stretch" gap={3}>
                 <Box>
                   <Text color="whiteAlpha.900" mb={1} fontSize="sm">Name</Text>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tournament name" bg="bgCard" borderColor="goldDark" color="textPrimary" borderRadius="cca" />
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tournament name" bg="bgCard" borderColor="goldDark" color="textPrimary" borderRadius="soft" />
                 </Box>
                 <Box>
                   <Text color="whiteAlpha.900" mb={1} fontSize="sm">School</Text>
@@ -185,17 +185,17 @@ export default function TournamentsPage() {
                 </Box>
                 <Box>
                   <Text color="whiteAlpha.900" mb={1} fontSize="sm">Start date</Text>
-                  <Input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} bg="bgCard" borderColor="goldDark" color="textPrimary" borderRadius="cca" />
+                  <Input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} bg="bgCard" borderColor="goldDark" color="textPrimary" borderRadius="soft" />
                 </Box>
                 <Box>
                   <Text color="whiteAlpha.900" mb={1} fontSize="sm">End date (optional)</Text>
-                  <Input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} bg="bgCard" borderColor="goldDark" color="textPrimary" borderRadius="cca" />
+                  <Input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} bg="bgCard" borderColor="goldDark" color="textPrimary" borderRadius="soft" />
                 </Box>
                 <Box display="flex" gap={2}>
-                  <Button type="submit" size="sm" bg="gold" color="black" borderRadius="cca" loading={creating} _hover={{ bg: "goldLight" }}>
+                  <Button type="submit" size="sm" bg="gold" color="black" borderRadius="soft" loading={creating} _hover={{ bg: "goldLight" }}>
                     Create
                   </Button>
-                  <Button type="button" size="sm" variant="outline" color="gold" borderColor="gold" borderRadius="cca" onClick={() => setShowCreate(false)}>
+                  <Button type="button" size="sm" variant="outline" color="gold" borderColor="gold" borderRadius="soft" onClick={() => setShowCreate(false)}>
                     Cancel
                   </Button>
                 </Box>
@@ -215,7 +215,7 @@ export default function TournamentsPage() {
               bg={tab === activeTab ? "gold" : "transparent"}
               color={tab === activeTab ? "black" : "gold"}
               borderColor="gold"
-              borderRadius="cca"
+              borderRadius="soft"
               onClick={() => setActiveTab(tab)}
             >
               {tab === "ongoing" ? "Live" : tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -288,11 +288,12 @@ function TournamentGrid({
           <Box
             key={t.id}
             p={5}
-            borderRadius="cca"
+            borderRadius="soft"
             bg="bgCard"
             borderWidth="1px"
             borderColor="goldDark"
-            _hover={{ borderColor: "gold", boxShadow: "0 0 20px rgba(198, 167, 94, 0.08)" }}
+            boxShadow="var(--shadow-card-soft)"
+            _hover={{ borderColor: "gold", boxShadow: "var(--shadow-card-soft-hover)" }}
             transition="all 0.2s"
             display="flex"
             flexDir="column"
@@ -302,7 +303,7 @@ function TournamentGrid({
               <Box
                 w="40px"
                 h="40px"
-                borderRadius="cca"
+                borderRadius="soft"
                 bg="goldDark"
                 color="gold"
                 display="flex"
@@ -332,7 +333,7 @@ function TournamentGrid({
                 variant="outline"
                 color="gold"
                 borderColor="gold"
-                borderRadius="cca"
+                borderRadius="soft"
                 alignSelf="flex-start"
                 loading={joining}
                 onClick={(e) => {

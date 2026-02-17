@@ -1,16 +1,22 @@
 :root {
-  --background: #0f1115;
-  --background-gradient-start: #12151c;
-  --background-surface: #161a22;
+  --background: #111318;
+  --background-gradient-start: #13151a;
+  --background-surface: #1a1e26;
   --foreground: #eaeaea;
   --foreground-secondary: #b8bdc7;
   --foreground-muted: #7e8795;
-  --gold: #c6a75e;
+  --gold: #c9a96e;
   --gold-highlight: #e8c77a;
   --gold-muted: #8f793d;
+  --cameroon-green: #007a3d;
+  --cameroon-red: #ce1126;
+  --cameroon-yellow: #fcd116;
   --status-success: #1f3b2d;
   --status-warning: #5a1f1f;
   --radius-cca: 6px;
+  --radius-soft: 10px;
+  --shadow-card-soft: 0 4px 24px rgba(0, 0, 0, 0.2);
+  --shadow-card-soft-hover: 0 8px 32px rgba(0, 0, 0, 0.25);
   --transition-page: 200ms ease;
 }
 
@@ -24,8 +30,6 @@ html,
 body {
   min-height: 100%;
 }
-
-/* 8px grid spacing; max 6px radius applied via theme/tokens */
 
 @keyframes shimmer {
   0%, 100% { opacity: 0.7; }

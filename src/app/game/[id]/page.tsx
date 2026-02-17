@@ -157,7 +157,7 @@ export default function GamePage() {
           Game not found
         </Text>
         <Link href="/games">
-          <Button mt={4} color="gold" variant="outline" borderColor="gold" borderRadius="cca">
+          <Button mt={4} color="gold" variant="outline" borderColor="gold" borderRadius="soft">
             Back to games
           </Button>
         </Link>
@@ -180,7 +180,7 @@ export default function GamePage() {
           <Box
             py={2}
             px={3}
-            borderRadius="cca"
+            borderRadius="soft"
             bg="bgCard"
             borderWidth="1px"
             borderColor="goldDark"
@@ -206,7 +206,7 @@ export default function GamePage() {
           <Box
             py={2}
             px={3}
-            borderRadius="cca"
+            borderRadius="soft"
             bg="bgCard"
             borderWidth="1px"
             borderColor="goldDark"
@@ -227,7 +227,7 @@ export default function GamePage() {
           <Box
             py={3}
             px={4}
-            borderRadius="cca"
+            borderRadius="soft"
             borderWidth="1px"
             borderColor="goldDark"
             bg="bgCard"
@@ -247,7 +247,7 @@ export default function GamePage() {
           <Box
             py={3}
             px={4}
-            borderRadius="cca"
+            borderRadius="soft"
             borderWidth="1px"
             borderColor="goldDark"
             bg="bgCard"
@@ -282,7 +282,7 @@ export default function GamePage() {
               variant="outline"
               borderColor="goldDark"
               color="textSecondary"
-              borderRadius="cca"
+              borderRadius="soft"
               _hover={{ color: "gold" }}
             >
               Offer draw
@@ -292,7 +292,7 @@ export default function GamePage() {
               variant="outline"
               borderColor="statusWarning"
               color="statusWarning"
-              borderRadius="cca"
+              borderRadius="soft"
               onClick={handleResign}
             >
               Resign
@@ -303,7 +303,7 @@ export default function GamePage() {
                 variant="outline"
                 borderColor="gold"
                 color="gold"
-                borderRadius="cca"
+                borderRadius="soft"
               >
                 Analyze
               </Button>
@@ -311,7 +311,7 @@ export default function GamePage() {
           </>
         )}
         <Link href="/games">
-          <Button size="sm" variant="ghost" color="textMuted" borderRadius="cca">
+          <Button size="sm" variant="ghost" color="textMuted" borderRadius="soft">
             Back to games
           </Button>
         </Link>
