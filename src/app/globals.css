@@ -1,27 +1,38 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #0f1115;
+  --background-gradient-start: #12151c;
+  --background-surface: #161a22;
+  --foreground: #eaeaea;
+  --foreground-secondary: #b8bdc7;
+  --foreground-muted: #7e8795;
+  --gold: #c6a75e;
+  --gold-highlight: #e8c77a;
+  --gold-muted: #8f793d;
+  --status-success: #1f3b2d;
+  --status-warning: #5a1f1f;
+  --radius-cca: 6px;
+  --transition-page: 200ms ease;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+html,
+body {
+  min-height: 100%;
+}
+
+/* 8px grid spacing; max 6px radius applied via theme/tokens */
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
