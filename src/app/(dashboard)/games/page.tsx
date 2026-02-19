@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Box, Heading, Text, VStack, Button, Input } from "@chakra-ui/react";
+import { Box, Heading, Text, VStack, Button, Input, HStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
@@ -62,8 +62,11 @@ const USERS = gql`
 
 const TIME_PRESETS = ["5+0", "10+0", "15+10", "30+0", "60+0"];
 
+type PlayMode = "human" | "self" | "bot";
+
 export default function GamesPage() {
   const router = useRouter();
+  const [playMode, setPlayMode] = useState<PlayMode>("human");
   const [whiteId, setWhiteId] = useState("");
   const [blackId, setBlackId] = useState("");
   const [timeControl, setTimeControl] = useState("10+0");
@@ -116,6 +119,58 @@ export default function GamesPage() {
         Play
       </Heading>
 
+      {/* Play mode selector */}
+      <HStack gap={2} flexWrap="wrap">
+        {(["human", "self", "bot"] as PlayMode[]).map((mode) => (
+          <Button
+            key={mode}
+            size="sm"
+            variant={playMode === mode ? "solid" : "outline"}
+            bg={playMode === mode ? "gold" : "transparent"}
+            color={playMode === mode ? "black" : "gold"}
+            borderColor="gold"
+            borderRadius="soft"
+            onClick={() => setPlayMode(mode)}
+          >
+            {mode === "human" ? "Vs Human" : mode === "self" ? "Vs Self" : "Vs Bot"}
+          </Button>
+        ))}
+      </HStack>
+
+      {playMode === "self" && (
+        <Box p={6} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="goldDark">
+          <Text color="textPrimary" fontWeight="600" mb={2}>
+            Play vs Self
+          </Text>
+          <Text color="textSecondary" fontSize="sm" mb={4}>
+            Practice by playing both sides on the same device. No rating, no opponent—just you and the board.
+          </Text>
+          <Link href="/play/local">
+            <Button size="md" bg="gold" color="black" borderRadius="soft" _hover={{ bg: "goldLight" }}>
+              Start local game
+            </Button>
+          </Link>
+        </Box>
+      )}
+
+      {playMode === "bot" && (
+        <Box p={6} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="goldDark">
+          <Text color="textPrimary" fontWeight="600" mb={2}>
+            Practice vs Bot
+          </Text>
+          <Text color="textSecondary" fontSize="sm" mb={4}>
+            Play against a computer opponent. You play as White; the bot plays as Black. No rating—ideal for practice.
+          </Text>
+          <Link href="/play/bot">
+            <Button size="md" bg="gold" color="black" borderRadius="soft" _hover={{ bg: "goldLight" }}>
+              Start vs Bot
+            </Button>
+          </Link>
+        </Box>
+      )}
+
+      {playMode === "human" && (
+        <>
       <Box
         as="form"
         onSubmit={handleCreateGame}
@@ -263,6 +318,8 @@ export default function GamesPage() {
           </VStack>
         )}
       </Box>
+        </>
+      )}
     </VStack>
   );
 }

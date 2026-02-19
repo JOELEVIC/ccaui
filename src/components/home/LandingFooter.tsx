@@ -65,8 +65,8 @@ export function LandingFooter() {
             </Box>
             <Box h="3px" w="64px" display="flex" sx={{ gap: "2px" }} borderRadius="full" overflow="hidden">
               <Box flex={1} bg="cameroonGreen" />
-              <Box flex={1} bg="gold" />
               <Box flex={1} bg="cameroonRed" />
+              <Box flex={1} bg="cameroonYellow" />
             </Box>
           </Box>
           <Text color="textMuted" fontSize="sm" fontStyle="italic">

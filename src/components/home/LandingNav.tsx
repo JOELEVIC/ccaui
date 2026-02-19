@@ -61,8 +61,8 @@ export function LandingNav() {
       {/* Thin Cameroon stripe */}
       <Box h="3px" display="flex" sx={{ gap: 0 }}>
         <Box flex={1} bg="cameroonGreen" />
-        <Box flex={1} bg="gold" />
         <Box flex={1} bg="cameroonRed" />
+        <Box flex={1} bg="cameroonYellow" />
       </Box>
     </Box>
   );

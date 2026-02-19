@@ -84,8 +84,8 @@ export function LandingHero() {
                     sx={{ gap: "2px" }}
                   >
                     <Box w="33.33%" h="full" bg="cameroonGreen" borderRadius="full" />
-                    <Box w="33.33%" h="full" bg="gold" borderRadius="full" />
                     <Box w="33.33%" h="full" bg="cameroonRed" borderRadius="full" />
+                    <Box w="33.33%" h="full" bg="cameroonYellow" borderRadius="full" />
                   </Box>
                 </Box>{" "}
                 Chess Academy
