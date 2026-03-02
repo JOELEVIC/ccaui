@@ -90,7 +90,7 @@ export default function TournamentsPage() {
       return;
     }
     try {
-      const { data, errors } = await createTournament({
+      const { data, error } = await createTournament({
         variables: {
           input: {
             name: name.trim(),
@@ -100,8 +100,8 @@ export default function TournamentsPage() {
           },
         },
       });
-      if (errors?.length) {
-        toaster.create({ title: errors[0]?.message ?? "Failed to create tournament", type: "error" });
+      if (error) {
+        toaster.create({ title: error.message || "Failed to create tournament", type: "error" });
         return;
       }
       if (data?.createTournament?.id) {
@@ -120,9 +120,9 @@ export default function TournamentsPage() {
 
   async function handleJoin(tournamentId: string) {
     try {
-      const { data, errors } = await joinTournament({ variables: { tournamentId } });
-      if (errors?.length) {
-        toaster.create({ title: errors[0]?.message ?? "Failed to join", type: "error" });
+      const { data, error } = await joinTournament({ variables: { tournamentId } });
+      if (error) {
+        toaster.create({ title: error.message || "Failed to join", type: "error" });
         return;
       }
       if (data?.joinTournament) {
@@ -170,11 +170,10 @@ export default function TournamentsPage() {
                     style={{
                       width: "100%",
                       padding: "8px 12px",
-                      borderRadius: "6px",
+                      borderRadius: 6,
                       backgroundColor: "var(--chakra-colors-bgCard)",
                       border: "1px solid var(--chakra-colors-goldDark)",
                       color: "var(--chakra-colors-textPrimary)",
-                      borderRadius: 6,
                     }}
                   >
                     <option value="">Select school</option>

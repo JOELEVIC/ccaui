@@ -31,7 +31,7 @@ export function LandingCameroonChess() {
             position="relative"
             w="full"
             maxW={{ lg: "420px" }}
-            sx={{ aspectRatio: "4/3" }}
+            aspectRatio="4/3"
             borderRadius="var(--radius-soft)"
             overflow="hidden"
             bg="bgSurface"

@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Container, HStack, Text, VStack, SimpleGrid, Link as ChakraLink } from "@chakra-ui/react";
+import { Box, Container, Text, VStack, SimpleGrid, Link as ChakraLink } from "@chakra-ui/react";
 import Link from "next/link";
 
 const FOOTER_LINKS = {
@@ -63,7 +63,7 @@ export function LandingFooter() {
             >
               ♔
             </Box>
-            <Box h="3px" w="64px" display="flex" sx={{ gap: "2px" }} borderRadius="full" overflow="hidden">
+            <Box h="3px" w="64px" display="flex" gap="2px" borderRadius="full" overflow="hidden">
               <Box flex={1} bg="cameroonGreen" />
               <Box flex={1} bg="cameroonRed" />
               <Box flex={1} bg="cameroonYellow" />

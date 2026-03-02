@@ -71,9 +71,9 @@ export default function TournamentDetailPage() {
 
   async function handleJoin() {
     try {
-      const { errors } = await joinTournament({ variables: { tournamentId: id } });
-      if (errors?.length) {
-        toaster.create({ title: errors[0]?.message ?? "Failed to join", type: "error" });
+      const { error } = await joinTournament({ variables: { tournamentId: id } });
+      if (error) {
+        toaster.create({ title: error.message || "Failed to join", type: "error" });
         return;
       }
       toaster.create({ title: "Joined tournament", type: "success" });
@@ -85,9 +85,9 @@ export default function TournamentDetailPage() {
 
   async function handleStart() {
     try {
-      const { errors } = await startTournament({ variables: { tournamentId: id } });
-      if (errors?.length) {
-        toaster.create({ title: errors[0]?.message ?? "Failed to start", type: "error" });
+      const { error } = await startTournament({ variables: { tournamentId: id } });
+      if (error) {
+        toaster.create({ title: error.message || "Failed to start", type: "error" });
         return;
       }
       toaster.create({ title: "Tournament started", type: "success" });
@@ -99,9 +99,9 @@ export default function TournamentDetailPage() {
 
   async function handleComplete() {
     try {
-      const { errors } = await completeTournament({ variables: { tournamentId: id } });
-      if (errors?.length) {
-        toaster.create({ title: errors[0]?.message ?? "Failed to complete", type: "error" });
+      const { error } = await completeTournament({ variables: { tournamentId: id } });
+      if (error) {
+        toaster.create({ title: error.message || "Failed to complete", type: "error" });
         return;
       }
       toaster.create({ title: "Tournament completed", type: "success" });

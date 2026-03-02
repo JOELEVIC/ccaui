@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Heading, Text, VStack, HStack, Button, Input } from "@chakra-ui/react";
+import { Box, Heading, Text, VStack, HStack, Input } from "@chakra-ui/react";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 
@@ -147,20 +147,17 @@ export default function RankingsPage() {
                 borderColor="goldDark"
                 bg={i < 3 ? "whiteAlpha.03" : "transparent"}
                 _hover={{ bg: "whiteAlpha.05" }}
-                sx={{
-                  "& td": { py: 3, px: 4 },
-                }}
               >
-                <Box as="td" color="textMuted" fontWeight="bold">
+                <Box as="td" py={3} px={4} color="textMuted" fontWeight="bold">
                   #{i + 1}
                 </Box>
-                <Box as="td" color="textPrimary">
+                <Box as="td" py={3} px={4} color="textPrimary">
                   {user.profile ? `${user.profile.firstName} ${user.profile.lastName}` : user.username}
                 </Box>
-                <Box as="td" color="textSecondary" fontSize="sm">
+                <Box as="td" py={3} px={4} color="textSecondary" fontSize="sm">
                   {user.school?.name ?? "—"}
                 </Box>
-                <Box as="td" textAlign="right" color="gold" fontWeight="700">
+                <Box as="td" py={3} px={4} textAlign="right" color="gold" fontWeight="700">
                   {user.rating}
                 </Box>
               </Box>

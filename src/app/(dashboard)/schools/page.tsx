@@ -45,11 +45,11 @@ export default function SchoolsPage() {
       return;
     }
     try {
-      const { data: mutData, errors } = await createSchool({
+      const { data: mutData, error } = await createSchool({
         variables: { input: { name: name.trim(), region: region.trim() } },
       });
-      if (errors?.length) {
-        toaster.create({ title: errors[0]?.message ?? "Failed to create school", type: "error" });
+      if (error) {
+        toaster.create({ title: error.message || "Failed to create school", type: "error" });
         return;
       }
       if (mutData?.createSchool?.id) {

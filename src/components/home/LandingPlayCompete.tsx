@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Container, Heading, Text, VStack, HStack, Button, Flex, ListRoot, ListItem } from "@chakra-ui/react";
+import { Box, Container, Heading, Text, VStack, Button, Flex, ListRoot, ListItem } from "@chakra-ui/react";
 import Link from "next/link";
 
 export function LandingPlayCompete() {
@@ -16,25 +16,18 @@ export function LandingPlayCompete() {
           <Box flex={1} w="full" maxW={{ lg: "420px" }} position="relative">
             <Box
               position="relative"
-              sx={{
-                aspectRatio: "1",
-                background: "linear-gradient(145deg, #2a2420 0%, #1a1510 100%)",
-                borderRadius: "var(--radius-soft)",
-                border: "1px solid var(--chakra-colors-goldDark)",
-                boxShadow: "var(--shadow-card-soft)",
-                overflow: "hidden",
-              }}
+              aspectRatio="1"
+              background="linear-gradient(145deg, #2a2420 0%, #1a1510 100%)"
+              borderRadius="var(--radius-soft)"
+              border="1px solid var(--chakra-colors-goldDark)"
+              boxShadow="var(--shadow-card-soft)"
+              overflow="hidden"
             >
               <Box
                 position="absolute"
                 inset={0}
-                sx={{
-                  backgroundImage: `
-                    linear-gradient(to right, rgba(143,121,61,0.5) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(143,121,61,0.5) 1px, transparent 1px)
-                  `,
-                  backgroundSize: "12.5% 12.5%",
-                }}
+                backgroundImage="linear-gradient(to right, rgba(143,121,61,0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(143,121,61,0.5) 1px, transparent 1px)"
+                backgroundSize="12.5% 12.5%"
               />
               <Box
                 position="absolute"
@@ -65,7 +58,7 @@ export function LandingPlayCompete() {
             <Text color="textSecondary" fontSize="lg" lineHeight="1.6" maxW="md">
               Engage in ranked matches, institutional tournaments, and national competitions.
             </Text>
-            <ListRoot spacing={3} color="textSecondary">
+            <ListRoot gap={3} color="textSecondary">
               <ListItem display="flex" alignItems="center" gap={2}>
                 <Box w="4px" h="4px" borderRadius="full" bg="gold" flexShrink={0} />
                 Real-time ranked games

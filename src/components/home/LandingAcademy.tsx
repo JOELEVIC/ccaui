@@ -62,10 +62,8 @@ export function LandingAcademy() {
         position="absolute"
         inset={0}
         opacity={0.02}
-        sx={{
-          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 20px, var(--chakra-colors-gold) 20px, var(--chakra-colors-gold) 21px)`,
-          pointerEvents: "none",
-        }}
+        backgroundImage={`repeating-linear-gradient(45deg, transparent, transparent 20px, var(--chakra-colors-gold) 20px, var(--chakra-colors-gold) 21px)`}
+        pointerEvents="none"
       />
       <Container position="relative" zIndex={1} maxW="6xl">
         <VStack gap={12} align="stretch">

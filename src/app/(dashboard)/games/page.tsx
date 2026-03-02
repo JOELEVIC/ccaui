@@ -91,13 +91,13 @@ export default function GamesPage() {
       return;
     }
     try {
-      const { data, errors } = await createGame({
+      const { data, error } = await createGame({
         variables: {
           input: { whiteId, blackId, timeControl },
         },
       });
-      if (errors?.length) {
-        toaster.create({ title: errors[0]?.message ?? "Failed to create game", type: "error" });
+      if (error) {
+        toaster.create({ title: error.message || "Failed to create game", type: "error" });
         return;
       }
       if (data?.createGame?.id) {

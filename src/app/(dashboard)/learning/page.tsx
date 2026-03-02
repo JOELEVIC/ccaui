@@ -81,7 +81,7 @@ function PuzzleCard({
             {title}
           </Text>
           {theme?.length ? (
-            <Text color="textMuted" fontSize="xs" noOfLines={1}>
+            <Text color="textMuted" fontSize="xs" lineClamp={1}>
               {theme.join(", ")}
             </Text>
           ) : null}

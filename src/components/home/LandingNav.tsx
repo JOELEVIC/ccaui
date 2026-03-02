@@ -59,7 +59,7 @@ export function LandingNav() {
         </HStack>
       </Container>
       {/* Thin Cameroon stripe */}
-      <Box h="3px" display="flex" sx={{ gap: 0 }}>
+      <Box h="3px" display="flex" gap={0}>
         <Box flex={1} bg="cameroonGreen" />
         <Box flex={1} bg="cameroonRed" />
         <Box flex={1} bg="cameroonYellow" />

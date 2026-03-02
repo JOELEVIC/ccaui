@@ -23,7 +23,7 @@ const TOP_USERS = gql`
   }
 `;
 
-function Avatar({ name, rank }: { name: string; rank: number }) {
+function Avatar({ name }: { name: string; rank: number }) {
   const initial = name?.charAt(0)?.toUpperCase() ?? "?";
   return (
     <Box
@@ -113,12 +113,12 @@ export function LandingRankingsPreview() {
                       rank={i + 1}
                     />
                     <VStack align="flex-start" gap={0} flex={1} minW={0}>
-                      <Text color="textPrimary" fontWeight="600" fontSize="sm" noOfLines={1}>
+                      <Text color="textPrimary" fontWeight="600" fontSize="sm" lineClamp={1}>
                         {user.profile
                           ? `${user.profile.firstName} ${user.profile.lastName}`
                           : user.username}
                       </Text>
-                      <Text color="textMuted" fontSize="xs" noOfLines={1}>
+                      <Text color="textMuted" fontSize="xs" lineClamp={1}>
                         {user.school?.name ?? "—"}
                       </Text>
                       <Text color="gold" fontWeight="700" fontSize="lg">

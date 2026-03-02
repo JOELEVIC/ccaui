@@ -28,11 +28,11 @@ export default function LoginPage() {
     e.preventDefault();
     setErrorMessage(null);
     try {
-      const { data, errors } = await login({
+      const { data, error } = await login({
         variables: { input: { email, password } },
       });
-      if (errors?.length) {
-        const msg = errors[0]?.message ?? "Invalid email or password";
+      if (error) {
+        const msg = error.message || "Invalid email or password";
         setErrorMessage(msg);
         toaster.create({ title: msg, type: "error" });
         return;
