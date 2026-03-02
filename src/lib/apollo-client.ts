@@ -3,7 +3,11 @@ import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
 
-const uri = process.env.NEXT_PUBLIC_GRAPHQL_URI ?? "http://localhost:4000/graphql";
+const defaultUri =
+  process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
+    ? "https://blacksilvergroups.xyz/api/graphql"
+    : "http://localhost:3000/api/graphql";
+const uri = process.env.NEXT_PUBLIC_GRAPHQL_URI ?? defaultUri;
 
 const httpLink = createHttpLink({ uri });
 
