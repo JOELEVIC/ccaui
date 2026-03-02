@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { HStack, Text } from "@chakra-ui/react";
 
 interface StreakCounterProps {
   count: number;

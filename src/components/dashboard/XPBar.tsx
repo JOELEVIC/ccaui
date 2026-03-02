@@ -8,12 +8,6 @@ function xpForLevel(level: number): number {
   return level * XP_PER_LEVEL;
 }
 
-function xpInCurrentLevel(xp: number): number {
-  const level = 1 + Math.floor(xp / XP_PER_LEVEL);
-  const xpAtLevelStart = (level - 1) * XP_PER_LEVEL;
-  return xp - xpAtLevelStart;
-}
-
 export interface XPBarProps {
   xp: number;
   level?: number;

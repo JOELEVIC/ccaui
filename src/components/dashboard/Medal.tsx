@@ -14,7 +14,7 @@ const MEDALS: Record<1 | 2 | 3, { char: string; color: string }> = {
 };
 
 export function Medal({ rank, size = "md" }: MedalProps) {
-  const { char, color } = MEDALS[rank];
+  const { char } = MEDALS[rank];
   const isSm = size === "sm";
   return (
     <Box
