@@ -2,12 +2,14 @@
 
 import { Box, HStack, Text } from "@chakra-ui/react";
 import { useAuth } from "@/lib/auth";
+import { StreakCounter } from "@/components/dashboard";
 
 export function TopBar() {
   const { user } = useAuth();
   if (!user) return null;
 
   const initial = user.username?.charAt(0)?.toUpperCase() ?? "?";
+  const streak = user.profile?.puzzleStreakCount ?? 0;
 
   return (
     <Box
@@ -19,6 +21,7 @@ export function TopBar() {
       bg="bgDark"
     >
       <HStack justify="flex-end" gap={4}>
+        <StreakCounter count={streak} size="sm" />
         <Box
           w="8px"
           h="8px"

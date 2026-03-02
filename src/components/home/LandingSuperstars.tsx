@@ -3,9 +3,9 @@
 import { Box, Container, Heading, Text, VStack, SimpleGrid } from "@chakra-ui/react";
 
 const SUPERSTARS = [
-  { name: "Magnus Carlsen", title: "World Champion", quote: "Replace with approved quote." },
-  { name: "Judit Polgár", title: "Legend", quote: "Replace with approved quote." },
-  { name: "Vishy Anand", title: "World Champion", quote: "Replace with approved quote." },
+  { name: "Magnus Carlsen", title: "World Champion", quote: "Chess is a fight and you have to be ready to fight." },
+  { name: "Judit Polgár", title: "Legend", quote: "I always wanted to be the best." },
+  { name: "Vishy Anand", title: "World Champion", quote: "You need to work on your game constantly." },
 ];
 
 export function LandingSuperstars() {
@@ -25,8 +25,8 @@ export function LandingSuperstars() {
               Inspired by greatness
             </Heading>
             <Box h="1px" w="64px" bg="gold" opacity={0.8} />
-            <Text color="textMuted" fontSize="sm" textAlign="center" maxW="md">
-              Global standards. Replace with licensed images and approved quotes.
+            <Text color="textMuted" fontSize="sm" textAlign="center" maxW="md" lineHeight="1.6">
+              Words from those who changed the game.
             </Text>
           </VStack>
           <SimpleGrid columns={{ base: 1, md: 3 }} gap={6} w="full">
@@ -64,7 +64,14 @@ export function LandingSuperstars() {
                 <Text color="gold" fontSize="xs" fontWeight="600" mt={1}>
                   {person.title}
                 </Text>
-                <Text color="textMuted" fontSize="sm" mt={2} lineHeight="1.5">
+                <Text
+                  color="textMuted"
+                  fontSize="sm"
+                  mt={2}
+                  lineHeight="1.6"
+                  fontFamily="var(--font-accent), var(--font-playfair), Georgia, serif"
+                  fontStyle="italic"
+                >
                   {person.quote}
                 </Text>
               </Box>

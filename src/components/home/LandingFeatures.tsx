@@ -59,10 +59,11 @@ export function LandingFeatures() {
               size="xl"
               fontFamily="var(--font-playfair), Georgia, serif"
               color="textPrimary"
+              letterSpacing="0.03em"
             >
               Tools for competitive excellence
             </Heading>
-            <Text color="textSecondary" fontSize="lg">
+            <Text color="textSecondary" fontSize="lg" lineHeight="1.65" maxW="xl">
               One platform for players, coaches, and institutions.
             </Text>
           </VStack>

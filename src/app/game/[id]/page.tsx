@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useQuery } from "@apollo/client/react";
+import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { Box, Button, Text, VStack, HStack, Flex } from "@chakra-ui/react";
 import { toaster } from "@/lib/toaster";
@@ -11,6 +11,7 @@ import { Chess } from "chess.js";
 import { useAuth } from "@/lib/auth";
 import { GameWebSocket, type GameWsMessage } from "@/lib/websocket";
 import { GameBoard } from "@/components/chess/GameBoard";
+import { RECORD_GAME_COMPLETED } from "@/graphql/mutations/games";
 
 const GAME_QUERY = gql`
   query GamePage($id: ID!) {
@@ -62,6 +63,8 @@ export default function GamePage() {
   const [status, setStatus] = useState<string>("PENDING");
   const [result, setResult] = useState<string | null>(null);
   const wsRef = useRef<GameWebSocket | null>(null);
+  const recordedXpRef = useRef(false);
+  const [recordGameCompleted] = useMutation<{ recordGameCompleted: { xpAwarded: number } }>(RECORD_GAME_COMPLETED);
 
   const { data, loading } = useQuery<{
     game: {
@@ -93,6 +96,20 @@ export default function GamePage() {
     setStatus(game.status ?? "PENDING");
     setResult(game.result ?? null);
   }, [game]);
+
+  // Record XP once when viewing a completed game as participant
+  useEffect(() => {
+    if (!id || !user?.id || status !== "COMPLETED" || !isParticipant || recordedXpRef.current) return;
+    recordedXpRef.current = true;
+    recordGameCompleted({ variables: { gameId: id } })
+      .then(({ data }) => {
+        const xp = data?.recordGameCompleted?.xpAwarded;
+        if (xp != null && xp > 0) {
+          toaster.create({ title: `+${xp} XP`, type: "success" });
+        }
+      })
+      .catch(() => {});
+  }, [id, user?.id, status, isParticipant, recordGameCompleted]);
 
   useEffect(() => {
     if (!id || !user?.id || !token || !isParticipant) return;

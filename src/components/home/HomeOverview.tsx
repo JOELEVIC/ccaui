@@ -12,6 +12,8 @@ import { LandingPlayCompete } from "./LandingPlayCompete";
 import { LandingSuperstars } from "./LandingSuperstars";
 import { LandingFeatures } from "./LandingFeatures";
 import { LandingCameroonChess } from "./LandingCameroonChess";
+import { LandingGallery } from "./LandingGallery";
+import { ChessDivider } from "./ChessDivider";
 import { LandingAcademy } from "./LandingAcademy";
 import { LandingCta } from "./LandingCta";
 import { LandingFooter } from "./LandingFooter";
@@ -156,7 +158,10 @@ export function HomeOverview() {
         <LandingSuperstars />
         <LandingFeatures />
         <LandingCameroonChess />
+        <LandingGallery />
+        <ChessDivider />
         <LandingAcademy />
+        <ChessDivider />
         <LandingCta />
         <LandingFooter />
       </Box>

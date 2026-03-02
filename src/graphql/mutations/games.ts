@@ -19,3 +19,11 @@ export const CREATE_GAME = gql`
     }
   }
 `;
+
+export const RECORD_GAME_COMPLETED = gql`
+  mutation RecordGameCompleted($gameId: ID!) {
+    recordGameCompleted(gameId: $gameId) {
+      xpAwarded
+    }
+  }
+`;

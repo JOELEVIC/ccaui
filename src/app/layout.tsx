@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter } from "next/font/google";
+import { Playfair_Display, Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/lib/toaster";
@@ -16,6 +16,14 @@ const inter = Inter({
   display: "swap",
 });
 
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-accent",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Cameroon Chess Academy",
   description: "National Platform for Competitive Excellence. Discipline. Strategy. Excellence.",
@@ -27,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable} ${cormorant.variable}`}>
       <body>
         <Providers>
           {children}

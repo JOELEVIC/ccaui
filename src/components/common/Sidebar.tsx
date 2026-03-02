@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Box, VStack, Text, Button } from "@chakra-ui/react";
+import { Box, VStack, HStack, Text, Button } from "@chakra-ui/react";
 import { useAuth } from "@/lib/auth";
+import { LevelBadge, XPBar } from "@/components/dashboard";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -66,9 +67,13 @@ export function Sidebar() {
       <Box pt={8}>
         {user && (
           <VStack align="stretch" gap={2}>
-            <Text color="textPrimary" fontSize="sm" lineClamp={1}>
-              {user.username}
-            </Text>
+            <HStack gap={2} flexWrap="wrap">
+              <LevelBadge level={user.profile?.level ?? 1} size="sm" />
+              <Text color="textPrimary" fontSize="sm" lineClamp={1}>
+                {user.username}
+              </Text>
+            </HStack>
+            <XPBar xp={user.profile?.xp ?? 0} showLabel={true} size="sm" />
             <Text color="gold" fontSize="xs" fontWeight="600">
               {user.rating} ELO
             </Text>

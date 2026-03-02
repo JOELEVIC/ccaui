@@ -18,6 +18,10 @@ const ME_QUERY = gql`
         lastName
         dateOfBirth
         country
+        xp
+        level
+        puzzleStreakCount
+        lastPuzzleSolvedAt
         badges {
           id
           name
@@ -57,6 +61,10 @@ export interface Profile {
   lastName: string;
   dateOfBirth: string | null;
   country: string;
+  xp: number;
+  level: number;
+  puzzleStreakCount: number;
+  lastPuzzleSolvedAt: string | null;
   badges: Badge[];
 }
 

@@ -4,6 +4,8 @@ import { Box, Heading, Text, VStack, HStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
+import { useAuth } from "@/lib/auth";
+import { StreakCounter } from "@/components/dashboard";
 
 const DAILY_PUZZLE = gql`
   query LearningDailyPuzzle {
@@ -92,21 +94,29 @@ function PuzzleCard({
 }
 
 export default function LearningPage() {
+  const { user } = useAuth();
   const { data: dailyData } = useQuery<{ dailyPuzzle: { id: string; difficulty: number; theme: string[] } | null }>(DAILY_PUZZLE);
   const { data: puzzlesData } = useQuery<{ puzzles: Array<{ id: string; difficulty: number; theme: string[] }> }>(PUZZLES);
 
   const dailyPuzzle = dailyData?.dailyPuzzle;
   const puzzles = puzzlesData?.puzzles ?? [];
+  const streak = user?.profile?.puzzleStreakCount ?? 0;
 
   return (
     <VStack align="stretch" gap={10}>
-      <Heading
-        size="xl"
-        color="gold"
-        fontFamily="var(--font-playfair), Georgia, serif"
-      >
-        Strategy Hall
-      </Heading>
+      <HStack justify="space-between" align="center" flexWrap="wrap" gap={4}>
+        <Heading
+          size="xl"
+          color="gold"
+          fontFamily="var(--font-playfair), Georgia, serif"
+        >
+          Strategy Hall
+        </Heading>
+        <StreakCounter count={streak} size="md" />
+      </HStack>
+      <Text color="textMuted" fontSize="sm">
+        Solve puzzles to earn XP and build your streak.
+      </Text>
 
       {/* Tactical Puzzles */}
       <Box>

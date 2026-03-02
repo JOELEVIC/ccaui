@@ -14,6 +14,10 @@ export const ME = gql`
         lastName
         dateOfBirth
         country
+        xp
+        level
+        puzzleStreakCount
+        lastPuzzleSolvedAt
         badges {
           id
           name

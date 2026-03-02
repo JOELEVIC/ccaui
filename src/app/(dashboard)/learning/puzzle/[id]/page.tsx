@@ -27,6 +27,8 @@ const CHECK_SOLUTION = gql`
     checkPuzzleSolution(puzzleId: $puzzleId, solution: $solution) {
       correct
       solution
+      xpAwarded
+      streakAfter
     }
   }
 `;
@@ -42,7 +44,7 @@ export default function PuzzlePage() {
   }>(PUZZLE, { variables: { id } });
 
   const [checkSolution] = useMutation<{
-    checkPuzzleSolution: { correct: boolean; solution: string };
+    checkPuzzleSolution: { correct: boolean; solution: string; xpAwarded?: number | null; streakAfter?: number | null };
   }>(CHECK_SOLUTION);
 
   const puzzle = data?.puzzle;
@@ -74,9 +76,15 @@ export default function PuzzlePage() {
         checkSolution({
           variables: { puzzleId: id, solution: attempt },
         }).then(({ data: res }) => {
-          if (res?.checkPuzzleSolution.correct) {
+          const result = res?.checkPuzzleSolution;
+          if (result?.correct) {
             setSolved(true);
-            toaster.create({ title: "Correct! Puzzle solved.", type: "success" });
+            const xp = result.xpAwarded ?? 0;
+            const streak = result.streakAfter ?? 0;
+            const msg = xp > 0 || streak > 0
+              ? `Correct! +${xp} XP${streak > 0 ? ` · Streak: ${streak}` : ""}`
+              : "Correct! Puzzle solved.";
+            toaster.create({ title: msg, type: "success" });
           }
         });
       }

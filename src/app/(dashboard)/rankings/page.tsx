@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Box, Heading, Text, VStack, HStack, Input } from "@chakra-ui/react";
+import { TierLabel, Medal } from "@/components/dashboard";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 
@@ -149,7 +150,10 @@ export default function RankingsPage() {
                 _hover={{ bg: "whiteAlpha.05" }}
               >
                 <Box as="td" py={3} px={4} color="textMuted" fontWeight="bold">
-                  #{i + 1}
+                  <HStack gap={2} display="inline-flex">
+                    {i < 3 ? <Medal rank={(i + 1) as 1 | 2 | 3} size="sm" /> : null}
+                    #{i + 1}
+                  </HStack>
                 </Box>
                 <Box as="td" py={3} px={4} color="textPrimary">
                   {user.profile ? `${user.profile.firstName} ${user.profile.lastName}` : user.username}
@@ -157,8 +161,13 @@ export default function RankingsPage() {
                 <Box as="td" py={3} px={4} color="textSecondary" fontSize="sm">
                   {user.school?.name ?? "—"}
                 </Box>
-                <Box as="td" py={3} px={4} textAlign="right" color="gold" fontWeight="700">
-                  {user.rating}
+                <Box as="td" py={3} px={4}>
+                  <HStack justify="flex-end" gap={2}>
+                    <TierLabel rating={user.rating} size="sm" />
+                    <Text color="gold" fontWeight="700">
+                      {user.rating}
+                    </Text>
+                  </HStack>
                 </Box>
               </Box>
             ))}

@@ -20,8 +20,8 @@ export function LandingCta() {
           >
             Enter the Arena
           </Heading>
-          <Text color="textSecondary" maxW="md">
-            Join Cameroon Chess Academy. Create an account and take your place in the national rankings.
+          <Text color="textSecondary" maxW="md" lineHeight="1.7">
+            Join the national platform. Create your account and climb the rankings.
           </Text>
           <Link href="/register">
             <Button

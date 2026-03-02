@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { useAuth } from "@/lib/auth";
+import { LevelBadge, XPBar, StreakCounter, TierLabel } from "@/components/dashboard";
 
 const ME_FULL = gql`
   query MeDashboard {
@@ -17,6 +18,10 @@ const ME_FULL = gql`
       profile {
         firstName
         lastName
+        xp
+        level
+        puzzleStreakCount
+        lastPuzzleSolvedAt
         badges {
           id
           name
@@ -95,7 +100,14 @@ export default function DashboardPage() {
       username: string;
       role: string;
       rating: number;
-      profile?: { firstName: string; lastName: string };
+      profile?: {
+        firstName: string;
+        lastName: string;
+        xp?: number;
+        level?: number;
+        puzzleStreakCount?: number;
+        lastPuzzleSolvedAt?: string | null;
+      };
       school?: { name: string; region: string };
     };
   }>(ME_FULL);
@@ -114,6 +126,12 @@ export default function DashboardPage() {
   const upcomingTournaments = tournamentsData?.tournaments ?? [];
   const dailyPuzzle = puzzleData?.dailyPuzzle;
   const firstName = me?.profile?.firstName || me?.username || "Player";
+  const level = me?.profile?.level ?? 1;
+  const xp = me?.profile?.xp ?? 0;
+  const streak = me?.profile?.puzzleStreakCount ?? 0;
+  const xpPerLevel = 100;
+  const xpNextLevel = level * xpPerLevel;
+  const xpNeededForNext = xpNextLevel - xp;
 
   return (
     <VStack align="stretch" gap={10}>
@@ -133,6 +151,15 @@ export default function DashboardPage() {
             {getDateString()}
           </Text>
         </Box>
+        {me && (
+          <HStack gap={4} flexWrap="wrap" align="center">
+            <LevelBadge level={level} size="md" />
+            <Box minW="140px" w="140px">
+              <XPBar xp={xp} level={level} showLabel={true} size="sm" />
+            </Box>
+            <StreakCounter count={streak} size="md" />
+          </HStack>
+        )}
       </Flex>
 
       <SimpleGrid columns={{ base: 1, lg: 2 }} gap={8} w="full">
@@ -169,14 +196,20 @@ export default function DashboardPage() {
                     <Text color="textSecondary" fontSize="sm">
                       {me.school ? `${me.school.name} · ${me.school.region}` : "—"}
                     </Text>
-                    <HStack gap={4} mt={2}>
+                    <HStack gap={4} mt={2} flexWrap="wrap">
                       <Text color="gold" fontWeight="700" fontSize="2xl">
                         {me.rating}
                       </Text>
+                      <TierLabel rating={me.rating} size="sm" />
                       <Text color="textMuted" fontSize="sm">
                         National rank: —
                       </Text>
                     </HStack>
+                    {xpNeededForNext > 0 && (
+                      <Text color="textMuted" fontSize="xs" mt={1}>
+                        Next level at {xpNextLevel} XP ({xpNeededForNext} to go)
+                      </Text>
+                    )}
                   </VStack>
                 </HStack>
               </Card.Body>
@@ -198,6 +231,9 @@ export default function DashboardPage() {
                   <Heading size="md" color="gold">
                     Continue Match
                   </Heading>
+                  <Text color="textMuted" fontSize="xs">
+                    Finish games to earn XP (win: 20, draw: 10, loss: 5).
+                  </Text>
                   <VStack align="stretch" gap={2}>
                     {liveGames.slice(0, 3).map((g: { id: string; white: { username: string }; black: { username: string } }) => (
                       <Link key={g.id} href={`/game/${g.id}`}>
@@ -233,7 +269,7 @@ export default function DashboardPage() {
                     Start a Match
                   </Heading>
                   <Text color="textSecondary" fontSize="sm">
-                    Create a new game and compete in the arena.
+                    Create a new game and compete in the arena. Earn XP by completing games (win: 20, draw: 10, loss: 5).
                   </Text>
                   <Link href="/games">
                     <Button size="md" bg="gold" color="black" borderRadius="soft" _hover={{ bg: "goldLight" }}>
@@ -312,10 +348,16 @@ export default function DashboardPage() {
         <Card.Root bg="bgCard" borderWidth="1px" borderColor="goldDark" borderRadius="soft" boxShadow="var(--shadow-card-soft)">
           <Card.Body py={4}>
             <HStack justify="space-between" flexWrap="wrap" gap={2}>
-              <Text color="textSecondary" fontSize="sm">
-                Daily puzzle · Difficulty {dailyPuzzle.difficulty}
-              </Text>
-              <Link href="/learning">
+              <HStack gap={3}>
+                <Text color="textSecondary" fontSize="sm">
+                  Daily puzzle · Difficulty {dailyPuzzle.difficulty}
+                </Text>
+                {streak > 0 && <StreakCounter count={streak} size="sm" />}
+                <Text color="textMuted" fontSize="xs">
+                  +XP on solve
+                </Text>
+              </HStack>
+              <Link href={`/learning/puzzle/${dailyPuzzle.id}`}>
                 <Button size="sm" variant="ghost" color="gold" borderRadius="soft">
                   Solve →
                 </Button>

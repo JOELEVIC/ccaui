@@ -1,8 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Box, Container, Heading, Text, VStack, Flex } from "@chakra-ui/react";
+import Image from "next/image";
 
 export function LandingCameroonChess() {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <Box py={{ base: 16, md: 24 }} bg="bgCard">
       <Container maxW="6xl">
@@ -21,7 +25,7 @@ export function LandingCameroonChess() {
               Cameroon &amp; Chess
             </Heading>
             <Box h="1px" w="48px" bg="gold" opacity={0.8} />
-            <Text color="textSecondary" fontSize="md" lineHeight="1.7" maxW="lg">
+            <Text color="textSecondary" fontSize="md" lineHeight="1.75" maxW="lg">
               Chess in Cameroon is growing through youth programmes, university leagues, and the work of the national federation. 
               The Cameroon Chess Academy brings together players, coaches, and institutions on one platform—so that every mind with a passion for the game can compete, learn, and represent.
             </Text>
@@ -39,18 +43,29 @@ export function LandingCameroonChess() {
             borderColor="goldDark"
             boxShadow="var(--shadow-card-soft)"
           >
-            {/* Placeholder: add /images/cameroon-chess.jpg for chess in Cameroon (youth, school, or federation) */}
-            <Box
-              position="absolute"
-              inset={0}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              color="textMuted"
-              fontSize="sm"
-            >
-              Chess in Cameroon
-            </Box>
+            {!imageError ? (
+              <Image
+                src="/images/cameroon-chess.jpg"
+                alt="Chess in Cameroon"
+                fill
+                sizes="(max-width: 1024px) 100vw, 420px"
+                style={{ objectFit: "cover" }}
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <Box
+                position="absolute"
+                inset={0}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                color="textMuted"
+                fontSize="sm"
+                background="linear-gradient(145deg, #1a1e26 0%, #15181f 100%)"
+              >
+                Chess in Cameroon
+              </Box>
+            )}
           </Box>
         </Flex>
       </Container>

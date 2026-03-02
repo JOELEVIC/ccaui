@@ -111,13 +111,18 @@ export default function GamesPage() {
 
   return (
     <VStack align="stretch" gap={8}>
-      <Heading
-        size="xl"
-        color="gold"
-        fontFamily="var(--font-playfair), Georgia, serif"
-      >
-        Play
-      </Heading>
+      <Box>
+        <Heading
+          size="xl"
+          color="gold"
+          fontFamily="var(--font-playfair), Georgia, serif"
+        >
+          Play
+        </Heading>
+        <Text color="textMuted" fontSize="sm" mt={1}>
+          Earn XP by completing games (win: 20, draw: 10, loss: 5).
+        </Text>
+      </Box>
 
       {/* Play mode selector */}
       <HStack gap={2} flexWrap="wrap">

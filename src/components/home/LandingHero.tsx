@@ -14,11 +14,20 @@ export function LandingHero() {
       bg="bgDark"
       overflow="hidden"
     >
-      {/* Warm gradient base (add /images/hero.jpg for optional full-bleed hero image) */}
+      {/* Optional full-bleed hero image; gradient overlay keeps text readable */}
       <Box
         position="absolute"
         inset={0}
-        background="linear-gradient(180deg, #13151a 0%, #15181f 50%, #171a22 100%)"
+        bg="bgDark"
+        backgroundImage="url('/images/hero.jpg')"
+        backgroundSize="cover"
+        backgroundPosition="center"
+        pointerEvents="none"
+      />
+      <Box
+        position="absolute"
+        inset={0}
+        background="linear-gradient(180deg, rgba(19,21,26,0.92) 0%, rgba(21,24,31,0.94) 50%, rgba(23,26,34,0.96) 100%)"
         pointerEvents="none"
       />
       {/* Softer vignette */}
@@ -82,6 +91,9 @@ export function LandingHero() {
                 Chess Academy
               </Heading>
               <Box mt={5} h="2px" w="80px" bg="gold" opacity={0.9} style={{ animation: "shimmer 3s ease-in-out infinite" }} />
+              <Text color="gold" fontSize="sm" letterSpacing="0.06em" textTransform="uppercase" mt={2}>
+                Discipline. Strategy. Excellence.
+              </Text>
               <Text color="textSecondary" fontSize="lg" lineHeight="1.6" mt={4} maxW="md">
                 Where Cameroon&apos;s best minds meet over the board.
               </Text>
@@ -153,12 +165,16 @@ export function LandingHero() {
                 border="1px solid var(--chakra-colors-goldDark)"
                 boxShadow="var(--shadow-card-soft)"
                 overflow="hidden"
+                bg="bgSurface"
+                backgroundImage="url('/images/hero.jpg')"
+                backgroundSize="cover"
+                backgroundPosition="center"
               >
                 <Box
                   position="absolute"
                   inset={0}
-                  background="linear-gradient(145deg, #1e1a16 0%, #15181f 100%)"
-                  backgroundImage="linear-gradient(to right, rgba(143,121,61,0.35) 1px, transparent 1px), linear-gradient(to bottom, rgba(143,121,61,0.35) 1px, transparent 1px)"
+                  background="linear-gradient(145deg, rgba(30,26,22,0.85) 0%, rgba(21,24,31,0.9) 100%)"
+                  backgroundImage="linear-gradient(to right, rgba(143,121,61,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(143,121,61,0.2) 1px, transparent 1px)"
                   backgroundSize="12.5% 12.5%"
                 />
                 <Box

@@ -57,12 +57,20 @@ export function LandingAcademy() {
         filter="blur(80px)"
         pointerEvents="none"
       />
-      {/* Very subtle geometric pattern */}
+      {/* Very subtle chess-style pattern (alternating squares + diagonal) */}
       <Box
         position="absolute"
         inset={0}
-        opacity={0.02}
-        backgroundImage={`repeating-linear-gradient(45deg, transparent, transparent 20px, var(--chakra-colors-gold) 20px, var(--chakra-colors-gold) 21px)`}
+        opacity={0.025}
+        backgroundImage="repeating-linear-gradient(45deg, transparent, transparent 20px, var(--chakra-colors-gold) 20px, var(--chakra-colors-gold) 21px)"
+        pointerEvents="none"
+      />
+      <Box
+        position="absolute"
+        inset={0}
+        opacity={0.03}
+        backgroundImage="repeating-linear-gradient(0deg, transparent, transparent 24px, var(--chakra-colors-gold) 24px, var(--chakra-colors-gold) 1px), repeating-linear-gradient(90deg, transparent, transparent 24px, var(--chakra-colors-gold) 24px, var(--chakra-colors-gold) 1px)"
+        backgroundSize="24px 24px"
         pointerEvents="none"
       />
       <Container position="relative" zIndex={1} maxW="6xl">
