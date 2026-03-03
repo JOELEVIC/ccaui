@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Spinner, Center, Text, VStack } from "@chakra-ui/react";
 import { useAuth } from "@/lib/auth";
+import { ChessLoader } from "./ChessLoader";
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading, token } = useAuth();
@@ -26,14 +26,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (loading) {
-    return (
-      <Center minH="100vh" bg="bgDark">
-        <VStack gap={4}>
-          <Spinner size="xl" color="gold" />
-          <Text color="gold">Loading...</Text>
-        </VStack>
-      </Center>
-    );
+    return <ChessLoader message="Loading..." />;
   }
 
   return <>{children}</>;
