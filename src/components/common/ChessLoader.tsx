@@ -12,9 +12,7 @@ function KnightIcon({ size = 48 }: { size?: number }) {
       fontSize={`${size}px`}
       lineHeight={1}
       fontFamily="var(--font-playfair), Georgia, serif"
-      sx={{
-        animation: "chessLoaderFloat 2s ease-in-out infinite",
-      }}
+      style={{ animation: "chessLoaderFloat 2s ease-in-out infinite" }}
       aria-hidden
     >
       ♞
@@ -44,7 +42,7 @@ function MiniBoard() {
             bg={isLight ? "gold" : "goldDark"}
             borderRadius="2px"
             opacity={isLight ? 0.9 : 0.5}
-            sx={{
+            style={{
               animation: "chessLoaderPulse 1.8s ease-in-out infinite",
               animationDelay: `${(row * size + col) * 0.06}s`,
             }}
@@ -72,7 +70,7 @@ export function ChessLoader({ message = "Loading..." }: ChessLoaderProps) {
       position="fixed"
       inset={0}
       zIndex={10}
-      sx={{ minHeight: "100vh", minHeight: "100dvh" }}
+      style={{ minHeight: "100vh" }}
     >
       <style>{`
         @keyframes chessLoaderFloat {

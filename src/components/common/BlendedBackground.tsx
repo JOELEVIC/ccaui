@@ -32,22 +32,22 @@ export function BlendedBackground({
       position="relative"
       w="full"
       overflow="hidden"
-      sx={{ minHeight: "100vh", minHeight: "100dvh" }}
+      style={{ minHeight: "100vh" }}
     >
       {/* Image layer */}
       <Box
         position="absolute"
         inset={0}
         opacity={imageOpacity}
-        mixBlendMode={blendMode}
-        pointerEvents="none"
-        zIndex={0}
-        sx={{
+        style={{
+          mixBlendMode: blendMode,
           backgroundImage: `url(${src})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
         }}
+        pointerEvents="none"
+        zIndex={0}
       />
       {/* Dark overlay for contrast */}
       <Box
@@ -55,7 +55,7 @@ export function BlendedBackground({
         inset={0}
         pointerEvents="none"
         zIndex={1}
-        sx={{ background: overlay }}
+        style={{ background: overlay }}
       />
       {/* Content */}
       <Box position="relative" zIndex={2} w="full" minH="100%">

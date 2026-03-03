@@ -170,7 +170,7 @@ export default function DashboardPage() {
         position="relative"
         h="140px"
         minH="140px"
-        sx={{
+        style={{
           backgroundImage: "linear-gradient(180deg, rgba(17, 19, 24, 0.75) 0%, rgba(17, 19, 24, 0.92) 100%), url(/images/ubca/players-2.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
