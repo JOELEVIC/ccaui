@@ -1,6 +1,24 @@
 # Landing Page Images
 
-Free, commercial-use images for the ccaui landing page. Place downloaded files in `public/images/`.
+The **landing page and dashboard** use UBCA academy images imported from `src/assets/images/ubca/`. They are bundled at build time, so no separate commit of `public/` images is needed for deployment.
+
+## UBCA academy images (current design)
+
+Files in `src/assets/images/ubca/` are imported in code:
+
+| File | Used for |
+|------|----------|
+| `hero-1.png` | Landing hero full-bleed background |
+| `hero-2.png` | Landing hero right panel |
+| `players-2.png` | Gallery, Cameroon section, dashboard “Where the game is played” strip |
+| `board-top.png` | Dashboard layout blended background |
+| `hands-board.png` | Landing gallery |
+
+To add or replace an image: update the file in `src/assets/images/ubca/` and re-export from `index.ts`.
+
+---
+
+Legacy: free, commercial-use images for a generic landing. Place downloaded files in `public/images/`.
 
 ## Filenames and sources
 

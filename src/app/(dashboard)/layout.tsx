@@ -6,6 +6,7 @@ import { TopBar } from "@/components/common/TopBar";
 import { PageTransition } from "@/components/common/PageTransition";
 import { ProtectedRoute } from "@/components/common/ProtectedRoute";
 import { BlendedBackground } from "@/components/common/BlendedBackground";
+import { ubcaImages } from "@/assets/images/ubca";
 
 export default function DashboardLayout({
   children,
@@ -15,7 +16,7 @@ export default function DashboardLayout({
   return (
     <ProtectedRoute>
       <BlendedBackground
-        src="/images/ubca/board-top.png"
+        src={ubcaImages.boardTop}
         imageOpacity={0.28}
         blendMode="multiply"
       >

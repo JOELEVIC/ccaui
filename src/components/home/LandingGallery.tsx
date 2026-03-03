@@ -3,15 +3,16 @@
 import { useState } from "react";
 import { Box, Container, Heading, SimpleGrid, VStack } from "@chakra-ui/react";
 import Image from "next/image";
+import { hero1, players2, boardTop, handsBoard } from "@/assets/images/ubca";
 
 const GALLERY_ITEMS = [
-  { src: "/images/gallery-1.jpg", alt: "Chess play" },
-  { src: "/images/gallery-2.jpg", alt: "Strategy" },
-  { src: "/images/gallery-3.jpg", alt: "Chess pieces" },
-  { src: "/images/gallery-4.jpg", alt: "Tournament moment" },
+  { src: hero1, alt: "Chess at the academy" },
+  { src: players2, alt: "Players at the board" },
+  { src: boardTop, alt: "Board and pieces" },
+  { src: handsBoard, alt: "Game in progress" },
 ];
 
-function GalleryTile({ src, alt }: { src: string; alt: string }) {
+function GalleryTile({ src, alt }: { src: (typeof GALLERY_ITEMS)[number]["src"]; alt: string }) {
   const [error, setError] = useState(false);
 
   return (
@@ -71,8 +72,8 @@ export function LandingGallery() {
             <Box h="1px" w="48px" bg="gold" opacity={0.8} />
           </VStack>
           <SimpleGrid columns={{ base: 2, md: 4 }} gap={4} w="full">
-            {GALLERY_ITEMS.map((item) => (
-              <GalleryTile key={item.src} src={item.src} alt={item.alt} />
+            {GALLERY_ITEMS.map((item, i) => (
+              <GalleryTile key={i} src={item.src} alt={item.alt} />
             ))}
           </SimpleGrid>
         </VStack>

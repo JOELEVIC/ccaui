@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Box, Container, Heading, Text, VStack, Flex } from "@chakra-ui/react";
 import Image from "next/image";
+import { players2 } from "@/assets/images/ubca";
 
 export function LandingCameroonChess() {
   const [imageError, setImageError] = useState(false);
@@ -45,7 +46,7 @@ export function LandingCameroonChess() {
           >
             {!imageError ? (
               <Image
-                src="/images/cameroon-chess.jpg"
+                src={players2}
                 alt="Chess in Cameroon"
                 fill
                 sizes="(max-width: 1024px) 100vw, 420px"

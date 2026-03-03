@@ -6,6 +6,7 @@ import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { useAuth } from "@/lib/auth";
 import { LevelBadge, XPBar, StreakCounter, TierLabel } from "@/components/dashboard";
+import { ubcaImages } from "@/assets/images/ubca";
 
 const ME_FULL = gql`
   query MeDashboard {
@@ -171,7 +172,7 @@ export default function DashboardPage() {
         h="140px"
         minH="140px"
         style={{
-          backgroundImage: "linear-gradient(180deg, rgba(17, 19, 24, 0.75) 0%, rgba(17, 19, 24, 0.92) 100%), url(/images/ubca/players-2.png)",
+          backgroundImage: `linear-gradient(180deg, rgba(17, 19, 24, 0.75) 0%, rgba(17, 19, 24, 0.92) 100%), url(${ubcaImages.players2.src})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}

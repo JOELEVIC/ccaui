@@ -3,6 +3,7 @@
 import { Box, Container, Heading, Text, VStack, HStack, Button, Flex } from "@chakra-ui/react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { hero1, hero2 } from "@/assets/images/ubca";
 
 export function LandingHero() {
   return (
@@ -14,12 +15,12 @@ export function LandingHero() {
       bg="bgDark"
       overflow="hidden"
     >
-      {/* Optional full-bleed hero image; gradient overlay keeps text readable */}
+      {/* Full-bleed hero image (UBCA academy); gradient overlay keeps text readable */}
       <Box
         position="absolute"
         inset={0}
         bg="bgDark"
-        backgroundImage="url('/images/hero.jpg')"
+        backgroundImage={`url(${hero1.src})`}
         backgroundSize="cover"
         backgroundPosition="center"
         pointerEvents="none"
@@ -166,7 +167,7 @@ export function LandingHero() {
                 boxShadow="var(--shadow-card-soft)"
                 overflow="hidden"
                 bg="bgSurface"
-                backgroundImage="url('/images/hero.jpg')"
+                backgroundImage={`url(${hero2.src})`}
                 backgroundSize="cover"
                 backgroundPosition="center"
               >

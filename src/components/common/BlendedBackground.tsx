@@ -5,8 +5,8 @@ import { Box } from "@chakra-ui/react";
 const OVERLAY = "linear-gradient(180deg, rgba(17, 19, 24, 0.92) 0%, rgba(17, 19, 24, 0.97) 100%)";
 
 export interface BlendedBackgroundProps {
-  /** Image path (e.g. /images/ubca/board-top.png) */
-  src: string;
+  /** Image path or imported static image (e.g. ubcaImages.boardTop) */
+  src: string | { src: string };
   /** Overlay gradient for readability. Default: dark CCA overlay */
   overlay?: string;
   /** Blend mode for the image layer */
@@ -27,6 +27,7 @@ export function BlendedBackground({
   imageOpacity = 0.35,
   children,
 }: BlendedBackgroundProps) {
+  const imageSrc = typeof src === "string" ? src : src.src;
   return (
     <Box
       position="relative"
@@ -41,7 +42,7 @@ export function BlendedBackground({
         opacity={imageOpacity}
         style={{
           mixBlendMode: blendMode,
-          backgroundImage: `url(${src})`,
+          backgroundImage: `url(${imageSrc})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
