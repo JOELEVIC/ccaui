@@ -162,6 +162,27 @@ export default function DashboardPage() {
         )}
       </Flex>
 
+      {/* Academy / community hero blend */}
+      <Box
+        w="full"
+        borderRadius="soft"
+        overflow="hidden"
+        position="relative"
+        h="140px"
+        minH="140px"
+        sx={{
+          backgroundImage: "linear-gradient(180deg, rgba(17, 19, 24, 0.75) 0%, rgba(17, 19, 24, 0.92) 100%), url(/images/ubca/players-2.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <Box position="absolute" inset={0} display="flex" alignItems="center" px={6}>
+          <Text color="gold" fontSize="sm" fontWeight="600" letterSpacing="0.04em" textTransform="uppercase">
+            Where the game is played
+          </Text>
+        </Box>
+      </Box>
+
       <SimpleGrid columns={{ base: 1, lg: 2 }} gap={8} w="full">
         {/* Left column: profile + continue match */}
         <VStack align="stretch" gap={8}>
