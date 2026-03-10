@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Box, Container, Heading, Text, VStack, List, ListItem } from "@chakra-ui/react";
+import { Box, Container, Heading, Text, VStack, ListRoot, ListItem } from "@chakra-ui/react";
 import { LandingNav } from "@/components/home/LandingNav";
 import { LandingFooter } from "@/components/home/LandingFooter";
 
@@ -70,7 +70,7 @@ export default function AboutPage() {
             <Text color="textSecondary" mb={3}>
               The letter &ldquo;D&rdquo; has multiple meanings:
             </Text>
-            <List spacing={2} color="textSecondary">
+            <ListRoot gap={2} color="textSecondary">
               <ListItem><strong>Desmond</strong> – Honoring the founder and visionary behind the organization.</ListItem>
               <ListItem>
                 <strong>Dynamic Countries</strong> – Representing national chapters such as DChessAcademy Cameroon,
@@ -80,7 +80,7 @@ export default function AboutPage() {
                 <strong>&ldquo;The&rdquo; Chess Academy</strong> – Symbolizing excellence, leadership, and global
                 standards in chess philosophy and education.
               </ListItem>
-            </List>
+            </ListRoot>
             <Text color="textSecondary" mt={4}>
               This structure supports the organization&apos;s goal of becoming a unified global network while allowing
               strong local identities.
@@ -98,13 +98,13 @@ export default function AboutPage() {
             <Text color="textSecondary" mb={3}>
               To promote the philosophy of chess as a tool for:
             </Text>
-            <List spacing={2} color="textSecondary">
+            <ListRoot gap={2} color="textSecondary">
               <ListItem>Intellectual development</ListItem>
               <ListItem>Ethical leadership</ListItem>
               <ListItem>Strategic thinking</ListItem>
               <ListItem>Social empowerment</ListItem>
               <ListItem>Lifelong learning</ListItem>
-            </List>
+            </ListRoot>
             <Text color="textSecondary" mt={4}>
               Through education, mentorship, research, and community programs.
             </Text>
@@ -114,18 +114,18 @@ export default function AboutPage() {
             <Text color="textSecondary" mb={3}>
               DChessAcademy is built on the belief that chess represents life itself. Its philosophy includes:
             </Text>
-            <List spacing={2} color="textSecondary">
+            <ListRoot gap={2} color="textSecondary">
               <ListItem><strong>Responsibility</strong> – Every move has consequences.</ListItem>
               <ListItem><strong>Strategy</strong> – Long-term vision is essential for success.</ListItem>
               <ListItem><strong>Adaptability</strong> – Change is constant; flexibility is key.</ListItem>
               <ListItem><strong>Discipline</strong> – Growth requires commitment and practice.</ListItem>
               <ListItem><strong>Creativity</strong> – Freedom exists within structure.</ListItem>
               <ListItem><strong>Resilience</strong> – Failure is a lesson, not an end.</ListItem>
-            </List>
+            </ListRoot>
           </Section>
 
           <Section title="Objectives">
-            <List spacing={2} color="textSecondary">
+            <ListRoot gap={2} color="textSecondary">
               <ListItem>To promote chess philosophy as a life skill.</ListItem>
               <ListItem>To train young people in critical thinking and leadership.</ListItem>
               <ListItem>To establish chess and life-skills academies in different countries.</ListItem>
@@ -133,7 +133,7 @@ export default function AboutPage() {
               <ListItem>To create platforms for mentorship and personal development.</ListItem>
               <ListItem>To use chess as a tool for social change and community building.</ListItem>
               <ListItem>To expand DChessAcademy into education, technology, entrepreneurship, and arts.</ListItem>
-            </List>
+            </ListRoot>
           </Section>
 
           <Section title="Key Areas of Activity">
