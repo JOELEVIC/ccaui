@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Box, VStack, HStack, Text, Button } from "@chakra-ui/react";
 import { useAuth } from "@/lib/auth";
+import type { User } from "@/lib/auth";
 import { LevelBadge, XPBar } from "@/components/dashboard";
 
 const NAV_ITEMS = [
@@ -19,7 +20,7 @@ const NAV_ITEMS = [
 const sidebarContent = (
   pathname: string,
   isAdmin: boolean,
-  user: { username?: string; profile?: { level?: number; xp?: number }; rating?: number } | null,
+  user: User | null,
   logout: () => void,
   onNavClick?: () => void
 ) => (
