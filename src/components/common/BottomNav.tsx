@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { Box, HStack, Text, Button } from "@chakra-ui/react";
 
 const BOTTOM_NAV_ITEMS = [
   { href: "/dashboard", label: "Home" },
@@ -54,9 +54,9 @@ export function BottomNav({ onMorePress }: BottomNavProps) {
             </Link>
           );
         })}
-        <Box
-          as="button"
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           px={3}
           py={2}
           borderRadius="cca"
@@ -67,7 +67,7 @@ export function BottomNav({ onMorePress }: BottomNavProps) {
           <Text fontSize="xs" fontWeight="500">
             More
           </Text>
-        </Box>
+        </Button>
       </HStack>
     </Box>
   );
