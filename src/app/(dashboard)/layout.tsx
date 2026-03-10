@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Box, Flex, VStack } from "@chakra-ui/react";
 import { Sidebar } from "@/components/common/Sidebar";
 import { TopBar } from "@/components/common/TopBar";
@@ -13,6 +14,8 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <ProtectedRoute>
       <BlendedBackground
@@ -21,10 +24,13 @@ export default function DashboardLayout({
         blendMode="multiply"
       >
         <Flex minH="100%" bg="transparent">
-          <Sidebar />
-          <VStack flex={1} align="stretch" minW={0}>
-            <TopBar />
-            <Box flex={1} p={6} overflow="auto" w="full">
+          <Sidebar
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
+          <VStack flex={1} align="stretch" minW={0} minWidth={0}>
+            <TopBar onMenuPress={() => setSidebarOpen(true)} />
+            <Box flex={1} p={{ base: 3, md: 6 }} overflow="auto" w="full">
               <PageTransition>{children}</PageTransition>
             </Box>
           </VStack>
