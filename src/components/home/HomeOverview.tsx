@@ -17,6 +17,7 @@ import { ChessDivider } from "./ChessDivider";
 import { LandingAcademy } from "./LandingAcademy";
 import { LandingCta } from "./LandingCta";
 import { LandingFooter } from "./LandingFooter";
+import { ChessLoader } from "@/components/common/ChessLoader";
 
 const ME_FULL = gql`
   query HomeMe {
@@ -141,11 +142,7 @@ export function HomeOverview() {
   }>(MY_GAMES, { skip: !user });
 
   if (authLoading) {
-    return (
-      <Box minH="40vh" display="flex" alignItems="center" justifyContent="center" bg="bgDark">
-        <Text color="gold">Loading...</Text>
-      </Box>
-    );
+    return <ChessLoader message="Loading..." />;
   }
 
   if (!user) {

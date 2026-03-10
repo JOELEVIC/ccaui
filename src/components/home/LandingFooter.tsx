@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const FOOTER_LINKS = {
   Academy: [
-    { label: "About", href: "/" },
+    { label: "About", href: "/about" },
     { label: "Schools", href: "/schools" },
   ],
   Rankings: [{ label: "National Rankings", href: "/rankings" }],
