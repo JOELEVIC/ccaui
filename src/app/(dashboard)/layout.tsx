@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Box, Flex, VStack } from "@chakra-ui/react";
 import { Sidebar } from "@/components/common/Sidebar";
 import { TopBar } from "@/components/common/TopBar";
+import { BottomNav } from "@/components/common/BottomNav";
 import { PageTransition } from "@/components/common/PageTransition";
 import { ProtectedRoute } from "@/components/common/ProtectedRoute";
 import { BlendedBackground } from "@/components/common/BlendedBackground";
@@ -30,9 +31,16 @@ export default function DashboardLayout({
           />
           <VStack flex={1} align="stretch" minW={0} minWidth={0}>
             <TopBar onMenuPress={() => setSidebarOpen(true)} />
-            <Box flex={1} p={{ base: 3, md: 6 }} overflow="auto" w="full">
+            <Box
+              flex={1}
+              p={{ base: 3, md: 6 }}
+              pb={{ base: 14, md: 6 }}
+              overflow="auto"
+              w="full"
+            >
               <PageTransition>{children}</PageTransition>
             </Box>
+            <BottomNav onMorePress={() => setSidebarOpen(true)} />
           </VStack>
         </Flex>
       </BlendedBackground>
