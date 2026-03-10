@@ -332,7 +332,7 @@ export default function DashboardPage() {
               ) : (
                 <VStack align="stretch" gap={2}>
                   {upcomingTournaments.slice(0, 5).map((t) => (
-                    <Link key={t.id} href={`/tournaments/${t.id}`}>
+                    <Link key={t.id} href={`/dashboard/tournaments/${t.id}`}>
                       <Box
                         py={2}
                         px={3}

@@ -43,7 +43,7 @@ type UserRow = {
   school?: { id: string; name: string; region: string };
 };
 
-export default function RankingsPage() {
+export default function DashboardRankingsPage() {
   const [schoolId, setSchoolId] = useState("");
   const [search, setSearch] = useState("");
 

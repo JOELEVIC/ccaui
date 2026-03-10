@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/login",
     "/register",
     "/rankings",
+    "/tournaments",
     "/contact",
     "/regulations",
   ];

@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Box, Heading, Text, VStack, Button, Input, SimpleGrid, HStack } from "@chakra-ui/react";
-import Link from "next/link";
+import { Box, Heading, Text, VStack, Button, Input, HStack } from "@chakra-ui/react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { toaster } from "@/lib/toaster";
@@ -12,6 +11,7 @@ import {
   CREATE_TOURNAMENT,
   JOIN_TOURNAMENT,
 } from "@/graphql/mutations/tournaments";
+import { TournamentGrid, type TournamentItem } from "@/components/tournaments/TournamentGrid";
 
 const TOURNAMENTS = gql`
   query TournamentsList($status: TournamentStatus) {
@@ -49,19 +49,9 @@ const SCHOOLS = gql`
   }
 `;
 
-interface TournamentItem {
-  id: string;
-  name: string;
-  status: string;
-  startDate: string;
-  endDate?: string | null;
-  school: { id: string; name: string; region: string };
-  participants: Array<{ user: { id: string; username: string; rating: number } }>;
-}
-
 type TabKey = "ongoing" | "upcoming" | "completed";
 
-export default function TournamentsPage() {
+export default function DashboardTournamentsPage() {
   const router = useRouter();
   const { user, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState<TabKey>("ongoing");
@@ -111,7 +101,7 @@ export default function TournamentsPage() {
         setSchoolId("");
         setStartDate("");
         setEndDate("");
-        router.push(`/tournaments/${data.createTournament.id}`);
+        router.push(`/dashboard/tournaments/${data.createTournament.id}`);
       }
     } catch (err) {
       toaster.create({ title: err instanceof Error ? err.message : "Failed to create tournament", type: "error" });
@@ -221,7 +211,7 @@ export default function TournamentsPage() {
             </Button>
           ))}
         </HStack>
-        {activeTab === "ongoing" && <TournamentGrid list={ongoingList} />}
+        {activeTab === "ongoing" && <TournamentGrid list={ongoingList} tournamentsBasePath="/dashboard/tournaments" />}
         {activeTab === "upcoming" && (
           <TournamentGrid
             list={upcomingList}
@@ -229,123 +219,11 @@ export default function TournamentsPage() {
             currentUserId={user?.id}
             onJoin={handleJoin}
             joining={joining}
+            tournamentsBasePath="/dashboard/tournaments"
           />
         )}
-        {activeTab === "completed" && <TournamentGrid list={completedList} />}
+        {activeTab === "completed" && <TournamentGrid list={completedList} tournamentsBasePath="/dashboard/tournaments" />}
       </Box>
     </VStack>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const isLive = status === "ONGOING";
-  return (
-    <HStack gap={2}>
-      {isLive && (
-        <Box
-          w="8px"
-          h="8px"
-          borderRadius="full"
-          bg="gold"
-          style={{ animation: "pulse 1.5s ease-in-out infinite" }}
-        />
-      )}
-      <Text
-        color="textSecondary"
-        fontSize="xs"
-        fontWeight="600"
-        textTransform="uppercase"
-      >
-        {status === "ONGOING" ? "Live" : status === "UPCOMING" ? "Upcoming" : "Completed"}
-      </Text>
-    </HStack>
-  );
-}
-
-function TournamentGrid({
-  list,
-  upcoming,
-  currentUserId,
-  onJoin,
-  joining,
-}: {
-  list: TournamentItem[];
-  upcoming?: boolean;
-  currentUserId?: string;
-  onJoin?: (id: string) => void;
-  joining?: boolean;
-}) {
-  if (list.length === 0) {
-    return <Text color="textMuted">No tournaments in this category.</Text>;
-  }
-  return (
-    <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={4}>
-      {list.map((t) => {
-        const isParticipant = currentUserId && t.participants?.some((p) => p.user?.id === currentUserId);
-        const initial = t.school.name?.charAt(0)?.toUpperCase() ?? "?";
-        return (
-          <Box
-            key={t.id}
-            p={5}
-            borderRadius="soft"
-            bg="bgCard"
-            borderWidth="1px"
-            borderColor="goldDark"
-            boxShadow="var(--shadow-card-soft)"
-            _hover={{ borderColor: "gold", boxShadow: "var(--shadow-card-soft-hover)" }}
-            transition="all 0.2s"
-            display="flex"
-            flexDir="column"
-            gap={3}
-          >
-            <HStack justify="space-between" align="flex-start">
-              <Box
-                w="40px"
-                h="40px"
-                borderRadius="soft"
-                bg="goldDark"
-                color="gold"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                fontWeight="bold"
-                fontSize="sm"
-              >
-                {initial}
-              </Box>
-              <StatusBadge status={t.status} />
-            </HStack>
-            <Link href={`/tournaments/${t.id}`}>
-              <Text color="gold" fontWeight="bold" fontSize="lg" _hover={{ textDecoration: "underline" }}>
-                {t.name}
-              </Text>
-              <Text color="textSecondary" fontSize="sm" mt={1}>
-                {t.school.name} · {t.participants.length} participants
-              </Text>
-              <Text color="textMuted" fontSize="xs" mt={1}>
-                {new Date(t.startDate).toLocaleDateString()}
-              </Text>
-            </Link>
-            {upcoming && currentUserId && !isParticipant && onJoin && (
-              <Button
-                size="sm"
-                variant="outline"
-                color="gold"
-                borderColor="gold"
-                borderRadius="soft"
-                alignSelf="flex-start"
-                loading={joining}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onJoin(t.id);
-                }}
-              >
-                Register
-              </Button>
-            )}
-          </Box>
-        );
-      })}
-    </SimpleGrid>
   );
 }

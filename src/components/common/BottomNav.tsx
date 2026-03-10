@@ -7,7 +7,7 @@ import { Box, HStack, Text, Button } from "@chakra-ui/react";
 const BOTTOM_NAV_ITEMS = [
   { href: "/dashboard", label: "Home" },
   { href: "/games", label: "Play" },
-  { href: "/rankings", label: "Rankings" },
+  { href: "/dashboard/rankings", label: "Rankings" },
   { href: "/learning", label: "Training" },
 ];
 

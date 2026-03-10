@@ -10,8 +10,8 @@ import { LevelBadge, XPBar } from "@/components/dashboard";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/games", label: "Play" },
-  { href: "/rankings", label: "Rankings" },
-  { href: "/tournaments", label: "Tournaments" },
+  { href: "/dashboard/rankings", label: "Rankings" },
+  { href: "/dashboard/tournaments", label: "Tournaments" },
   { href: "/learning", label: "Training" },
   { href: "/schools", label: "Academy" },
   { href: "/admin", label: "Admin" },

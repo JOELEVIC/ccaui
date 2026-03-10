@@ -44,7 +44,7 @@ const TOURNAMENT = gql`
   }
 `;
 
-export default function TournamentDetailPage() {
+export default function DashboardTournamentDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const { user, isAdmin } = useAuth();
@@ -66,7 +66,6 @@ export default function TournamentDetailPage() {
   const [completeTournament, { loading: completing }] = useMutation(COMPLETE_TOURNAMENT);
 
   const t = data?.tournament;
-
   const isParticipant = user?.id && t?.participants?.some((p) => p.user?.id === user.id);
 
   async function handleJoin() {
@@ -123,7 +122,7 @@ export default function TournamentDetailPage() {
 
   return (
     <VStack align="stretch" gap={6}>
-      <Link href="/tournaments">
+      <Link href="/dashboard/tournaments">
         <Button size="sm" variant="outline" color="gold" borderColor="gold">
           Back to tournaments
         </Button>
