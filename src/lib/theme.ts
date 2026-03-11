@@ -11,6 +11,8 @@ const ccaTokens = defineTokens({
   fonts: {
     heading: { value: "var(--font-playfair), Georgia, serif" },
     body: { value: "var(--font-inter), system-ui, sans-serif" },
+    label: { value: "var(--font-oswald), var(--font-inter), sans-serif" },
+    stat: { value: "var(--font-oswald), var(--font-inter), sans-serif" },
   },
   colors: {
     // Backgrounds (warmer darks)
@@ -19,6 +21,7 @@ const ccaTokens = defineTokens({
     bgSurface: { value: "#1A1E26" },
     bgDark: { value: "#111318" },
     bgCard: { value: "#1A1E26" },
+    bgWarm: { value: "#1E1C18" },
     // Gold system (slightly warmer primary)
     gold: { value: "#C9A96E" },
     goldLight: { value: "#E8C77A" },

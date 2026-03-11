@@ -18,10 +18,10 @@ export function LandingCta() {
             fontFamily="var(--font-playfair), Georgia, serif"
             color="textPrimary"
           >
-            Enter the Arena
+            Ready to make your first move?
           </Heading>
           <Text color="textSecondary" maxW="md" lineHeight="1.7">
-            Join the national platform. Create your account and climb the rankings.
+            Countless game nights are waiting. Join us at CCA where play sparks growth and creativity. Our love of games, learning, and people makes each visit a welcoming joy for every valued member.
           </Text>
           <Link href="/register">
             <Button
@@ -41,7 +41,7 @@ export function LandingCta() {
               }}
               transition="all 0.2s"
             >
-              Register
+              Join the CCA Family
             </Button>
           </Link>
         </VStack>

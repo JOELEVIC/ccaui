@@ -4,6 +4,8 @@ import { Box, Container, Heading, Text, VStack, HStack, Button, SimpleGrid } fro
 import Link from "next/link";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
+import { motion } from "framer-motion";
+import { fadeInUp, defaultViewport } from "@/lib/animations";
 
 const TOP_USERS = gql`
   query LandingTopUsers {
@@ -61,8 +63,14 @@ export function LandingRankingsPreview() {
     <Box py={{ base: 16, md: 20 }} bg="bgCard">
       <Container maxW="6xl">
         <VStack gap={10} align="stretch">
-          <VStack gap={2} align="stretch">
-            <Heading
+          <motion.div
+            variants={fadeInUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={defaultViewport}
+          >
+            <VStack gap={2} align="stretch">
+              <Heading
               size="lg"
               fontFamily="var(--font-playfair), Georgia, serif"
               color="textPrimary"
@@ -73,6 +81,7 @@ export function LandingRankingsPreview() {
             </Heading>
             <Box h="1px" w="64px" bg="gold" opacity={0.8} />
           </VStack>
+          </motion.div>
 
           <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 5 }} gap={4} w="full">
             {top5.map((user, i) => (

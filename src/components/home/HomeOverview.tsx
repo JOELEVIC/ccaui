@@ -8,10 +8,13 @@ import { useAuth } from "@/lib/auth";
 import { LandingNav } from "./LandingNav";
 import { LandingHero } from "./LandingHero";
 import { LandingRankingsPreview } from "./LandingRankingsPreview";
-import { LandingPlayCompete } from "./LandingPlayCompete";
-import { LandingSuperstars } from "./LandingSuperstars";
-import { LandingFeatures } from "./LandingFeatures";
+import { LandingIconFeatures } from "./LandingIconFeatures";
 import { LandingCameroonChess } from "./LandingCameroonChess";
+import { LandingStats } from "./LandingStats";
+import { LandingPlayCompete } from "./LandingPlayCompete";
+import { LandingEventsPreview } from "./LandingEventsPreview";
+import { LandingCoursesPreview } from "./LandingCoursesPreview";
+import { LandingTestimonialsCarousel } from "./LandingTestimonialsCarousel";
 import { LandingGallery } from "./LandingGallery";
 import { ChessDivider } from "./ChessDivider";
 import { LandingAcademy } from "./LandingAcademy";
@@ -151,10 +154,13 @@ export function HomeOverview() {
         <LandingNav />
         <LandingHero />
         <LandingRankingsPreview />
-        <LandingPlayCompete />
-        <LandingSuperstars />
-        <LandingFeatures />
+        <LandingIconFeatures />
         <LandingCameroonChess />
+        <LandingStats />
+        <LandingPlayCompete />
+        <LandingEventsPreview />
+        <LandingCoursesPreview />
+        <LandingTestimonialsCarousel />
         <LandingGallery />
         <ChessDivider />
         <LandingAcademy />

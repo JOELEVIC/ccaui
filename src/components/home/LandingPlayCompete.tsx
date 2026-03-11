@@ -2,6 +2,8 @@
 
 import { Box, Container, Heading, Text, VStack, Button, Flex, ListRoot, ListItem } from "@chakra-ui/react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { fadeInUp, defaultViewport } from "@/lib/animations";
 
 export function LandingPlayCompete() {
   return (
@@ -12,6 +14,13 @@ export function LandingPlayCompete() {
           align="center"
           gap={{ base: 10, lg: 16 }}
         >
+          <motion.div
+            variants={fadeInUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={defaultViewport}
+            style={{ flex: 1, width: "100%", maxWidth: "420px" }}
+          >
           {/* Left: board preview */}
           <Box flex={1} w="full" maxW={{ lg: "420px" }} position="relative">
             <Box
@@ -39,12 +48,20 @@ export function LandingPlayCompete() {
                 opacity={0.2}
                 aria-hidden
               >
-                ♟
-              </Box>
+              ♟
             </Box>
           </Box>
+          </Box>
+          </motion.div>
 
           {/* Right: copy */}
+          <motion.div
+            variants={fadeInUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={defaultViewport}
+            style={{ flex: 1 }}
+          >
           <VStack align={{ base: "center", lg: "flex-start" }} textAlign={{ base: "center", lg: "left" }} gap={6} flex={1}>
             <Heading
               size="xl"
@@ -88,6 +105,7 @@ export function LandingPlayCompete() {
               </Button>
             </Link>
           </VStack>
+          </motion.div>
         </Flex>
       </Container>
     </Box>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Box, Container, Heading, Text, VStack, ListRoot, ListItem } from "@chakra-ui/react";
+import { Box, Container, Heading, Text, VStack, ListRoot, ListItem, SimpleGrid } from "@chakra-ui/react";
 import { LandingNav } from "@/components/home/LandingNav";
 import { LandingFooter } from "@/components/home/LandingFooter";
 
@@ -110,6 +110,46 @@ export default function AboutPage() {
             </Text>
           </Section>
 
+          <Section title="Our Values">
+            <Text color="textSecondary" mb={4}>
+              The principles that guide each of our actions:
+            </Text>
+            <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+              <ValueBlock
+                title="Excellence"
+                items={[
+                  "Culture of growth: encourage everyone to reach their best level",
+                  "Measurable progress: clear goals, challenges, and tracking",
+                  "Certified coaching: qualified trainers, international methods",
+                ]}
+              />
+              <ValueBlock
+                title="Respect"
+                items={[
+                  "Respect for time: punctuality, commitment to sessions",
+                  "Respect for people: listen, value, encourage",
+                  "Respect for the game: rules, fair play, integrity in every match",
+                ]}
+              />
+              <ValueBlock
+                title="Community"
+                items={[
+                  "Mutual respect: a welcoming and inclusive environment",
+                  "Spirit of mutual aid: we grow by sharing knowledge",
+                  "Learning together: exchanges between beginners, intermediate, and experts",
+                ]}
+              />
+              <ValueBlock
+                title="Discipline"
+                items={[
+                  "Rigor: a structured, progressive method adapted to each level",
+                  "Self-mastery: staying calm and focused under pressure",
+                  "Regular attendance: personalized follow-up and measured goals",
+                ]}
+              />
+            </SimpleGrid>
+          </Section>
+
           <Section title="Core Philosophy">
             <Text color="textSecondary" mb={3}>
               DChessAcademy is built on the belief that chess represents life itself. Its philosophy includes:
@@ -215,6 +255,29 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
       <Text color="textSecondary" fontSize="sm">
         {children}
       </Text>
+    </Box>
+  );
+}
+
+function ValueBlock({ title, items }: { title: string; items: string[] }) {
+  return (
+    <Box
+      p={4}
+      borderRadius="10px"
+      bg="bgCard"
+      borderWidth="1px"
+      borderColor="goldDark"
+    >
+      <Heading size="sm" color="gold" fontWeight="600" mb={2}>
+        {title}
+      </Heading>
+      <ListRoot gap={1}>
+        {items.map((item) => (
+          <ListItem key={item} color="textSecondary" fontSize="sm">
+            • {item}
+          </ListItem>
+        ))}
+      </ListRoot>
     </Box>
   );
 }

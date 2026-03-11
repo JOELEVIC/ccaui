@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { Box, Container, Heading, SimpleGrid, VStack } from "@chakra-ui/react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { hero1, players2, boardTop, handsBoard } from "@/assets/images/ubca";
+import { fadeInUp, staggerContainer, staggerChild, defaultViewport } from "@/lib/animations";
 
 const GALLERY_ITEMS = [
   { src: hero1, alt: "Chess at the academy" },
@@ -16,6 +18,7 @@ function GalleryTile({ src, alt }: { src: (typeof GALLERY_ITEMS)[number]["src"];
   const [error, setError] = useState(false);
 
   return (
+    <motion.div variants={staggerChild}>
     <Box
       position="relative"
       aspectRatio="4/3"
@@ -50,6 +53,7 @@ function GalleryTile({ src, alt }: { src: (typeof GALLERY_ITEMS)[number]["src"];
         </Box>
       )}
     </Box>
+    </motion.div>
   );
 }
 
@@ -58,6 +62,12 @@ export function LandingGallery() {
     <Box py={{ base: 12, md: 16 }} bg="bgDark">
       <Container maxW="6xl">
         <VStack gap={8} align="stretch">
+          <motion.div
+            variants={fadeInUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={defaultViewport}
+          >
           <VStack gap={2}>
             <Heading
               size="lg"
@@ -71,11 +81,20 @@ export function LandingGallery() {
             </Heading>
             <Box h="1px" w="48px" bg="gold" opacity={0.8} />
           </VStack>
+          </motion.div>
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={defaultViewport}
+            style={{ width: "100%" }}
+          >
           <SimpleGrid columns={{ base: 2, md: 4 }} gap={4} w="full">
             {GALLERY_ITEMS.map((item, i) => (
               <GalleryTile key={i} src={item.src} alt={item.alt} />
             ))}
           </SimpleGrid>
+          </motion.div>
         </VStack>
       </Container>
     </Box>

@@ -1,6 +1,8 @@
 "use client";
 
 import { Box, Container, Heading, Text, VStack, SimpleGrid } from "@chakra-ui/react";
+import { motion } from "framer-motion";
+import { fadeInUp, staggerContainer, staggerChild, defaultViewport } from "@/lib/animations";
 
 const PILLARS = [
   {
@@ -75,6 +77,12 @@ export function LandingAcademy() {
       />
       <Container position="relative" zIndex={1} maxW="6xl">
         <VStack gap={12} align="stretch">
+          <motion.div
+            variants={fadeInUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={defaultViewport}
+          >
           <Heading
             size="lg"
             fontFamily="var(--font-playfair), Georgia, serif"
@@ -85,9 +93,18 @@ export function LandingAcademy() {
           >
             The National Authority
           </Heading>
+          </motion.div>
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={defaultViewport}
+            style={{ width: "100%" }}
+          >
           <SimpleGrid columns={{ base: 1, md: 3 }} gap={8} w="full">
             {PILLARS.map((pillar) => (
-              <VStack key={pillar.title} align="flex-start" gap={3} p={6} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="goldDark" boxShadow="var(--shadow-card-soft)" _hover={{ boxShadow: "var(--shadow-card-soft-hover)" }} transition="all 0.2s">
+              <motion.div key={pillar.title} variants={staggerChild}>
+              <VStack align="flex-start" gap={3} p={6} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="goldDark" boxShadow="var(--shadow-card-soft)" _hover={{ boxShadow: "var(--shadow-card-soft-hover)" }} transition="all 0.2s">
                 <Box display="flex" alignItems="center" gap={2}>
                   <PillarIcon />
                   <Heading size="sm" color="gold" fontWeight="600">
@@ -99,8 +116,10 @@ export function LandingAcademy() {
                 </Text>
                 <Box h="1px" w="48px" bg="gold" opacity={0.6} />
               </VStack>
+              </motion.div>
             ))}
           </SimpleGrid>
+          </motion.div>
         </VStack>
       </Container>
     </Box>
