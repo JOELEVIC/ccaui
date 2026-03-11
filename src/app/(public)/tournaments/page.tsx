@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Heading, Text, VStack, Button, HStack } from "@chakra-ui/react";
+import { Box, Text, VStack, Button, HStack } from "@chakra-ui/react";
 import Link from "next/link";
+import { PageHeader } from "@/components/common/PageHeader";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { toaster } from "@/lib/toaster";
@@ -70,9 +71,11 @@ export default function PublicTournamentsPage() {
 
   return (
     <VStack align="stretch" gap={8}>
-      <Heading size="xl" color="gold" fontFamily="var(--font-playfair), Georgia, serif">
-        Tournaments
-      </Heading>
+      <PageHeader
+        label="Upcoming chess events"
+        title="Tournaments"
+        subtitle="Join official CCA tournaments. Live, upcoming, and completed events."
+      />
 
       {activeTab === "upcoming" && !user && (
         <Text color="textMuted" fontSize="sm">

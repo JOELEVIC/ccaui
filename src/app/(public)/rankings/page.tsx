@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Heading, Text, VStack, HStack, Input } from "@chakra-ui/react";
+import { Box, Text, VStack, HStack, Input } from "@chakra-ui/react";
 import { TierLabel, Medal } from "@/components/dashboard";
+import { PageHeader } from "@/components/common/PageHeader";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 
@@ -62,15 +63,11 @@ export default function PublicRankingsPage() {
 
   return (
     <VStack align="stretch" gap={8}>
-      <Heading
-        size="xl"
-        color="gold"
-        fontFamily="var(--font-playfair), Georgia, serif"
-        letterSpacing="0.03em"
-        textTransform="uppercase"
-      >
-        National Rankings
-      </Heading>
+      <PageHeader
+        label="National platform"
+        title="National Rankings"
+        subtitle="See where you stand among Cameroon's chess players. Filter by school or search by name."
+      />
 
       <HStack gap={4} flexWrap="wrap">
         <Box>

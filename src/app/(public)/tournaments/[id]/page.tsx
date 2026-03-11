@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { Box, Button, Heading, Text, VStack } from "@chakra-ui/react";
+import { PageHeader } from "@/components/common/PageHeader";
 import { toaster } from "@/lib/toaster";
 import { useAuth } from "@/lib/auth";
 import {
@@ -123,22 +124,17 @@ export default function PublicTournamentDetailPage() {
   return (
     <VStack align="stretch" gap={6}>
       <Link href="/tournaments">
-        <Button size="sm" variant="outline" color="gold" borderColor="gold">
-          Back to tournaments
+        <Button size="sm" variant="ghost" color="textMuted" _hover={{ color: "gold" }} borderRadius="soft">
+          ← Back to tournaments
         </Button>
       </Link>
-      <Heading size="xl" color="gold" fontFamily="serif">
-        {t.name}
-      </Heading>
-      <Text color="whiteAlpha.800">
-        {t.school.name} · {t.school.region}
-      </Text>
-      <Text color="gold">
-        {new Date(t.startDate).toLocaleDateString()}
-        {t.endDate && ` – ${new Date(t.endDate).toLocaleDateString()}`} · {t.status}
-      </Text>
+      <PageHeader
+        label={t.status}
+        title={t.name}
+        subtitle={`${t.school.name} · ${t.school.region} · ${new Date(t.startDate).toLocaleDateString()}${t.endDate ? ` – ${new Date(t.endDate).toLocaleDateString()}` : ""}`}
+      />
 
-      <Box display="flex" gap={2} flexWrap="wrap">
+      <Box display="flex" gap={2} flexWrap="wrap" mt={2}>
         {t.status === "UPCOMING" && !user && (
           <Link href="/login">
             <Button size="sm" variant="outline" color="gold" borderColor="gold">
@@ -163,8 +159,15 @@ export default function PublicTournamentDetailPage() {
         )}
       </Box>
 
-      <Box>
-        <Heading size="md" color="goldLight" mb={3}>
+      <Box
+        p={6}
+        borderRadius="soft"
+        bg="bgCard"
+        borderWidth="1px"
+        borderColor="goldDark"
+        w="full"
+      >
+        <Heading size="md" color="gold" mb={3} fontFamily="var(--font-playfair), Georgia, serif">
           Standings
         </Heading>
         <VStack align="stretch" gap={2}>
@@ -172,8 +175,8 @@ export default function PublicTournamentDetailPage() {
             <Box
               key={p.id}
               p={3}
-              borderRadius="md"
-              bg="bgCard"
+              borderRadius="cca"
+              bg="bgSurface"
               borderWidth="1px"
               borderColor="goldDark"
               display="flex"
