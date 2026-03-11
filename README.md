@@ -26,10 +26,10 @@ Next.js frontend for the CCA platform. Dark luxury theme with gold accents and C
 
    Edit `.env.local`:
 
-   - `NEXT_PUBLIC_GRAPHQL_URI` — CCA backend GraphQL endpoint (e.g. `http://localhost:4000/graphql`)
-   - `NEXT_PUBLIC_WS_URL` — WebSocket base for live games (e.g. `ws://localhost:4000`)
+   - `NEXT_PUBLIC_GRAPHQL_URI` — Main API (ccanext): auth, users, create game, game list, etc. (e.g. `http://localhost:3000/api/graphql`)
+   - `NEXT_PUBLIC_GAME_API_URI` — CCA game play API (live session, moves, subscriptions). Production: `https://chessliveapi.blacksilvergroups.xyz/graphql`; dev: `http://localhost:4000/graphql`
 
-3. Run the CCA backend (see `../cca`) so the API is available.
+3. Run the main backend (ccanext) and, for Vs Human games, the CCA game API (see `../cca`) so the live API and subscriptions are available.
 
 4. Start the dev server:
 
@@ -39,9 +39,9 @@ Next.js frontend for the CCA platform. Dark luxury theme with gold accents and C
 
    Open [http://localhost:3000](http://localhost:3000).
 
-## WebSocket auth (live games)
+## Live games (Vs Human)
 
-The backend WebSocket route `/ws/game/:gameId` expects auth. Browsers cannot set `Authorization` on `WebSocket`; this UI sends the JWT via query: `?token=...`. If your backend only reads the header, add support for `request.url` query param `token` and use it when present.
+The game page uses the **CCA game API** (`NEXT_PUBLIC_GAME_API_URI`): mutations (startGameSession, makeMove, resignGame, offerDraw, acceptDraw, rejectDraw) over HTTP and the `gameUpdated` subscription over **graphql-ws** at `wss://<host>/subscriptions`. The UI passes the JWT in subscription `connectionParams: { token }`. Game record (create, list, fetch, record completed) stays on the main GraphQL API (ccanext).
 
 ## Scripts
 
