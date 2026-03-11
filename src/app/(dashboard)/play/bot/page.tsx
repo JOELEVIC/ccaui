@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { Box, Button, Text, VStack, HStack, Flex } from "@chakra-ui/react";
 import { Chess } from "chess.js";
 import { GameBoard } from "@/components/chess/GameBoard";
+import { useStockfish, type Difficulty } from "@/lib/useStockfish";
 
 const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-const BOT_DELAY_MS = 400;
 
 function getRandomMove(fen: string): string | null {
   const chess = new Chess(fen);
@@ -26,52 +26,70 @@ function applyMove(fen: string, moveStr: string): string | null {
   return move ? c.fen() : null;
 }
 
+const DIFFICULTY_LABELS: Record<Difficulty, string> = {
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
+};
+
 export default function PlayBotPage() {
   const [fen, setFen] = useState(START_FEN);
   const [orientation] = useState<"white" | "black">("white");
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [botThinking, setBotThinking] = useState(false);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
-  const botTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { getBestMove, ready: stockfishReady, error: stockfishError } = useStockfish(difficulty);
 
   const chess = new Chess(fen);
   const turnIsWhite = fen.split(" ")[1] === "w";
   const isUserTurn = turnIsWhite;
   const isGameOver = chess.isGameOver();
 
-  const runBot = useCallback(() => {
+  const runBot = useCallback(async () => {
     const nextFen = fen;
-    const moveStr = getRandomMove(nextFen);
-    if (!moveStr) return;
+    let moveStr: string | null = null;
+
+    if (stockfishReady) {
+      moveStr = await getBestMove(nextFen);
+    }
+    if (!moveStr) {
+      moveStr = getRandomMove(nextFen);
+    }
+
+    if (!moveStr) {
+      setBotThinking(false);
+      return;
+    }
+
     const newFen = applyMove(nextFen, moveStr);
     if (newFen) {
       setFen(newFen);
-      setMoveHistory(prev => [...prev, moveStr]);
+      setMoveHistory((prev) => [...prev, moveStr!]);
     }
     setBotThinking(false);
-  }, [fen]);
+  }, [fen, stockfishReady, getBestMove]);
 
   useEffect(() => {
-    if (botThinking) {
-      botTimeoutRef.current = setTimeout(runBot, BOT_DELAY_MS);
-      return () => {
-        if (botTimeoutRef.current) clearTimeout(botTimeoutRef.current);
-      };
-    }
+    if (!botThinking) return;
+    runBot();
   }, [botThinking, runBot]);
 
-  const handleMove = useCallback((moveStr: string) => {
-    const newFen = applyMove(fen, moveStr);
-    if (!newFen) return;
-    setFen(newFen);
-    setMoveHistory(prev => [...prev, moveStr]);
-    const turnIsBlack = newFen.split(" ")[1] === "b";
-    if (turnIsBlack && !new Chess(newFen).isGameOver()) {
-      setBotThinking(true);
-    }
-  }, [fen]);
+  const handleMove = useCallback(
+    (moveStr: string) => {
+      const newFen = applyMove(fen, moveStr);
+      if (!newFen) return;
+      setFen(newFen);
+      setMoveHistory((prev) => [...prev, moveStr]);
+      const turnIsBlack = newFen.split(" ")[1] === "b";
+      if (turnIsBlack && !new Chess(newFen).isGameOver()) {
+        setBotThinking(true);
+      }
+    },
+    [fen]
+  );
 
   const handleNewGame = () => {
-    if (botTimeoutRef.current) clearTimeout(botTimeoutRef.current);
     setBotThinking(false);
     setFen(START_FEN);
     setMoveHistory([]);
@@ -89,7 +107,14 @@ export default function PlayBotPage() {
           </Text>
         )}
         <HStack gap={2}>
-          <Button size="sm" borderRadius="soft" bg="gold" color="black" _hover={{ bg: "goldLight" }} onClick={handleNewGame}>
+          <Button
+            size="sm"
+            borderRadius="soft"
+            bg="gold"
+            color="black"
+            _hover={{ bg: "goldLight" }}
+            onClick={handleNewGame}
+          >
             New game
           </Button>
           <Link href="/games">
@@ -100,10 +125,52 @@ export default function PlayBotPage() {
         </HStack>
       </Flex>
 
+      <HStack gap={2} flexWrap="wrap">
+        <Text color="textSecondary" fontSize="sm">
+          Difficulty:
+        </Text>
+        {(["easy", "medium", "hard"] as Difficulty[]).map((d) => (
+          <Button
+            key={d}
+            size="sm"
+            variant={difficulty === d ? "solid" : "outline"}
+            bg={difficulty === d ? "gold" : "transparent"}
+            color={difficulty === d ? "black" : "gold"}
+            borderColor="gold"
+            borderRadius="soft"
+            onClick={() => setDifficulty(d)}
+            disabled={botThinking}
+          >
+            {DIFFICULTY_LABELS[d]}
+          </Button>
+        ))}
+        {!stockfishReady && !stockfishError && (
+          <Text color="textMuted" fontSize="xs">
+            (loading engine…)
+          </Text>
+        )}
+        {stockfishError && (
+          <Text color="statusWarning" fontSize="xs">
+            Engine unavailable, using random moves
+          </Text>
+        )}
+      </HStack>
+
       <Flex direction={{ base: "column", lg: "row" }} justify="center" align="flex-start" gap={6}>
         <VStack gap={2}>
-          <Box py={2} px={3} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="goldDark" minW="200px" textAlign="center">
-            <Text color="textSecondary" fontSize="sm">You (White)</Text>
+          <Box
+            py={2}
+            px={3}
+            borderRadius="soft"
+            bg="bgCard"
+            borderWidth="1px"
+            borderColor="goldDark"
+            minW="200px"
+            textAlign="center"
+          >
+            <Text color="textSecondary" fontSize="sm">
+              You (White)
+            </Text>
           </Box>
           <GameBoard
             fen={fen}
@@ -112,8 +179,19 @@ export default function PlayBotPage() {
             onMove={handleMove}
             allowMove={!isGameOver && !botThinking}
           />
-          <Box py={2} px={3} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="goldDark" minW="200px" textAlign="center">
-            <Text color="textMuted" fontSize="sm">Bot (Black)</Text>
+          <Box
+            py={2}
+            px={3}
+            borderRadius="soft"
+            bg="bgCard"
+            borderWidth="1px"
+            borderColor="goldDark"
+            minW="200px"
+            textAlign="center"
+          >
+            <Text color="textMuted" fontSize="sm">
+              Bot (Black) · {DIFFICULTY_LABELS[difficulty]}
+            </Text>
           </Box>
         </VStack>
         <Box
@@ -136,7 +214,11 @@ export default function PlayBotPage() {
                 {m}
               </Text>
             ))}
-            {moveHistory.length === 0 && <Text color="textMuted" fontSize="sm">—</Text>}
+            {moveHistory.length === 0 && (
+              <Text color="textMuted" fontSize="sm">
+                —
+              </Text>
+            )}
           </Flex>
           {isGameOver && (
             <Text color="gold" fontSize="sm" mt={2}>
