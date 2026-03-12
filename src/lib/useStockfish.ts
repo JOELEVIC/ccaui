@@ -23,47 +23,83 @@ export function useStockfish(difficulty: Difficulty) {
 
   useEffect(() => {
     let mounted = true;
+    let wasmBlobUrl: string | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     setReady(false);
-    // Same-origin: worker from public, WASM from API route (avoids Next.js static 404 + cross-origin Worker block)
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const wasmUrl = `${origin}/api/stockfish-wasm`;
-    const workerUrl = `/stockfish/stockfish-18-lite-single.js#${encodeURIComponent(wasmUrl)},worker`;
-    const worker = new Worker(workerUrl);
+    setError(null);
 
-    worker.onmessage = (e: MessageEvent<string>) => {
-      const line = e.data;
-      if (line.startsWith("bestmove ")) {
-        const match = line.match(/bestmove (\S+)/);
-        const move = match ? match[1] : null;
-        if (resolveRef.current) {
-          resolveRef.current(move === "(none)" ? null : move);
-          resolveRef.current = null;
+    async function init() {
+      try {
+        const res = await fetch("/api/stockfish-wasm");
+        if (!mounted) return;
+        if (!res.ok) throw new Error(`WASM fetch failed: ${res.status}`);
+        const buf = await res.arrayBuffer();
+        if (!mounted) return;
+        const magic = new Uint8Array(buf, 0, 4);
+        if (magic[0] !== 0 || magic[1] !== 0x61 || magic[2] !== 0x73 || magic[3] !== 0x6d) {
+          throw new Error("Invalid WASM: not a WebAssembly binary");
         }
-      } else if (line === "readyok" && mounted) {
-        setReady(true);
+        const blob = new Blob([buf], { type: "application/wasm" });
+        wasmBlobUrl = URL.createObjectURL(blob);
+
+        const workerUrl = `/stockfish/stockfish-18-lite-single.js#${encodeURIComponent(wasmBlobUrl)},worker`;
+        const worker = new Worker(workerUrl);
+        if (!mounted) {
+          worker.terminate();
+          URL.revokeObjectURL(wasmBlobUrl);
+          return;
+        }
+
+        worker.onmessage = (e: MessageEvent<string>) => {
+          const line = e.data;
+          if (line.startsWith("bestmove ")) {
+            const match = line.match(/bestmove (\S+)/);
+            const move = match ? match[1] : null;
+            if (resolveRef.current) {
+              resolveRef.current(move === "(none)" ? null : move);
+              resolveRef.current = null;
+            }
+          } else if (line === "readyok" && mounted) {
+            if (timeoutId) clearTimeout(timeoutId);
+            setReady(true);
+          }
+        };
+
+        worker.onerror = (err) => {
+          if (mounted) {
+            setError(err.message || "Stockfish failed to load");
+            setReady(false);
+          }
+        };
+
+        workerRef.current = worker;
+
+        worker.postMessage("uci");
+        worker.postMessage(`setoption name Skill Level value ${config.skillLevel}`);
+        worker.postMessage("isready");
+
+        timeoutId = setTimeout(() => {
+          if (mounted) setError("Engine timed out—using random moves");
+        }, 15000);
+      } catch (err) {
+        if (mounted) {
+          setError(err instanceof Error ? err.message : "Stockfish failed to load");
+        }
       }
-    };
+    }
 
-    worker.onerror = (err) => {
-      if (mounted) {
-        setError(err.message || "Stockfish failed to load");
-        setReady(false);
-      }
-    };
+    init();
 
-    worker.postMessage("uci");
-    worker.postMessage(`setoption name Skill Level value ${config.skillLevel}`);
-    worker.postMessage("isready");
-
-    workerRef.current = worker;
     return () => {
       mounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
       if (resolveRef.current) {
         resolveRef.current(null);
         resolveRef.current = null;
       }
-      worker.terminate();
+      workerRef.current?.terminate();
       workerRef.current = null;
+      if (wasmBlobUrl) URL.revokeObjectURL(wasmBlobUrl);
     };
   }, [config.skillLevel]);
 
