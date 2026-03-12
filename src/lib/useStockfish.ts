@@ -24,10 +24,10 @@ export function useStockfish(difficulty: Difficulty) {
   useEffect(() => {
     let mounted = true;
     setReady(false);
-    // Use CDN to avoid Next.js serving HTML 404 for worker's WASM fetch (known issue)
-    const STOCKFISH_CDN = "https://unpkg.com/stockfish@18.0.5/bin";
-    const wasmUrl = `${STOCKFISH_CDN}/stockfish-18-lite-single.wasm`;
-    const workerUrl = `${STOCKFISH_CDN}/stockfish-18-lite-single.js#${encodeURIComponent(wasmUrl)},worker`;
+    // Same-origin: worker from public, WASM from API route (avoids Next.js static 404 + cross-origin Worker block)
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const wasmUrl = `${origin}/api/stockfish-wasm`;
+    const workerUrl = `/stockfish/stockfish-18-lite-single.js#${encodeURIComponent(wasmUrl)},worker`;
     const worker = new Worker(workerUrl);
 
     worker.onmessage = (e: MessageEvent<string>) => {
