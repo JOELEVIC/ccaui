@@ -23,6 +23,11 @@ export function getGameApiUrl(): string {
   return GAME_API_URI;
 }
 
+/** Base URL of CCA API (without /graphql). Used for Stockfish endpoint. */
+export function getCcaApiBase(): string {
+  return GAME_API_URI.replace(/\/graphql$/, "");
+}
+
 export interface GameSession {
   gameId: string;
   whiteId: string;

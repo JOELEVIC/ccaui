@@ -144,11 +144,6 @@ export default function PlayBotPage() {
             {DIFFICULTY_LABELS[d]}
           </Button>
         ))}
-        {!stockfishReady && !stockfishError && (
-          <Text color="textMuted" fontSize="xs">
-            (loading engine…)
-          </Text>
-        )}
         {stockfishError && (
           <Text color="statusWarning" fontSize="xs">
             Engine unavailable, using random moves

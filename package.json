@@ -4,11 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/copy-stockfish.js && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run",
-    "postinstall": "node scripts/copy-stockfish.js"
+    "test": "vitest run"
   },
   "dependencies": {
     "@apollo/client": "^4.1.4",
@@ -24,7 +23,6 @@
     "react-chessboard": "^5.10.0",
     "react-dom": "^18",
     "rxjs": "^7.8.2",
-    "stockfish": "^18.0.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {
