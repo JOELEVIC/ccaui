@@ -1,8 +1,23 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
-import { Box, Button, Text, VStack, HStack, Flex } from "@chakra-ui/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Box,
+  Button,
+  Text,
+  VStack,
+  HStack,
+  Flex,
+  DialogRoot,
+  DialogBackdrop,
+  DialogContent,
+  DialogBody,
+  DialogFooter,
+  DialogTitle,
+  IconButton,
+} from "@chakra-ui/react";
 import { Chess } from "chess.js";
 import { GameBoard } from "@/components/chess/GameBoard";
 import { MaterialDisplay } from "@/components/chess/MaterialDisplay";
@@ -10,10 +25,11 @@ import { EvaluationBar } from "@/components/chess/EvaluationBar";
 import { TierLabel } from "@/components/dashboard/TierLabel";
 import { useStockfish } from "@/lib/useStockfish";
 import type { Evaluation } from "@/lib/useStockfish";
+import { toaster } from "@/lib/toaster";
 
 const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-const ELO_PRESETS = [230, 400, 600, 800, 1000, 1200, 1600, 2000, 2400, 2800, 3200];
+const BOT_ELO_PRESETS = [230, 400, 600, 800, 1000, 1200, 1600, 2000, 2400, 2800, 3200];
 
 function getRandomMove(fen: string): string | null {
   const chess = new Chess(fen);
@@ -32,25 +48,60 @@ function applyMove(fen: string, moveStr: string): string | null {
   return move ? c.fen() : null;
 }
 
+function buildFenAtMove(startFen: string, moves: string[], upToIndex: number): string {
+  let fen = startFen;
+  for (let i = 0; i < upToIndex && i < moves.length; i++) {
+    const next = applyMove(fen, moves[i]);
+    if (!next) break;
+    fen = next;
+  }
+  return fen;
+}
+
 const EVAL_DEBOUNCE_MS = 400;
 
 export default function PlayBotPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const eloParam = searchParams.get("elo");
+  const elo = useMemo(() => {
+    const n = eloParam ? parseInt(eloParam, 10) : 1600;
+    return BOT_ELO_PRESETS.includes(n) ? n : 1600;
+  }, [eloParam]);
+
   const [fen, setFen] = useState(START_FEN);
   const [orientation] = useState<"white" | "black">("white");
-  const [elo, setElo] = useState(1600);
   const [botThinking, setBotThinking] = useState(false);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
+  const [viewingIndex, setViewingIndex] = useState(0);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
   const [evalLoading, setEvalLoading] = useState(false);
+  const [gameResult, setGameResult] = useState<"1-0" | "0-1" | "1/2-1/2" | null>(null);
+  const [gameOverReason, setGameOverReason] = useState<string | null>(null);
   const evalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { getBestMove, getEvaluation, ready: stockfishReady, error: stockfishError } = useStockfish(elo);
 
-  const chess = new Chess(fen);
-  const turnIsWhite = fen.split(" ")[1] === "w";
+  const displayFen = useMemo(
+    () => buildFenAtMove(START_FEN, moveHistory, viewingIndex),
+    [moveHistory, viewingIndex]
+  );
+
+  const chess = useMemo(() => {
+    const c = new Chess();
+    try {
+      c.load(displayFen);
+    } catch {
+      // invalid
+    }
+    return c;
+  }, [displayFen]);
+
+  const turnIsWhite = displayFen.split(" ")[1] === "w";
   const isUserTurn = turnIsWhite;
   const isGameOver = chess.isGameOver();
+  const atHead = viewingIndex === moveHistory.length;
 
   useEffect(() => {
     if (!showAnalysis) {
@@ -70,7 +121,7 @@ export default function PlayBotPage() {
     evalTimeoutRef.current = setTimeout(() => {
       evalTimeoutRef.current = null;
       setEvalLoading(true);
-      getEvaluation(fen)
+      getEvaluation(displayFen)
         .then((ev) => {
           setEvaluation(ev);
         })
@@ -84,7 +135,7 @@ export default function PlayBotPage() {
         clearTimeout(evalTimeoutRef.current);
       }
     };
-  }, [showAnalysis, fen, getEvaluation]);
+  }, [showAnalysis, displayFen, getEvaluation]);
 
   const runBot = useCallback(async () => {
     const nextFen = fen;
@@ -104,8 +155,14 @@ export default function PlayBotPage() {
 
     const newFen = applyMove(nextFen, moveStr);
     if (newFen) {
+      const c = new Chess(newFen);
       setFen(newFen);
       setMoveHistory((prev) => [...prev, moveStr!]);
+      setViewingIndex((i) => i + 1);
+      if (c.isGameOver()) {
+        setGameResult(c.isCheckmate() ? "0-1" : "1/2-1/2");
+        setGameOverReason(c.isCheckmate() ? "Checkmate" : "Draw");
+      }
     }
     setBotThinking(false);
   }, [fen, stockfishReady, getBestMove]);
@@ -117,29 +174,65 @@ export default function PlayBotPage() {
 
   const handleMove = useCallback(
     (moveStr: string) => {
+      if (!atHead || gameResult) return;
       const newFen = applyMove(fen, moveStr);
       if (!newFen) return;
       setFen(newFen);
       setMoveHistory((prev) => [...prev, moveStr]);
-      const turnIsBlack = newFen.split(" ")[1] === "b";
-      if (turnIsBlack && !new Chess(newFen).isGameOver()) {
-        setBotThinking(true);
+      setViewingIndex((i) => i + 1);
+
+      const c = new Chess(newFen);
+      if (c.isGameOver()) {
+        if (c.isCheckmate()) setGameResult("1-0");
+        else if (c.isStalemate() || c.isDraw()) setGameResult("1/2-1/2");
+        setGameOverReason(c.isCheckmate() ? "Checkmate" : "Draw");
+      } else {
+        const turnIsBlack = newFen.split(" ")[1] === "b";
+        if (turnIsBlack) setBotThinking(true);
       }
     },
-    [fen]
+    [fen, atHead, gameResult]
   );
 
-  const handleNewGame = () => {
+  const handleResign = useCallback(() => {
+    if (gameResult) return;
+    setGameResult("0-1");
+    setGameOverReason("Resignation");
     setBotThinking(false);
+  }, [gameResult]);
+
+  const handleOfferDraw = useCallback(() => {
+    if (gameResult) return;
+    const c = new Chess(fen);
+    if (c.isDraw() || c.isStalemate()) {
+      setGameResult("1/2-1/2");
+      setGameOverReason("Draw agreed");
+    } else {
+      toaster.create({ title: "Bot declined the draw", type: "info" });
+    }
+  }, [fen, gameResult]);
+
+  const handleRematch = useCallback(() => {
     setFen(START_FEN);
     setMoveHistory([]);
-  };
+    setViewingIndex(0);
+    setGameResult(null);
+    setGameOverReason(null);
+    setBotThinking(false);
+  }, []);
+
+  const handlePlayNewGame = useCallback(() => {
+    router.push("/games");
+  }, [router]);
+
+  const canGoBack = viewingIndex > 0;
+  const canGoForward = viewingIndex < moveHistory.length;
 
   return (
     <VStack align="stretch" gap={6}>
       <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
         <Text color="gold" fontWeight="600" fontSize="lg">
-          Practice vs Bot
+          Practice vs Bot · {elo} ELO
         </Text>
         {botThinking && (
           <Text color="textMuted" fontSize="sm">
@@ -149,13 +242,15 @@ export default function PlayBotPage() {
         <HStack gap={2}>
           <Button
             size="sm"
+            variant={showAnalysis ? "solid" : "outline"}
+            bg={showAnalysis ? "gold" : "transparent"}
+            color={showAnalysis ? "black" : "gold"}
+            borderColor="gold"
             borderRadius="soft"
-            bg="gold"
-            color="black"
-            _hover={{ bg: "goldLight" }}
-            onClick={handleNewGame}
+            onClick={() => setShowAnalysis((s) => !s)}
+            disabled={!!gameResult}
           >
-            New game
+            {showAnalysis ? "Analysis on" : "Analysis"}
           </Button>
           <Link href="/games">
             <Button size="sm" variant="ghost" color="textMuted" borderRadius="soft">
@@ -165,44 +260,11 @@ export default function PlayBotPage() {
         </HStack>
       </Flex>
 
-      <Flex gap={4} flexWrap="wrap" align="center">
-        <Text color="textSecondary" fontSize="sm">
-          Bot ELO:
+      {stockfishError && (
+        <Text color="statusWarning" fontSize="xs">
+          Engine unavailable, using random moves
         </Text>
-        <Flex gap={2} flexWrap="wrap" maxW="100%">
-          {ELO_PRESETS.map((e) => (
-            <Button
-              key={e}
-              size="sm"
-              variant={elo === e ? "solid" : "outline"}
-              bg={elo === e ? "gold" : "transparent"}
-              color={elo === e ? "black" : "gold"}
-              borderColor="gold"
-              borderRadius="soft"
-              onClick={() => setElo(e)}
-              disabled={botThinking}
-            >
-              {e}
-            </Button>
-          ))}
-        </Flex>
-        <Button
-          size="sm"
-          variant={showAnalysis ? "solid" : "outline"}
-          bg={showAnalysis ? "gold" : "transparent"}
-          color={showAnalysis ? "black" : "gold"}
-          borderColor="gold"
-          borderRadius="soft"
-          onClick={() => setShowAnalysis((s) => !s)}
-        >
-          {showAnalysis ? "Analysis on" : "Analysis"}
-        </Button>
-        {stockfishError && (
-          <Text color="statusWarning" fontSize="xs">
-            Engine unavailable, using random moves
-          </Text>
-        )}
-      </Flex>
+      )}
 
       <Flex direction={{ base: "column", lg: "row" }} justify="center" align="flex-start" gap={6}>
         <VStack gap={2}>
@@ -229,11 +291,11 @@ export default function PlayBotPage() {
               />
             )}
             <GameBoard
-              fen={fen}
+              fen={displayFen}
               orientation={orientation}
-              isMyTurn={!isGameOver && isUserTurn && !botThinking}
+              isMyTurn={!gameResult && atHead && isUserTurn && !botThinking}
               onMove={handleMove}
-              allowMove={!isGameOver && !botThinking}
+              allowMove={!gameResult && atHead && !botThinking}
             />
           </HStack>
           <Box
@@ -254,8 +316,10 @@ export default function PlayBotPage() {
             </HStack>
           </Box>
         </VStack>
+
         <VStack align="stretch" gap={4} minW="200px">
-          <MaterialDisplay fen={fen} />
+          <MaterialDisplay fen={displayFen} />
+
           <Box
             py={3}
             px={4}
@@ -263,15 +327,53 @@ export default function PlayBotPage() {
             borderWidth="1px"
             borderColor="goldDark"
             bg="bgCard"
-            maxH="400px"
-            overflowY="auto"
           >
             <Text color="gold" fontSize="xs" fontWeight="600" mb={2}>
               Moves
             </Text>
-            <Flex gap={2} flexWrap="wrap">
+            <HStack gap={2} mb={2}>
+              <IconButton
+                aria-label="Previous move"
+                size="sm"
+                variant="outline"
+                borderColor="goldDark"
+                color="gold"
+                borderRadius="soft"
+                onClick={() => setViewingIndex((i) => Math.max(0, i - 1))}
+                disabled={!canGoBack}
+                icon={
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                  </svg>
+                }
+              />
+              <IconButton
+                aria-label="Next move"
+                size="sm"
+                variant="outline"
+                borderColor="goldDark"
+                color="gold"
+                borderRadius="soft"
+                onClick={() => setViewingIndex((i) => Math.min(moveHistory.length, i + 1))}
+                disabled={!canGoForward}
+                icon={
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                  </svg>
+                }
+              />
+              <Text color="textMuted" fontSize="xs">
+                {viewingIndex} / {moveHistory.length}
+              </Text>
+            </HStack>
+            <Flex gap={2} flexWrap="wrap" maxH="120px" overflowY="auto">
               {moveHistory.map((m, i) => (
-                <Text key={i} color="textSecondary" fontSize="sm">
+                <Text
+                  key={i}
+                  color={i < viewingIndex ? "gold" : "textMuted"}
+                  fontSize="sm"
+                  fontWeight={i === viewingIndex - 1 ? "600" : "normal"}
+                >
                   {m}
                 </Text>
               ))}
@@ -281,14 +383,76 @@ export default function PlayBotPage() {
                 </Text>
               )}
             </Flex>
-            {isGameOver && (
-              <Text color="gold" fontSize="sm" mt={2}>
-                {chess.isCheckmate() ? "Checkmate." : "Game over."}
-              </Text>
-            )}
           </Box>
+
+          {!gameResult && atHead && (
+            <HStack gap={2}>
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor="statusWarning"
+                color="statusWarning"
+                borderRadius="soft"
+                onClick={handleResign}
+              >
+                Resign
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor="goldDark"
+                color="textSecondary"
+                borderRadius="soft"
+                onClick={handleOfferDraw}
+              >
+                Offer draw
+              </Button>
+            </HStack>
+          )}
         </VStack>
       </Flex>
+
+      <DialogRoot open={!!gameResult} onOpenChange={() => {}}>
+        <DialogBackdrop />
+        <DialogContent bg="bgCard" borderWidth="1px" borderColor="goldDark">
+          <DialogBody pt={6}>
+            <DialogTitle>
+              <Text color="gold" fontSize="xl" fontWeight="700" textAlign="center" mb={2}>
+                {gameResult === "1-0"
+                  ? "You win!"
+                  : gameResult === "0-1"
+                    ? "You lose"
+                    : "Draw"}
+              </Text>
+            </DialogTitle>
+            <Text color="textMuted" fontSize="sm" textAlign="center">
+              {gameOverReason} · {gameResult}
+            </Text>
+          </DialogBody>
+          <DialogFooter gap={2} justifyContent="center" pb={6}>
+            <Button
+              size="sm"
+              bg="gold"
+              color="black"
+              borderRadius="soft"
+              _hover={{ bg: "goldLight" }}
+              onClick={handleRematch}
+            >
+              Rematch
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              borderColor="gold"
+              color="gold"
+              borderRadius="soft"
+              onClick={handlePlayNewGame}
+            >
+              Play new game
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </DialogRoot>
     </VStack>
   );
 }

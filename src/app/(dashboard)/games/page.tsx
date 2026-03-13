@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Box, Heading, Text, VStack, Button, Input, HStack } from "@chakra-ui/react";
+import { Box, Heading, Text, VStack, Button, Input, HStack, Flex } from "@chakra-ui/react";
 import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { toaster } from "@/lib/toaster";
 import { CREATE_GAME } from "@/graphql/mutations/games";
+const BOT_ELO_PRESETS = [230, 400, 600, 800, 1000, 1200, 1600, 2000, 2400, 2800, 3200];
 
 const LIVE_GAMES = gql`
   query GamesLiveGames {
@@ -67,6 +68,7 @@ type PlayMode = "human" | "self" | "bot";
 export default function GamesPage() {
   const router = useRouter();
   const [playMode, setPlayMode] = useState<PlayMode>("human");
+  const [selectedBotElo, setSelectedBotElo] = useState(1600);
   const [whiteId, setWhiteId] = useState("");
   const [blackId, setBlackId] = useState("");
   const [timeControl, setTimeControl] = useState("10+0");
@@ -164,11 +166,27 @@ export default function GamesPage() {
             Practice vs Bot
           </Text>
           <Text color="textSecondary" fontSize="sm" mb={4}>
-            Play against a computer opponent. You play as White; the bot plays as Black. No rating—ideal for practice.
+            Choose your opponent. You play as White; the bot plays as Black. No rating—ideal for practice.
           </Text>
-          <Link href="/play/bot">
+          <Flex gap={2} flexWrap="wrap" mb={4}>
+            {BOT_ELO_PRESETS.map((elo) => (
+              <Button
+                key={elo}
+                size="sm"
+                variant={selectedBotElo === elo ? "solid" : "outline"}
+                bg={selectedBotElo === elo ? "gold" : "transparent"}
+                color={selectedBotElo === elo ? "black" : "gold"}
+                borderColor="gold"
+                borderRadius="soft"
+                onClick={() => setSelectedBotElo(elo)}
+              >
+                {elo} ELO
+              </Button>
+            ))}
+          </Flex>
+          <Link href={`/play/bot?elo=${selectedBotElo}`}>
             <Button size="md" bg="gold" color="black" borderRadius="soft" _hover={{ bg: "goldLight" }}>
-              Start vs Bot
+              Start vs Bot ({selectedBotElo} ELO)
             </Button>
           </Link>
         </Box>
