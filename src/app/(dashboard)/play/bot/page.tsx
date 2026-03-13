@@ -1,13 +1,19 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Box, Button, Text, VStack, HStack, Flex } from "@chakra-ui/react";
 import { Chess } from "chess.js";
 import { GameBoard } from "@/components/chess/GameBoard";
-import { useStockfish, type Difficulty } from "@/lib/useStockfish";
+import { MaterialDisplay } from "@/components/chess/MaterialDisplay";
+import { EvaluationBar } from "@/components/chess/EvaluationBar";
+import { TierLabel } from "@/components/dashboard/TierLabel";
+import { useStockfish } from "@/lib/useStockfish";
+import type { Evaluation } from "@/lib/useStockfish";
 
 const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+const ELO_PRESETS = [230, 400, 600, 800, 1000, 1200, 1600, 2000, 2400, 2800, 3200];
 
 function getRandomMove(fen: string): string | null {
   const chess = new Chess(fen);
@@ -26,25 +32,59 @@ function applyMove(fen: string, moveStr: string): string | null {
   return move ? c.fen() : null;
 }
 
-const DIFFICULTY_LABELS: Record<Difficulty, string> = {
-  easy: "Easy",
-  medium: "Medium",
-  hard: "Hard",
-};
+const EVAL_DEBOUNCE_MS = 400;
 
 export default function PlayBotPage() {
   const [fen, setFen] = useState(START_FEN);
   const [orientation] = useState<"white" | "black">("white");
-  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const [elo, setElo] = useState(1600);
   const [botThinking, setBotThinking] = useState(false);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
+  const [evalLoading, setEvalLoading] = useState(false);
+  const evalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { getBestMove, ready: stockfishReady, error: stockfishError } = useStockfish(difficulty);
+  const { getBestMove, getEvaluation, ready: stockfishReady, error: stockfishError } = useStockfish(elo);
 
   const chess = new Chess(fen);
   const turnIsWhite = fen.split(" ")[1] === "w";
   const isUserTurn = turnIsWhite;
   const isGameOver = chess.isGameOver();
+
+  useEffect(() => {
+    if (!showAnalysis) {
+      setEvaluation(null);
+      setEvalLoading(false);
+      if (evalTimeoutRef.current) {
+        clearTimeout(evalTimeoutRef.current);
+        evalTimeoutRef.current = null;
+      }
+      return;
+    }
+
+    if (evalTimeoutRef.current) {
+      clearTimeout(evalTimeoutRef.current);
+    }
+
+    evalTimeoutRef.current = setTimeout(() => {
+      evalTimeoutRef.current = null;
+      setEvalLoading(true);
+      getEvaluation(fen)
+        .then((ev) => {
+          setEvaluation(ev);
+        })
+        .finally(() => {
+          setEvalLoading(false);
+        });
+    }, EVAL_DEBOUNCE_MS);
+
+    return () => {
+      if (evalTimeoutRef.current) {
+        clearTimeout(evalTimeoutRef.current);
+      }
+    };
+  }, [showAnalysis, fen, getEvaluation]);
 
   const runBot = useCallback(async () => {
     const nextFen = fen;
@@ -125,31 +165,44 @@ export default function PlayBotPage() {
         </HStack>
       </Flex>
 
-      <HStack gap={2} flexWrap="wrap">
+      <Flex gap={4} flexWrap="wrap" align="center">
         <Text color="textSecondary" fontSize="sm">
-          Difficulty:
+          Bot ELO:
         </Text>
-        {(["easy", "medium", "hard"] as Difficulty[]).map((d) => (
-          <Button
-            key={d}
-            size="sm"
-            variant={difficulty === d ? "solid" : "outline"}
-            bg={difficulty === d ? "gold" : "transparent"}
-            color={difficulty === d ? "black" : "gold"}
-            borderColor="gold"
-            borderRadius="soft"
-            onClick={() => setDifficulty(d)}
-            disabled={botThinking}
-          >
-            {DIFFICULTY_LABELS[d]}
-          </Button>
-        ))}
+        <Flex gap={2} flexWrap="wrap" maxW="100%">
+          {ELO_PRESETS.map((e) => (
+            <Button
+              key={e}
+              size="sm"
+              variant={elo === e ? "solid" : "outline"}
+              bg={elo === e ? "gold" : "transparent"}
+              color={elo === e ? "black" : "gold"}
+              borderColor="gold"
+              borderRadius="soft"
+              onClick={() => setElo(e)}
+              disabled={botThinking}
+            >
+              {e}
+            </Button>
+          ))}
+        </Flex>
+        <Button
+          size="sm"
+          variant={showAnalysis ? "solid" : "outline"}
+          bg={showAnalysis ? "gold" : "transparent"}
+          color={showAnalysis ? "black" : "gold"}
+          borderColor="gold"
+          borderRadius="soft"
+          onClick={() => setShowAnalysis((s) => !s)}
+        >
+          {showAnalysis ? "Analysis on" : "Analysis"}
+        </Button>
         {stockfishError && (
           <Text color="statusWarning" fontSize="xs">
             Engine unavailable, using random moves
           </Text>
         )}
-      </HStack>
+      </Flex>
 
       <Flex direction={{ base: "column", lg: "row" }} justify="center" align="flex-start" gap={6}>
         <VStack gap={2}>
@@ -167,13 +220,22 @@ export default function PlayBotPage() {
               You (White)
             </Text>
           </Box>
-          <GameBoard
-            fen={fen}
-            orientation={orientation}
-            isMyTurn={!isGameOver && isUserTurn && !botThinking}
-            onMove={handleMove}
-            allowMove={!isGameOver && !botThinking}
-          />
+          <HStack align="flex-start" gap={2}>
+            {showAnalysis && (
+              <EvaluationBar
+                evaluation={evaluation}
+                loading={evalLoading}
+                orientation={orientation}
+              />
+            )}
+            <GameBoard
+              fen={fen}
+              orientation={orientation}
+              isMyTurn={!isGameOver && isUserTurn && !botThinking}
+              onMove={handleMove}
+              allowMove={!isGameOver && !botThinking}
+            />
+          </HStack>
           <Box
             py={2}
             px={3}
@@ -184,43 +246,48 @@ export default function PlayBotPage() {
             minW="200px"
             textAlign="center"
           >
-            <Text color="textMuted" fontSize="sm">
-              Bot (Black) · {DIFFICULTY_LABELS[difficulty]}
-            </Text>
+            <HStack justify="center" gap={2} flexWrap="wrap">
+              <Text color="textMuted" fontSize="sm">
+                Bot (Black) · {elo} ELO
+              </Text>
+              <TierLabel rating={elo} size="sm" />
+            </HStack>
           </Box>
         </VStack>
-        <Box
-          py={3}
-          px={4}
-          borderRadius="soft"
-          borderWidth="1px"
-          borderColor="goldDark"
-          bg="bgCard"
-          maxH="400px"
-          overflowY="auto"
-          minW="200px"
-        >
-          <Text color="gold" fontSize="xs" fontWeight="600" mb={2}>
-            Moves
-          </Text>
-          <Flex gap={2} flexWrap="wrap">
-            {moveHistory.map((m, i) => (
-              <Text key={i} color="textSecondary" fontSize="sm">
-                {m}
-              </Text>
-            ))}
-            {moveHistory.length === 0 && (
-              <Text color="textMuted" fontSize="sm">
-                —
+        <VStack align="stretch" gap={4} minW="200px">
+          <MaterialDisplay fen={fen} />
+          <Box
+            py={3}
+            px={4}
+            borderRadius="soft"
+            borderWidth="1px"
+            borderColor="goldDark"
+            bg="bgCard"
+            maxH="400px"
+            overflowY="auto"
+          >
+            <Text color="gold" fontSize="xs" fontWeight="600" mb={2}>
+              Moves
+            </Text>
+            <Flex gap={2} flexWrap="wrap">
+              {moveHistory.map((m, i) => (
+                <Text key={i} color="textSecondary" fontSize="sm">
+                  {m}
+                </Text>
+              ))}
+              {moveHistory.length === 0 && (
+                <Text color="textMuted" fontSize="sm">
+                  —
+                </Text>
+              )}
+            </Flex>
+            {isGameOver && (
+              <Text color="gold" fontSize="sm" mt={2}>
+                {chess.isCheckmate() ? "Checkmate." : "Game over."}
               </Text>
             )}
-          </Flex>
-          {isGameOver && (
-            <Text color="gold" fontSize="sm" mt={2}>
-              {chess.isCheckmate() ? "Checkmate." : "Game over."}
-            </Text>
-          )}
-        </Box>
+          </Box>
+        </VStack>
       </Flex>
     </VStack>
   );

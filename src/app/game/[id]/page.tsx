@@ -10,6 +10,7 @@ import { toaster } from "@/lib/toaster";
 import { Chess } from "chess.js";
 import { useAuth } from "@/lib/auth";
 import { GameBoard } from "@/components/chess/GameBoard";
+import { MaterialDisplay } from "@/components/chess/MaterialDisplay";
 import { RECORD_GAME_COMPLETED } from "@/graphql/mutations/games";
 import {
   startGameSession,
@@ -291,6 +292,7 @@ export default function GamePage() {
         </VStack>
 
         <VStack align="stretch" gap={4} minW="200px">
+          <MaterialDisplay fen={fen} />
           <Box
             py={3}
             px={4}
