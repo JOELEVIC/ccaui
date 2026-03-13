@@ -10,13 +10,7 @@ import {
   VStack,
   HStack,
   Flex,
-  DialogRoot,
-  DialogBackdrop,
-  DialogContent,
-  DialogBody,
-  DialogFooter,
-  DialogTitle,
-  IconButton,
+  Dialog,
 } from "@chakra-ui/react";
 import { Chess } from "chess.js";
 import { GameBoard } from "@/components/chess/GameBoard";
@@ -88,19 +82,8 @@ export default function PlayBotPage() {
     [moveHistory, viewingIndex]
   );
 
-  const chess = useMemo(() => {
-    const c = new Chess();
-    try {
-      c.load(displayFen);
-    } catch {
-      // invalid
-    }
-    return c;
-  }, [displayFen]);
-
   const turnIsWhite = displayFen.split(" ")[1] === "w";
   const isUserTurn = turnIsWhite;
-  const isGameOver = chess.isGameOver();
   const atHead = viewingIndex === moveHistory.length;
 
   useEffect(() => {
@@ -332,8 +315,7 @@ export default function PlayBotPage() {
               Moves
             </Text>
             <HStack gap={2} mb={2}>
-              <IconButton
-                aria-label="Previous move"
+              <Button
                 size="sm"
                 variant="outline"
                 borderColor="goldDark"
@@ -341,14 +323,11 @@ export default function PlayBotPage() {
                 borderRadius="soft"
                 onClick={() => setViewingIndex((i) => Math.max(0, i - 1))}
                 disabled={!canGoBack}
-                icon={
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                  </svg>
-                }
-              />
-              <IconButton
-                aria-label="Next move"
+                px={2}
+              >
+                ←
+              </Button>
+              <Button
                 size="sm"
                 variant="outline"
                 borderColor="goldDark"
@@ -356,12 +335,10 @@ export default function PlayBotPage() {
                 borderRadius="soft"
                 onClick={() => setViewingIndex((i) => Math.min(moveHistory.length, i + 1))}
                 disabled={!canGoForward}
-                icon={
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
-                  </svg>
-                }
-              />
+                px={2}
+              >
+                →
+              </Button>
               <Text color="textMuted" fontSize="xs">
                 {viewingIndex} / {moveHistory.length}
               </Text>
@@ -412,47 +389,49 @@ export default function PlayBotPage() {
         </VStack>
       </Flex>
 
-      <DialogRoot open={!!gameResult} onOpenChange={() => {}}>
-        <DialogBackdrop />
-        <DialogContent bg="bgCard" borderWidth="1px" borderColor="goldDark">
-          <DialogBody pt={6}>
-            <DialogTitle>
-              <Text color="gold" fontSize="xl" fontWeight="700" textAlign="center" mb={2}>
-                {gameResult === "1-0"
-                  ? "You win!"
-                  : gameResult === "0-1"
-                    ? "You lose"
-                    : "Draw"}
+      <Dialog.Root open={!!gameResult} onOpenChange={() => {}}>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content bg="bgCard" borderWidth="1px" borderColor="goldDark">
+            <Dialog.Body pt={6}>
+              <Dialog.Title>
+                <Text color="gold" fontSize="xl" fontWeight="700" textAlign="center" mb={2}>
+                  {gameResult === "1-0"
+                    ? "You win!"
+                    : gameResult === "0-1"
+                      ? "You lose"
+                      : "Draw"}
+                </Text>
+              </Dialog.Title>
+              <Text color="textMuted" fontSize="sm" textAlign="center">
+                {gameOverReason} · {gameResult}
               </Text>
-            </DialogTitle>
-            <Text color="textMuted" fontSize="sm" textAlign="center">
-              {gameOverReason} · {gameResult}
-            </Text>
-          </DialogBody>
-          <DialogFooter gap={2} justifyContent="center" pb={6}>
-            <Button
-              size="sm"
-              bg="gold"
-              color="black"
-              borderRadius="soft"
-              _hover={{ bg: "goldLight" }}
-              onClick={handleRematch}
-            >
-              Rematch
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              borderColor="gold"
-              color="gold"
-              borderRadius="soft"
-              onClick={handlePlayNewGame}
-            >
-              Play new game
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </DialogRoot>
+            </Dialog.Body>
+            <Dialog.Footer gap={2} justifyContent="center" pb={6}>
+              <Button
+                size="sm"
+                bg="gold"
+                color="black"
+                borderRadius="soft"
+                _hover={{ bg: "goldLight" }}
+                onClick={handleRematch}
+              >
+                Rematch
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor="gold"
+                color="gold"
+                borderRadius="soft"
+                onClick={handlePlayNewGame}
+              >
+                Play new game
+              </Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </VStack>
   );
 }
