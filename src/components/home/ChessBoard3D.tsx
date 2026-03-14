@@ -55,8 +55,7 @@ function Piece({
   isAnimating?: boolean;
   targetPos?: [number, number, number];
 }) {
-  const ref = useRef<THREE.Mesh>(null);
-  const geom = type === "p" || type === "k" ? "cylinder" : "box";
+  const ref = useRef<THREE.Group>(null);
 
   useFrame((_, delta) => {
     if (!ref.current || !isAnimating || !targetPos) return;
@@ -67,26 +66,148 @@ function Piece({
   });
 
   const [x, y, z] = position;
-  const scale: [number, number, number] =
-    type === "k"
-      ? [0.5, 0.6, 0.5]
-      : type === "q"
-        ? [0.45, 0.55, 0.45]
-        : type === "r" || type === "b"
-          ? [0.4, 0.5, 0.4]
-          : type === "n"
-            ? [0.35, 0.45, 0.35]
-            : [0.3, 0.4, 0.3];
+  const s = type === "k" ? 0.5 : type === "q" ? 0.46 : type === "r" || type === "b" ? 0.44 : type === "n" ? 0.4 : 0.36;
+  const mat = <meshStandardMaterial color={color} />;
+
+  // Staunton-style procedural pieces
+  const pieceContent = (() => {
+    switch (type) {
+      case "p":
+        return (
+          <>
+            <mesh castShadow position={[0, 0.12 * s, 0]}>
+              <cylinderGeometry args={[0.22 * s, 0.28 * s, 0.2 * s, 16]} />
+              {mat}
+            </mesh>
+            <mesh castShadow position={[0, 0.08 * s, 0]}>
+              <cylinderGeometry args={[0.1 * s, 0.14 * s, 0.08 * s, 16]} />
+              {mat}
+            </mesh>
+            <mesh castShadow position={[0, 0.22 * s, 0]}>
+              <sphereGeometry args={[0.14 * s, 16, 12]} />
+              {mat}
+            </mesh>
+          </>
+        );
+      case "r":
+        return (
+          <>
+            <mesh castShadow position={[0, 0.2 * s, 0]}>
+              <cylinderGeometry args={[0.32 * s, 0.35 * s, 0.28 * s, 16]} />
+              {mat}
+            </mesh>
+            <mesh castShadow position={[0, 0.35 * s, 0]}>
+              <cylinderGeometry args={[0.3 * s, 0.32 * s, 0.06 * s, 16]} />
+              {mat}
+            </mesh>
+            {[0, 1, 2, 3].map((i) => (
+              <mesh
+                key={i}
+                castShadow
+                position={[
+                  Math.cos((i / 4) * Math.PI * 2 + Math.PI / 4) * 0.22 * s,
+                  0.42 * s,
+                  Math.sin((i / 4) * Math.PI * 2 + Math.PI / 4) * 0.22 * s,
+                ]}
+              >
+                <cylinderGeometry args={[0.07 * s, 0.09 * s, 0.1 * s, 8]} />
+                {mat}
+              </mesh>
+            ))}
+          </>
+        );
+      case "n":
+        return (
+          <>
+            <mesh castShadow position={[0, 0.15 * s, 0]}>
+              <cylinderGeometry args={[0.18 * s, 0.28 * s, 0.2 * s, 16]} />
+              {mat}
+            </mesh>
+            <mesh castShadow position={[0, 0.28 * s, 0]} rotation={[0.2, 0, 0]}>
+              <coneGeometry args={[0.16 * s, 0.16 * s, 8]} />
+              {mat}
+            </mesh>
+            <mesh castShadow position={[0, 0.38 * s, 0.04 * s]}>
+              <sphereGeometry args={[0.12 * s, 12, 8]} />
+              {mat}
+            </mesh>
+          </>
+        );
+      case "b":
+        return (
+          <>
+            <mesh castShadow position={[0, 0.18 * s, 0]}>
+              <cylinderGeometry args={[0.14 * s, 0.3 * s, 0.24 * s, 16]} />
+              {mat}
+            </mesh>
+            <mesh castShadow position={[0, 0.32 * s, 0]}>
+              <cylinderGeometry args={[0.05 * s, 0.09 * s, 0.06 * s, 16]} />
+              {mat}
+            </mesh>
+            <mesh castShadow position={[0, 0.38 * s, 0]}>
+              <sphereGeometry args={[0.07 * s, 12, 8]} />
+              {mat}
+            </mesh>
+          </>
+        );
+      case "q":
+        return (
+          <>
+            <mesh castShadow position={[0, 0.18 * s, 0]}>
+              <cylinderGeometry args={[0.25 * s, 0.3 * s, 0.22 * s, 16]} />
+              {mat}
+            </mesh>
+            <mesh castShadow position={[0, 0.32 * s, 0]}>
+              <cylinderGeometry args={[0.12 * s, 0.18 * s, 0.06 * s, 16]} />
+              {mat}
+            </mesh>
+            {[0, 1, 2].map((i) => (
+              <mesh key={i} castShadow position={[0, (0.38 + i * 0.04) * s, 0]}>
+                <sphereGeometry args={[0.1 * s * (1 - i * 0.15), 12, 8]} />
+                {mat}
+              </mesh>
+            ))}
+          </>
+        );
+      case "k":
+        return (
+          <>
+            <mesh castShadow position={[0, 0.18 * s, 0]}>
+              <cylinderGeometry args={[0.23 * s, 0.28 * s, 0.2 * s, 16]} />
+              {mat}
+            </mesh>
+            <mesh castShadow position={[0, 0.3 * s, 0]}>
+              <cylinderGeometry args={[0.09 * s, 0.12 * s, 0.05 * s, 16]} />
+              {mat}
+            </mesh>
+            <mesh castShadow position={[0, 0.38 * s, 0]}>
+              <cylinderGeometry args={[0.05 * s, 0.07 * s, 0.08 * s, 8]} />
+              {mat}
+            </mesh>
+            <mesh castShadow position={[0, 0.42 * s, 0]} rotation={[0, 0, Math.PI / 2]}>
+              <cylinderGeometry args={[0.025 * s, 0.025 * s, 0.2 * s, 8]} />
+              {mat}
+            </mesh>
+            <mesh castShadow position={[0, 0.46 * s, 0]}>
+              <sphereGeometry args={[0.08 * s, 12, 8]} />
+              {mat}
+            </mesh>
+          </>
+        );
+      default:
+        return (
+          <mesh castShadow>
+            <cylinderGeometry args={[0.2 * s, 0.22 * s, 0.3 * s, 16]} />
+            {mat}
+          </mesh>
+        );
+    }
+  })();
 
   return (
-    <mesh ref={ref} position={[x, y, z]} castShadow>
-      {geom === "cylinder" ? (
-        <cylinderGeometry args={[scale[0], scale[0] * 1.1, scale[1], 16]} />
-      ) : (
-        <boxGeometry args={scale} />
-      )}
-      <meshStandardMaterial color={color} />
-    </mesh>
+    <group ref={ref} position={[x, y, z]}>
+      {pieceContent}
+    </group>
   );
 }
 
@@ -103,11 +224,7 @@ function BoardScene({
   const chess = new Chess(fen);
   const board = chess.board();
 
-  useFrame((_, delta) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.15;
-    }
-  });
+  // No auto-rotation - board stays stable for playability
 
   const fileToX = (f: number) => f - 3.5;
   const rankToZ = (r: number) => r - 3.5;
@@ -131,7 +248,7 @@ function BoardScene({
       if (piece) {
         const pos: [number, number, number] = [
           fileToX(f),
-          0.15,
+          0.1,
           rankToZ(r),
         ];
         const isAnim =
@@ -142,7 +259,7 @@ function BoardScene({
           isAnim && toSq
             ? [
                 fileToX(toSq.charCodeAt(0) - 97),
-                0.15,
+                0.1,
                 rankToZ(8 - parseInt(toSq[1], 10)),
               ]
             : undefined;
@@ -258,10 +375,13 @@ export function ChessBoard3D() {
             animatingMove={animatingMove}
           />
           <OrbitControls
-            enableZoom={true}
+            enableZoom={false}
             enablePan={false}
-            minDistance={6}
-            maxDistance={20}
+            enableRotate={true}
+            minPolarAngle={Math.PI * 0.35}
+            maxPolarAngle={Math.PI * 0.55}
+            minAzimuthAngle={-Math.PI * 0.055}
+            maxAzimuthAngle={Math.PI * 0.055}
           />
         </Canvas>
       </Suspense>

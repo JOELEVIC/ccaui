@@ -47,6 +47,15 @@ body {
   50% { opacity: 0.4; }
 }
 
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.play-btn-gradient:hover {
+  animation: gradientShift 2s ease infinite;
+}
+
 .text-serif {
   font-family: var(--font-playfair), Georgia, serif;
 }
