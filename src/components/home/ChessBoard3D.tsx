@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { Suspense, useRef, useState, useCallback } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
@@ -239,30 +239,32 @@ export function ChessBoard3D() {
 
   return (
     <Box h="100vh" w="full" position="relative" bg="bgDark">
-      <Canvas
-        camera={{ position: [8, 6, 8], fov: 45 }}
-        shadows
-        gl={{ alpha: false, antialias: true }}
-      >
-        <ambientLight intensity={0.4} />
-        <directionalLight
-          position={[10, 10, 5]}
-          intensity={1}
-          castShadow
-          shadow-mapSize={[1024, 1024]}
-        />
-        <BoardScene
-          fen={fen}
-          onSquareClick={handleSquareClick}
-          animatingMove={animatingMove}
-        />
-        <OrbitControls
-          enableZoom={true}
-          enablePan={false}
-          minDistance={6}
-          maxDistance={20}
-        />
-      </Canvas>
+      <Suspense fallback={null}>
+        <Canvas
+          camera={{ position: [8, 6, 8], fov: 45 }}
+          shadows
+          gl={{ alpha: false, antialias: true }}
+        >
+          <ambientLight intensity={0.4} />
+          <directionalLight
+            position={[10, 10, 5]}
+            intensity={1}
+            castShadow
+            shadow-mapSize={[1024, 1024]}
+          />
+          <BoardScene
+            fen={fen}
+            onSquareClick={handleSquareClick}
+            animatingMove={animatingMove}
+          />
+          <OrbitControls
+            enableZoom={true}
+            enablePan={false}
+            minDistance={6}
+            maxDistance={20}
+          />
+        </Canvas>
+      </Suspense>
       <Box
         position="absolute"
         bottom={4}
