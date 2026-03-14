@@ -1,13 +1,19 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Box, Container, Heading, Text, VStack, SimpleGrid, Card, Button, HStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { useAuth } from "@/lib/auth";
 import { LandingNav } from "./LandingNav";
-import { LandingHero } from "./LandingHero";
+import { LandingHeroMinimal } from "./LandingHeroMinimal";
 import { LandingRankingsPreview } from "./LandingRankingsPreview";
+
+const ChessBoard3D = dynamic(() => import("./ChessBoard3D").then((m) => ({ default: m.ChessBoard3D })), {
+  ssr: false,
+  loading: () => <Box h="100vh" w="full" bg="bgDark" display="flex" alignItems="center" justifyContent="center"><Text color="textMuted">Loading...</Text></Box>,
+});
 import { LandingIconFeatures } from "./LandingIconFeatures";
 import { LandingCameroonChess } from "./LandingCameroonChess";
 import { LandingStats } from "./LandingStats";
@@ -152,7 +158,8 @@ export function HomeOverview() {
     return (
       <Box minH="100vh" bg="bgDark" color="white">
         <LandingNav />
-        <LandingHero />
+        <LandingHeroMinimal />
+        <ChessBoard3D />
         <LandingRankingsPreview />
         <LandingIconFeatures />
         <LandingCameroonChess />
@@ -185,7 +192,7 @@ export function HomeOverview() {
           <Box
             pb={8}
             borderBottomWidth="1px"
-            borderColor="whiteAlpha.08"
+            borderColor="whiteAlpha.06"
           >
             <Heading size="2xl" fontFamily="serif" color="white" mb={1}>
               Welcome back, {me?.profile?.firstName || me?.username}
@@ -230,7 +237,7 @@ export function HomeOverview() {
           </Box>
 
           {me?.school && (
-            <Card.Root bg="bgCard" borderWidth="1px" borderColor="goldDark">
+            <Card.Root bg="bgCard" borderWidth="1px" borderColor="whiteAlpha.06">
               <Card.Body py={4} px={5}>
                 <Text color="whiteAlpha.800" fontSize="sm">
                   Your school:{" "}
@@ -247,7 +254,7 @@ export function HomeOverview() {
           )}
 
           <SimpleGrid columns={{ base: 1, md: 2 }} gap={6} w="full">
-            <Card.Root bg="bgCard" borderWidth="1px" borderColor="goldDark">
+            <Card.Root bg="bgCard" borderWidth="1px" borderColor="whiteAlpha.06">
               <Card.Header pb={2}>
                 <Heading size="md" color="gold" fontWeight="600">
                   Active games
@@ -285,7 +292,7 @@ export function HomeOverview() {
               </Card.Body>
             </Card.Root>
 
-            <Card.Root bg="bgCard" borderWidth="1px" borderColor="goldDark">
+            <Card.Root bg="bgCard" borderWidth="1px" borderColor="whiteAlpha.06">
               <Card.Header pb={2}>
                 <Heading size="md" color="gold" fontWeight="600">
                   Upcoming tournaments
@@ -329,7 +336,7 @@ export function HomeOverview() {
               </Card.Body>
             </Card.Root>
 
-            <Card.Root bg="bgCard" borderWidth="1px" borderColor="goldDark">
+            <Card.Root bg="bgCard" borderWidth="1px" borderColor="whiteAlpha.06">
               <Card.Header pb={2}>
                 <Heading size="md" color="gold" fontWeight="600">
                   Daily puzzle
@@ -355,7 +362,7 @@ export function HomeOverview() {
               </Card.Body>
             </Card.Root>
 
-            <Card.Root bg="bgCard" borderWidth="1px" borderColor="goldDark">
+            <Card.Root bg="bgCard" borderWidth="1px" borderColor="whiteAlpha.06">
               <Card.Header pb={2}>
                 <Heading size="md" color="gold" fontWeight="600">
                   My recent games

@@ -23,7 +23,7 @@ export function LandingNav() {
       zIndex={10}
       bg="bgDark"
       borderBottomWidth="1px"
-      borderColor="whiteAlpha.08"
+      borderColor="whiteAlpha.06"
       backdropFilter="saturate(180%) blur(8px)"
     >
       <Container maxW="6xl" py={4}>
@@ -103,7 +103,7 @@ export function LandingNav() {
           py={4}
           px={4}
           borderTopWidth="1px"
-          borderColor="whiteAlpha.08"
+          borderColor="whiteAlpha.06"
           bg="bgDark"
         >
           <VStack align="stretch" gap={1}>

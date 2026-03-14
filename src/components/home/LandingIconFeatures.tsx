@@ -67,7 +67,7 @@ export function LandingIconFeatures() {
                       borderRadius="soft"
                       bg="bgCard"
                       borderWidth="1px"
-                      borderColor="goldDark"
+                      borderColor="whiteAlpha.06"
                       align="flex-start"
                       gap={3}
                       h="full"

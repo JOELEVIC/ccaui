@@ -56,7 +56,7 @@ export function LandingTestimonialsCarousel() {
             borderRadius="soft"
             bg="bgCard"
             borderWidth="1px"
-            borderColor="goldDark"
+            borderColor="whiteAlpha.06"
           >
             <AnimatePresence mode="wait">
               <motion.div

@@ -60,7 +60,7 @@ export function LandingCoursesPreview() {
                     borderRadius="soft"
                     bg="bgSurface"
                     borderWidth="1px"
-                    borderColor="goldDark"
+                    borderColor="whiteAlpha.06"
                     h="full"
                     display="flex"
                     flexDir="column"

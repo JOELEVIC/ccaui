@@ -20,7 +20,7 @@ export function LandingFooter() {
     <Box
       py={12}
       borderTopWidth="1px"
-      borderColor="goldDark"
+      borderColor="whiteAlpha.06"
       bg="bgDark"
     >
       <Container maxW="6xl">
@@ -53,7 +53,7 @@ export function LandingFooter() {
             </VStack>
           ))}
         </SimpleGrid>
-        <Box py={6} borderTopWidth="1px" borderColor="whiteAlpha.08">
+        <Box py={6} borderTopWidth="1px" borderColor="whiteAlpha.06">
           <Text color="textMuted" fontSize="xs" textAlign="center" mb={4}>
             Trusted by schools and chess federations across Cameroon
           </Text>

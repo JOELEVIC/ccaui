@@ -28,7 +28,7 @@ export function LandingPlayCompete() {
               aspectRatio="1"
               background="linear-gradient(145deg, #2a2420 0%, #1a1510 100%)"
               borderRadius="var(--radius-soft)"
-              border="1px solid var(--chakra-colors-goldDark)"
+              border="1px solid rgba(255,255,255,0.06)"
               boxShadow="var(--shadow-card-soft)"
               overflow="hidden"
             >

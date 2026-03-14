@@ -9,8 +9,8 @@ import { Box } from "@chakra-ui/react";
 export function ChessDivider() {
   const size = 12;
   const count = 24;
-  const light = "var(--chakra-colors-goldDark)";
-  const dark = "rgba(0,0,0,0.3)";
+  const light = "rgba(255,255,255,0.08)";
+  const dark = "rgba(0,0,0,0.2)";
 
   return (
     <Box
@@ -36,7 +36,7 @@ export function ChessDivider() {
             width={size}
             height={size}
             fill={i % 2 === 0 ? light : dark}
-            opacity={0.6}
+            opacity={0.4}
           />
         ))}
       </svg>

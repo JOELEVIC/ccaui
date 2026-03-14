@@ -60,7 +60,7 @@ export function LandingRankingsPreview() {
   const top5 = (data?.users ?? []).slice(0, 5);
 
   return (
-    <Box py={{ base: 16, md: 20 }} bg="bgCard">
+    <Box py={{ base: 20, md: 24 }} bg="bgDark">
       <Container maxW="6xl">
         <VStack gap={10} align="stretch">
           <motion.div
@@ -91,7 +91,7 @@ export function LandingRankingsPreview() {
                   borderRadius="soft"
                   bg="bgSurface"
                   borderWidth="1px"
-                  borderColor="goldDark"
+                  borderColor="whiteAlpha.06"
                   boxShadow="var(--shadow-card-soft)"
                   _hover={{
                     borderColor: "gold",

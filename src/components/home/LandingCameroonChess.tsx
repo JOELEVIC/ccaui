@@ -82,7 +82,7 @@ export function LandingCameroonChess() {
               overflow="hidden"
               bg="bgSurface"
               borderWidth="1px"
-              borderColor="goldDark"
+              borderColor="whiteAlpha.06"
               boxShadow="var(--shadow-card-soft)"
             >
               {!imageError ? (
