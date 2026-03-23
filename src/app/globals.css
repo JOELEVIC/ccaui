@@ -1,13 +1,14 @@
 :root {
-  --background: #111318;
-  --background-gradient-start: #13151a;
-  --background-surface: #1a1e26;
-  --foreground: #eaeaea;
-  --foreground-secondary: #b8bdc7;
-  --foreground-muted: #7e8795;
-  --gold: #c9a96e;
-  --gold-highlight: #e8c77a;
-  --gold-muted: #8f793d;
+  --background: #0a0e1a;
+  --background-gradient-start: #12182a;
+  --background-surface: #1a2238;
+  --foreground: #f0f2f8;
+  --foreground-secondary: #a8b0c4;
+  --foreground-muted: #6b728e;
+  --gold: #e6a452;
+  --gold-highlight: #f0b870;
+  --gold-muted: #b87a2a;
+  --accent-green: #4caf50;
   --cameroon-green: #007a3d;
   --cameroon-red: #ce1126;
   --cameroon-yellow: #fcd116;

@@ -11,14 +11,17 @@ interface GameBoardProps {
   isMyTurn: boolean;
   onMove: (move: string) => void;
   allowMove: boolean;
+  /** Highlight last move (gold) — squares in algebraic notation */
+  lastMove?: { from: string; to: string } | null;
 }
 
-const DARK_SQUARE = "#2a2420";
-const LIGHT_SQUARE = "#3d3630";
-const SELECTED_HIGHLIGHT = "rgba(198, 167, 94, 0.5)";
-const LEGAL_MOVE_HIGHLIGHT = "rgba(198, 167, 94, 0.25)";
+const DARK_SQUARE = "#9ca3af";
+const LIGHT_SQUARE = "#e5e7eb";
+const SELECTED_HIGHLIGHT = "rgba(230, 164, 82, 0.45)";
+const LEGAL_MOVE_HIGHLIGHT = "rgba(230, 164, 82, 0.22)";
+const LAST_MOVE_HIGHLIGHT = "rgba(230, 164, 82, 0.55)";
 
-export function GameBoard({ fen, orientation, isMyTurn, onMove, allowMove }: GameBoardProps) {
+export function GameBoard({ fen, orientation, isMyTurn, onMove, allowMove, lastMove }: GameBoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
   const game = useMemo(() => {
@@ -112,14 +115,16 @@ export function GameBoard({ fen, orientation, isMyTurn, onMove, allowMove }: Gam
 
   const squareStyles = useMemo(() => {
     const styles: Record<string, React.CSSProperties> = {};
+    if (lastMove?.from) styles[lastMove.from] = { backgroundColor: LAST_MOVE_HIGHLIGHT };
+    if (lastMove?.to) styles[lastMove.to] = { backgroundColor: LAST_MOVE_HIGHLIGHT };
     if (selectedSquare) {
       styles[selectedSquare] = { backgroundColor: SELECTED_HIGHLIGHT };
       legalTargets.forEach((sq) => {
-        styles[sq] = { backgroundColor: LEGAL_MOVE_HIGHLIGHT };
+        if (!styles[sq]) styles[sq] = { backgroundColor: LEGAL_MOVE_HIGHLIGHT };
       });
     }
     return styles;
-  }, [selectedSquare, legalTargets]);
+  }, [selectedSquare, legalTargets, lastMove]);
 
   return (
     <Box>
@@ -137,11 +142,11 @@ export function GameBoard({ fen, orientation, isMyTurn, onMove, allowMove }: Gam
             showNotation: true,
             darkSquareStyle: { backgroundColor: DARK_SQUARE },
             lightSquareStyle: { backgroundColor: LIGHT_SQUARE },
-            boardStyle: { borderRadius: 6, boxShadow: "0 0 0 1px rgba(143, 121, 61, 0.3)" },
-            darkSquareNotationStyle: { fill: "#8f793d", fontSize: 11 },
-            lightSquareNotationStyle: { fill: "#8f793d", fontSize: 11 },
-            alphaNotationStyle: { fill: "#8f793d", fontSize: 11 },
-            numericNotationStyle: { fill: "#8f793d", fontSize: 11 },
+            boardStyle: { borderRadius: 12, boxShadow: "0 0 0 1px rgba(255,255,255,0.12)" },
+            darkSquareNotationStyle: { fill: "#4b5563", fontSize: 11 },
+            lightSquareNotationStyle: { fill: "#6b7280", fontSize: 11 },
+            alphaNotationStyle: { fill: "#6b7280", fontSize: 11 },
+            numericNotationStyle: { fill: "#6b7280", fontSize: 11 },
           }}
         />
       </div>

@@ -18,6 +18,11 @@ const ME_QUERY = gql`
         lastName
         dateOfBirth
         country
+        chessTitle
+        avatarUrl
+        followerCount
+        friendCount
+        ratingTrend
         xp
         level
         puzzleStreakCount
@@ -61,6 +66,11 @@ export interface Profile {
   lastName: string;
   dateOfBirth: string | null;
   country: string;
+  chessTitle?: string | null;
+  avatarUrl?: string | null;
+  followerCount?: number;
+  friendCount?: number;
+  ratingTrend?: number[];
   xp: number;
   level: number;
   puzzleStreakCount: number;

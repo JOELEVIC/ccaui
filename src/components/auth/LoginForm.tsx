@@ -19,9 +19,11 @@ import { LOGIN } from "@/graphql/mutations/auth";
 export interface LoginFormProps {
   onSuccess?: (token: string) => void;
   compact?: boolean;
+  /** Gold sign-in screen styling */
+  chessPro?: boolean;
 }
 
-export function LoginForm({ onSuccess, compact = false }: LoginFormProps) {
+export function LoginForm({ onSuccess, compact = false, chessPro = false }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -61,29 +63,29 @@ export function LoginForm({ onSuccess, compact = false }: LoginFormProps) {
 
   return (
     <VStack gap={compact ? 4 : 6} as="form" onSubmit={handleSubmit} align="stretch" w="full">
-      {!compact && (
+      {!compact && !chessPro && (
         <Text color="gold" fontSize="sm" fontWeight="500">
           Sign in to your account
         </Text>
       )}
       <Box w="full">
-        <Text as="label" display="block" color="whiteAlpha.900" mb={1} fontSize="sm">
-          Email
+        <Text as="label" display="block" color={chessPro ? "bgDark" : "whiteAlpha.900"} mb={1} fontSize="sm" fontWeight="500">
+          {chessPro ? "Email" : "Email"}
         </Text>
         <Input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          bg="bgCard"
-          borderColor="whiteAlpha.12"
-          color="white"
+          bg={chessPro ? "whiteAlpha.800" : "bgCard"}
+          borderColor={chessPro ? "blackAlpha.100" : "whiteAlpha.12"}
+          color={chessPro ? "bgDark" : "white"}
           size={compact ? "sm" : "md"}
-          _placeholder={{ color: "whiteAlpha.500" }}
+          _placeholder={{ color: chessPro ? "blackAlpha.400" : "whiteAlpha.500" }}
         />
       </Box>
       <Box w="full">
-        <Text as="label" display="block" color="whiteAlpha.900" mb={1} fontSize="sm">
+        <Text as="label" display="block" color={chessPro ? "bgDark" : "whiteAlpha.900"} mb={1} fontSize="sm" fontWeight="500">
           Password
         </Text>
         <Input
@@ -91,11 +93,11 @@ export function LoginForm({ onSuccess, compact = false }: LoginFormProps) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          bg="bgCard"
-          borderColor="whiteAlpha.12"
-          color="white"
+          bg={chessPro ? "whiteAlpha.800" : "bgCard"}
+          borderColor={chessPro ? "blackAlpha.100" : "whiteAlpha.12"}
+          color={chessPro ? "bgDark" : "white"}
           size={compact ? "sm" : "md"}
-          _placeholder={{ color: "whiteAlpha.500" }}
+          _placeholder={{ color: chessPro ? "blackAlpha.400" : "whiteAlpha.500" }}
         />
       </Box>
       {errorMessage && (
@@ -107,21 +109,30 @@ export function LoginForm({ onSuccess, compact = false }: LoginFormProps) {
       <Button
         type="submit"
         w="full"
-        bg="gold"
-        color="black"
+        bg={chessPro ? "bgDark" : "gold"}
+        color={chessPro ? "gold" : "black"}
         size={compact ? "sm" : "md"}
         loading={loading}
-        _hover={{ bg: "goldLight" }}
+        _hover={{ bg: chessPro ? "#1a2238" : undefined }}
         borderRadius="soft"
       >
-        Sign In
+        Sign in
       </Button>
-      <Text color="whiteAlpha.700" fontSize="sm">
-        Don&apos;t have an account?{" "}
-        <Link href="/register" style={{ color: "var(--chakra-colors-gold)" }}>
-          Register
-        </Link>
-      </Text>
+      {!chessPro && (
+        <Text color="whiteAlpha.700" fontSize="sm">
+          Don&apos;t have an account?{" "}
+          <Link href="/register" style={{ color: "var(--chakra-colors-gold)" }}>
+            Register
+          </Link>
+        </Text>
+      )}
+      {chessPro && (
+        <Text color="bgDark" fontSize="sm" textAlign="center" opacity={0.85}>
+          <Link href="/register" style={{ fontWeight: 600, textDecoration: "underline" }}>
+            Don&apos;t have an account? Register
+          </Link>
+        </Text>
+      )}
     </VStack>
   );
 }

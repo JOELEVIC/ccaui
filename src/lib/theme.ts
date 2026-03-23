@@ -15,31 +15,29 @@ const ccaTokens = defineTokens({
     stat: { value: "var(--font-oswald), var(--font-inter), sans-serif" },
   },
   colors: {
-    // Backgrounds (warmer darks)
-    bgPrimary: { value: "#111318" },
-    bgGradientStart: { value: "#13151A" },
-    bgSurface: { value: "#1A1E26" },
-    bgDark: { value: "#111318" },
-    bgCard: { value: "#1A1E26" },
-    bgWarm: { value: "#1E1C18" },
-    // Gold system (slightly warmer primary)
-    gold: { value: "#C9A96E" },
-    goldLight: { value: "#E8C77A" },
-    goldDark: { value: "#8F793D" },
-    // Cameroon flag (sparing use)
+    // Chess.Pro navy + gold
+    bgPrimary: { value: "#0a0e1a" },
+    bgGradientStart: { value: "#12182a" },
+    bgSurface: { value: "#1a2238" },
+    bgDark: { value: "#0a0e1a" },
+    bgCard: { value: "#141b2e" },
+    bgWarm: { value: "#1a2238" },
+    gold: { value: "#e6a452" },
+    goldLight: { value: "#f0b870" },
+    goldDark: { value: "#b87a2a" },
+    accentGreen: { value: "#4caf50" },
     cameroonGreen: { value: "#007A3D" },
     cameroonRed: { value: "#CE1126" },
     cameroonYellow: { value: "#FCD116" },
-    // Text
-    textPrimary: { value: "#EAEAEA" },
-    textSecondary: { value: "#B8BDC7" },
-    textMuted: { value: "#7E8795" },
-    statusSuccess: { value: "#1F3B2D" },
+    textPrimary: { value: "#f0f2f8" },
+    textSecondary: { value: "#a8b0c4" },
+    textMuted: { value: "#6b728e" },
+    statusSuccess: { value: "#1b3d24" },
     statusWarning: { value: "#5A1F1F" },
   },
   radii: {
-    cca: { value: "6px" },
-    soft: { value: "10px" },
+    cca: { value: "10px" },
+    soft: { value: "12px" },
   },
   shadows: {
     cardSoft: { value: "0 4px 24px rgba(0, 0, 0, 0.2)" },

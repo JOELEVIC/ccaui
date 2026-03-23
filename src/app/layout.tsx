@@ -4,6 +4,8 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/lib/toaster";
 
+const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "Chess.Pro";
+
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
@@ -35,42 +37,26 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://cameroonchessacademy
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Cameroon Chess Academy",
-    template: "%s | Cameroon Chess Academy",
+    default: appName,
+    template: `%s | ${appName}`,
   },
-  description:
-    "DChessAcademy and Chess Group Cameroon: chess as philosophy for intellectual development, ethical leadership, and life skills. National platform for competitive excellence. Discipline. Strategy. Excellence.",
-  keywords: [
-    "DChessAcademy",
-    "Chess Group Cameroon",
-    "Cameroon Chess Academy",
-    "chess philosophy",
-    "leadership",
-    "youth development",
-    "mentorship",
-    "critical thinking",
-    "chess",
-    "Cameroon",
-    "chess academy",
-    "tournaments",
-    "rankings",
-    "chess training",
-  ],
-  authors: [{ name: "Cameroon Chess Academy" }],
-  creator: "Cameroon Chess Academy",
+  description: "Online chess: play, puzzles, tournaments, and analysis.",
+  keywords: ["chess", "online chess", "tournaments", "puzzles", "analysis", appName],
+  authors: [{ name: appName }],
+  creator: appName,
   openGraph: {
     type: "website",
     locale: "en",
     url: siteUrl,
-    siteName: "Cameroon Chess Academy",
-    title: "Cameroon Chess Academy",
-    description: "National Platform for Competitive Excellence. Discipline. Strategy. Excellence.",
-    images: [{ url: "/cca-logo.png", width: 1200, height: 630, alt: "Cameroon Chess Academy" }],
+    siteName: appName,
+    title: appName,
+    description: "Play, learn, and compete.",
+    images: [{ url: "/cca-logo.png", width: 1200, height: 630, alt: appName }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cameroon Chess Academy",
-    description: "National Platform for Competitive Excellence. Discipline. Strategy. Excellence.",
+    title: appName,
+    description: "Play, learn, and compete.",
   },
   robots: {
     index: true,

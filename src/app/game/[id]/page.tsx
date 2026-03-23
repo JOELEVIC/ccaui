@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
-import { Box, Button, Text, VStack, HStack, Flex } from "@chakra-ui/react";
+import { Box, Button, Text, VStack, HStack, Flex, SimpleGrid, Heading } from "@chakra-ui/react";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { PremiumModal } from "@/components/chess-pro/PremiumModal";
 import { toaster } from "@/lib/toaster";
 import { Chess } from "chess.js";
 import { useAuth } from "@/lib/auth";
@@ -31,6 +33,7 @@ const GAME_QUERY = gql`
       result
       moves
       timeControl
+      analysisJson
       white {
         id
         username
@@ -60,6 +63,44 @@ function movesToFen(moves: string): string {
   return chess.fen();
 }
 
+function lastMoveSquares(moves: string): { from: string; to: string } | null {
+  const chess = new Chess();
+  if (!moves?.trim()) return null;
+  const parts = moves.trim().split(/\s+/);
+  let last: { from: string; to: string } | null = null;
+  for (const m of parts) {
+    try {
+      const mv = chess.move(m);
+      if (mv) last = { from: mv.from, to: mv.to };
+    } catch {
+      break;
+    }
+  }
+  return last;
+}
+
+interface StoredAnalysis {
+  white: { inaccuracies: number; mistakes: number; blunders: number; acpl: number };
+  black: { inaccuracies: number; mistakes: number; blunders: number; acpl: number };
+  evalSeries: { ply: number; cp: number }[];
+}
+
+function parseAnalysis(json: string | null | undefined): StoredAnalysis | null {
+  if (!json) return null;
+  try {
+    return JSON.parse(json) as StoredAnalysis;
+  } catch {
+    return null;
+  }
+}
+
+function resultToScore(result: string | null | undefined): string {
+  if (result === "WHITE_WIN") return "1 – 0";
+  if (result === "BLACK_WIN") return "0 – 1";
+  if (result === "DRAW" || result === "STALEMATE") return "½ – ½";
+  return "—";
+}
+
 export default function GamePage() {
   const params = useParams();
   const id = params.id as string;
@@ -80,6 +121,7 @@ export default function GamePage() {
       result?: string | null;
       moves: string;
       timeControl: string;
+      analysisJson?: string | null;
       white: { id: string; username: string; rating: number };
       black: { id: string; username: string; rating: number };
     };
@@ -89,6 +131,9 @@ export default function GamePage() {
   });
 
   const game = data?.game;
+  const [premiumOpen, setPremiumOpen] = useState(false);
+  const analysis = game ? parseAnalysis(game.analysisJson) : null;
+  const lastSq = game ? lastMoveSquares(game.moves ?? "") : null;
   const isParticipant = user && game && (game.white?.id === user.id || game.black?.id === user.id);
   const isWhite = user && game?.white?.id === user.id;
   const orientation = isWhite ? "white" : "black";
@@ -270,6 +315,7 @@ export default function GamePage() {
             isMyTurn={isMyTurn && !gameEnded && !movePending}
             onMove={handleMove}
             allowMove={!gameEnded && !!isParticipant}
+            lastMove={lastSq}
           />
 
           <Box
@@ -326,10 +372,10 @@ export default function GamePage() {
             <Text color="gold" fontSize="xs" fontWeight="600" mb={2}>
               Moves
             </Text>
-            <Flex gap={2} flexWrap="wrap">
+            <Flex gap={2} flexWrap="nowrap" overflowX="auto" pb={1} css={{ scrollbarWidth: "thin" }}>
               {moveListFromFen.map((m, i) => (
-                <Text key={i} color="textSecondary" fontSize="sm">
-                  {Math.floor(i / 2) + 1}.{i % 2 === 0 ? "" : " .."}
+                <Text key={i} color="textSecondary" fontSize="sm" whiteSpace="nowrap" flexShrink={0}>
+                  {i % 2 === 0 ? `${Math.floor(i / 2) + 1}. ` : ""}
                   {m}
                 </Text>
               ))}
@@ -380,7 +426,7 @@ export default function GamePage() {
             >
               Resign
             </Button>
-            <Link href="/learning">
+            <Link href="/analysis">
               <Button
                 size="sm"
                 variant="outline"
@@ -405,6 +451,79 @@ export default function GamePage() {
           You are not a participant in this game.
         </Text>
       )}
+
+      {gameEnded && game && (
+        <VStack align="stretch" gap={6} maxW="900px" mx="auto" mt={10} px={2}>
+          <Heading textAlign="center" fontFamily="var(--font-playfair), Georgia, serif" color="textPrimary" size="lg">
+            Game review
+          </Heading>
+          <Text textAlign="center" fontSize="4xl" fontWeight="800" color="gold">
+            {resultToScore(result)}
+          </Text>
+          {analysis && (
+            <>
+              <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+                <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="whiteAlpha.100">
+                  <Text color="gold" fontWeight="700" mb={2}>
+                    {game.white.username}
+                  </Text>
+                  <StatRow label="Inaccuracies" value={analysis.white.inaccuracies} />
+                  <StatRow label="Mistakes" value={analysis.white.mistakes} />
+                  <StatRow label="Blunders" value={analysis.white.blunders} />
+                  <StatRow label="Avg centipawn loss" value={analysis.white.acpl} />
+                </Box>
+                <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="whiteAlpha.100">
+                  <Text color="gold" fontWeight="700" mb={2}>
+                    {game.black.username}
+                  </Text>
+                  <StatRow label="Inaccuracies" value={analysis.black.inaccuracies} />
+                  <StatRow label="Mistakes" value={analysis.black.mistakes} />
+                  <StatRow label="Blunders" value={analysis.black.blunders} />
+                  <StatRow label="Avg centipawn loss" value={analysis.black.acpl} />
+                </Box>
+              </SimpleGrid>
+              <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="whiteAlpha.100" h="220px">
+                <Text fontSize="xs" color="textMuted" mb={2}>
+                  Evaluation (opening · middlegame · endgame)
+                </Text>
+                <ResponsiveContainer width="100%" height="85%">
+                  <AreaChart data={analysis.evalSeries.map((e) => ({ ply: e.ply, cp: e.cp }))}>
+                    <XAxis dataKey="ply" tick={{ fill: "#6b728e", fontSize: 10 }} />
+                    <YAxis tick={{ fill: "#6b728e", fontSize: 10 }} />
+                    <Tooltip />
+                    <ReferenceLine y={0} stroke="#ffffff33" />
+                    <Area type="monotone" dataKey="cp" stroke="#e6a452" fill="#e6a452" fillOpacity={0.25} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </Box>
+            </>
+          )}
+          <Button
+            bg="gold"
+            color="bgDark"
+            borderRadius="soft"
+            size="lg"
+            onClick={() => setPremiumOpen(true)}
+          >
+            View detailed game performance →
+          </Button>
+        </VStack>
+      )}
+
+      <PremiumModal open={premiumOpen} onClose={() => setPremiumOpen(false)} />
     </Box>
+  );
+}
+
+function StatRow({ label, value }: { label: string; value: number }) {
+  return (
+    <HStack justify="space-between" py={1}>
+      <Text fontSize="sm" color="textSecondary">
+        {label}
+      </Text>
+      <Text fontSize="sm" fontWeight="700" color="textPrimary">
+        {value}
+      </Text>
+    </HStack>
   );
 }

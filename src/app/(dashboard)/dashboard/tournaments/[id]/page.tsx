@@ -21,6 +21,15 @@ const TOURNAMENT = gql`
       status
       startDate
       endDate
+      chessVariant
+      arenaTimeControl
+      maxPlayers
+      currentPlayers
+      durationMinutes
+      cardColor
+      isSponsored
+      isRated
+      prizePoolJson
       school {
         id
         name
