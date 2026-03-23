@@ -4,15 +4,28 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box } from "@chakra-ui/react";
 import { Chessboard } from "react-chessboard";
 import { Chess, type Square } from "chess.js";
+import { findPremoveMove, legalMovesIfSideToMove } from "@/lib/chessPremoves";
+
+export interface PendingPremove {
+  from: string;
+  to: string;
+  promotion?: string;
+}
 
 interface GameBoardProps {
   fen: string;
   orientation: "white" | "black";
+  /** True when it is this player's turn to move in the game. */
   isMyTurn: boolean;
+  /** True when a move request is in flight (blocks input). */
+  movePending?: boolean;
   onMove: (move: string) => void;
   allowMove: boolean;
   /** Highlight last move (gold) — squares in algebraic notation */
   lastMove?: { from: string; to: string } | null;
+  premoveEnabled?: boolean;
+  pendingPremove?: PendingPremove | null;
+  onPendingPremove?: (p: PendingPremove) => void;
 }
 
 const DARK_SQUARE = "#9ca3af";
@@ -20,8 +33,21 @@ const LIGHT_SQUARE = "#e5e7eb";
 const SELECTED_HIGHLIGHT = "rgba(230, 164, 82, 0.45)";
 const LEGAL_MOVE_HIGHLIGHT = "rgba(230, 164, 82, 0.22)";
 const LAST_MOVE_HIGHLIGHT = "rgba(230, 164, 82, 0.55)";
+const PREMOVE_HIGHLIGHT = "rgba(168, 85, 247, 0.42)";
+const PREMOVE_LEGAL_HIGHLIGHT = "rgba(168, 85, 247, 0.2)";
 
-export function GameBoard({ fen, orientation, isMyTurn, onMove, allowMove, lastMove }: GameBoardProps) {
+export function GameBoard({
+  fen,
+  orientation,
+  isMyTurn,
+  movePending = false,
+  onMove,
+  allowMove,
+  lastMove,
+  premoveEnabled = false,
+  pendingPremove = null,
+  onPendingPremove,
+}: GameBoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
   const game = useMemo(() => {
@@ -35,10 +61,12 @@ export function GameBoard({ fen, orientation, isMyTurn, onMove, allowMove, lastM
   }, [fen]);
 
   const myColor = orientation === "white" ? "w" : "b";
+  const canPlayNow = allowMove && isMyTurn && !movePending;
+  const premoveActive = !!(allowMove && premoveEnabled && onPendingPremove && !isMyTurn && !movePending);
 
   const executeMove = useCallback(
     (sourceSquare: string, targetSquare: string) => {
-      if (!allowMove) return false;
+      if (!canPlayNow) return false;
       try {
         const move = game.move({
           from: sourceSquare,
@@ -59,25 +87,74 @@ export function GameBoard({ fen, orientation, isMyTurn, onMove, allowMove, lastM
       }
       return false;
     },
-    [game, allowMove, onMove]
+    [game, canPlayNow, onMove]
+  );
+
+  const executePremove = useCallback(
+    (sourceSquare: string, targetSquare: string) => {
+      if (!premoveActive || !onPendingPremove) return false;
+      const m = findPremoveMove(fen, myColor, sourceSquare as Square, targetSquare as Square);
+      if (!m) return false;
+      onPendingPremove({
+        from: m.from,
+        to: m.to,
+        promotion: m.promotion ? m.promotion.toLowerCase() : undefined,
+      });
+      return true;
+    },
+    [premoveActive, onPendingPremove, fen, myColor]
   );
 
   const onDrop = useCallback(
     (sourceSquare: string, targetSquare: string) => {
-      const ok = executeMove(sourceSquare, targetSquare);
-      if (ok) setSelectedSquare(null);
-      return ok;
+      if (canPlayNow) {
+        const ok = executeMove(sourceSquare, targetSquare);
+        if (ok) setSelectedSquare(null);
+        return ok;
+      }
+      if (premoveActive) {
+        const ok = executePremove(sourceSquare, targetSquare);
+        if (ok) setSelectedSquare(null);
+        return ok;
+      }
+      return false;
     },
-    [executeMove]
+    [canPlayNow, premoveActive, executeMove, executePremove]
   );
 
-  const canDrag = useCallback(() => allowMove && isMyTurn, [allowMove, isMyTurn]);
+  const canDragPiece = useCallback(
+    ({
+      piece,
+      isSparePiece,
+      square,
+    }: {
+      piece: { pieceType: string };
+      isSparePiece: boolean;
+      square: string | null;
+    }) => {
+      if (isSparePiece || !square) return false;
+      if (!allowMove || movePending) return false;
+      const isWhite = piece.pieceType !== piece.pieceType.toLowerCase();
+      const mine = myColor === "w" ? isWhite : !isWhite;
+      if (!mine) return false;
+      if (canPlayNow) return true;
+      if (premoveActive) return true;
+      return false;
+    },
+    [allowMove, movePending, myColor, canPlayNow, premoveActive]
+  );
 
   const legalTargets = useMemo(() => {
-    if (!selectedSquare || !allowMove || !isMyTurn) return new Set<string>();
+    if (!selectedSquare || !canPlayNow) return new Set<string>();
     const moves = game.moves({ square: selectedSquare as Square, verbose: true });
     return new Set(moves.map((m) => m.to));
-  }, [game, selectedSquare, allowMove, isMyTurn]);
+  }, [game, selectedSquare, canPlayNow]);
+
+  const premoveLegalTargets = useMemo(() => {
+    if (!selectedSquare || !premoveActive) return new Set<string>();
+    const moves = legalMovesIfSideToMove(fen, myColor).filter((m) => m.from === selectedSquare);
+    return new Set(moves.map((m) => m.to));
+  }, [fen, myColor, selectedSquare, premoveActive]);
 
   const isMyPieceType = useCallback(
     (pieceType: string) => {
@@ -89,26 +166,66 @@ export function GameBoard({ fen, orientation, isMyTurn, onMove, allowMove, lastM
 
   const handleSquareClick = useCallback(
     ({ square, piece }: { square: string; piece: { pieceType: string } | null }) => {
-      if (!allowMove || !isMyTurn) return;
-      if (selectedSquare) {
-        if (legalTargets.has(square)) {
-          executeMove(selectedSquare, square);
-          setSelectedSquare(null);
-        } else if (piece && isMyPieceType(piece.pieceType)) {
-          setSelectedSquare(square);
+      if (movePending || !allowMove) return;
+
+      if (canPlayNow) {
+        if (selectedSquare) {
+          if (legalTargets.has(square)) {
+            executeMove(selectedSquare, square);
+            setSelectedSquare(null);
+          } else if (piece && isMyPieceType(piece.pieceType)) {
+            setSelectedSquare(square);
+          } else {
+            setSelectedSquare(null);
+          }
         } else {
-          setSelectedSquare(null);
+          if (piece && isMyPieceType(piece.pieceType)) {
+            setSelectedSquare(square);
+          }
         }
-      } else {
-        if (piece && isMyPieceType(piece.pieceType)) {
-          setSelectedSquare(square);
+        return;
+      }
+
+      if (premoveActive && onPendingPremove) {
+        if (selectedSquare) {
+          if (premoveLegalTargets.has(square)) {
+            const m = findPremoveMove(fen, myColor, selectedSquare as Square, square as Square);
+            if (m) {
+              onPendingPremove({
+                from: m.from,
+                to: m.to,
+                promotion: m.promotion ? m.promotion.toLowerCase() : undefined,
+              });
+            }
+            setSelectedSquare(null);
+          } else if (piece && isMyPieceType(piece.pieceType)) {
+            setSelectedSquare(square);
+          } else {
+            setSelectedSquare(null);
+          }
+        } else {
+          if (piece && isMyPieceType(piece.pieceType)) {
+            setSelectedSquare(square);
+          }
         }
       }
     },
-    [allowMove, isMyTurn, selectedSquare, legalTargets, isMyPieceType, executeMove]
+    [
+      movePending,
+      allowMove,
+      canPlayNow,
+      premoveActive,
+      onPendingPremove,
+      selectedSquare,
+      legalTargets,
+      premoveLegalTargets,
+      isMyPieceType,
+      executeMove,
+      fen,
+      myColor,
+    ]
   );
 
-  // Clear selection when position changes (e.g. after opponent move)
   useEffect(() => {
     setSelectedSquare(null);
   }, [fen]);
@@ -117,14 +234,40 @@ export function GameBoard({ fen, orientation, isMyTurn, onMove, allowMove, lastM
     const styles: Record<string, React.CSSProperties> = {};
     if (lastMove?.from) styles[lastMove.from] = { backgroundColor: LAST_MOVE_HIGHLIGHT };
     if (lastMove?.to) styles[lastMove.to] = { backgroundColor: LAST_MOVE_HIGHLIGHT };
+    if (pendingPremove?.from) {
+      styles[pendingPremove.from] = { backgroundColor: PREMOVE_HIGHLIGHT };
+    }
+    if (pendingPremove?.to) {
+      styles[pendingPremove.to] = {
+        ...styles[pendingPremove.to],
+        backgroundColor: PREMOVE_HIGHLIGHT,
+      };
+    }
     if (selectedSquare) {
-      styles[selectedSquare] = { backgroundColor: SELECTED_HIGHLIGHT };
-      legalTargets.forEach((sq) => {
-        if (!styles[sq]) styles[sq] = { backgroundColor: LEGAL_MOVE_HIGHLIGHT };
+      styles[selectedSquare] = {
+        ...styles[selectedSquare],
+        backgroundColor: canPlayNow ? SELECTED_HIGHLIGHT : PREMOVE_HIGHLIGHT,
+      };
+      const targets = canPlayNow ? legalTargets : premoveLegalTargets;
+      targets.forEach((sq) => {
+        if (!styles[sq]) {
+          styles[sq] = {
+            backgroundColor: canPlayNow ? LEGAL_MOVE_HIGHLIGHT : PREMOVE_LEGAL_HIGHLIGHT,
+          };
+        }
       });
     }
     return styles;
-  }, [selectedSquare, legalTargets, lastMove]);
+  }, [
+    selectedSquare,
+    legalTargets,
+    premoveLegalTargets,
+    lastMove,
+    pendingPremove,
+    canPlayNow,
+  ]);
+
+  const allowDragging = canPlayNow || premoveActive;
 
   return (
     <Box>
@@ -133,12 +276,15 @@ export function GameBoard({ fen, orientation, isMyTurn, onMove, allowMove, lastM
           options={{
             position: fen,
             boardOrientation: orientation,
-            allowDragging: allowMove && isMyTurn,
-            onPieceDrop: ({ sourceSquare, targetSquare }) => (targetSquare ? onDrop(sourceSquare, targetSquare) : false),
-            canDragPiece: canDrag,
+            allowDragging,
+            onPieceDrop: ({ sourceSquare, targetSquare }) =>
+              targetSquare ? onDrop(sourceSquare, targetSquare) : false,
+            canDragPiece,
             onSquareClick: handleSquareClick,
             squareStyles,
-            dropSquareStyle: { backgroundColor: LEGAL_MOVE_HIGHLIGHT },
+            dropSquareStyle: {
+              backgroundColor: canPlayNow ? LEGAL_MOVE_HIGHLIGHT : PREMOVE_LEGAL_HIGHLIGHT,
+            },
             showNotation: true,
             darkSquareStyle: { backgroundColor: DARK_SQUARE },
             lightSquareStyle: { backgroundColor: LIGHT_SQUARE },

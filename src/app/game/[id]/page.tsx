@@ -5,13 +5,15 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
-import { Box, Button, Text, VStack, HStack, Flex, SimpleGrid, Heading } from "@chakra-ui/react";
+import { Box, Button, Text, VStack, HStack, Flex, SimpleGrid, Heading, Switch } from "@chakra-ui/react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { PremiumModal } from "@/components/chess-pro/PremiumModal";
 import { toaster } from "@/lib/toaster";
 import { Chess } from "chess.js";
 import { useAuth } from "@/lib/auth";
-import { GameBoard } from "@/components/chess/GameBoard";
+import { GameBoard, type PendingPremove } from "@/components/chess/GameBoard";
+import { isPremoveStillValid } from "@/lib/chessPremoves";
+import { isCaptureByFenChange, playCaptureSound, playMoveSound } from "@/lib/chessSounds";
 import { MaterialDisplay } from "@/components/chess/MaterialDisplay";
 import { RECORD_GAME_COMPLETED } from "@/graphql/mutations/games";
 import {
@@ -94,6 +96,20 @@ function parseAnalysis(json: string | null | undefined): StoredAnalysis | null {
   }
 }
 
+const LS_PREMOVE = "dchess-game-premove";
+const LS_SOUNDS = "dchess-game-sounds";
+
+function readStoredBool(key: string, defaultVal: boolean): boolean {
+  if (typeof window === "undefined") return defaultVal;
+  try {
+    const v = localStorage.getItem(key);
+    if (v === null) return defaultVal;
+    return v === "1" || v === "true";
+  } catch {
+    return defaultVal;
+  }
+}
+
 function resultToScore(result: string | null | undefined): string {
   if (result === "WHITE_WIN") return "1 – 0";
   if (result === "BLACK_WIN") return "0 – 1";
@@ -110,6 +126,11 @@ export default function GamePage() {
   const [result, setResult] = useState<string | null>(null);
   const [drawOfferBy, setDrawOfferBy] = useState<string | null>(null);
   const [movePending, setMovePending] = useState(false);
+  const submittingMoveRef = useRef(false);
+  const prevFenForSoundRef = useRef<string | null>(null);
+  const [premoveEnabled, setPremoveEnabled] = useState(() => readStoredBool(LS_PREMOVE, false));
+  const [soundsEnabled, setSoundsEnabled] = useState(() => readStoredBool(LS_SOUNDS, true));
+  const [pendingPremove, setPendingPremove] = useState<PendingPremove | null>(null);
   const startSessionDone = useRef(false);
   const recordedXpRef = useRef(false);
   const [recordGameCompleted] = useMutation<{ recordGameCompleted: { xpAwarded: number } }>(RECORD_GAME_COMPLETED);
@@ -137,6 +158,7 @@ export default function GamePage() {
   const isParticipant = user && game && (game.white?.id === user.id || game.black?.id === user.id);
   const isWhite = user && game?.white?.id === user.id;
   const orientation = isWhite ? "white" : "black";
+  const myColor = isWhite ? "w" : "b";
   const turnIsWhite = fen.split(" ")[1] === "w";
   const isMyTurn = isWhite ? turnIsWhite : !turnIsWhite;
   const gameEnded = status === "COMPLETED" || status === "ABANDONED";
@@ -156,6 +178,48 @@ export default function GamePage() {
     setStatus(game.status ?? "PENDING");
     setResult(game.result ?? null);
   }, [game]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LS_PREMOVE, premoveEnabled ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }, [premoveEnabled]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LS_SOUNDS, soundsEnabled ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }, [soundsEnabled]);
+
+  useEffect(() => {
+    if (!soundsEnabled || gameEnded) {
+      prevFenForSoundRef.current = fen;
+      return;
+    }
+    if (prevFenForSoundRef.current === null) {
+      prevFenForSoundRef.current = fen;
+      return;
+    }
+    if (prevFenForSoundRef.current === fen) return;
+    if (isCaptureByFenChange(prevFenForSoundRef.current, fen)) playCaptureSound();
+    else playMoveSound();
+    prevFenForSoundRef.current = fen;
+  }, [fen, soundsEnabled, gameEnded]);
+
+  useEffect(() => {
+    if (gameEnded) setPendingPremove(null);
+  }, [gameEnded]);
+
+  useEffect(() => {
+    if (!isParticipant || !pendingPremove || isMyTurn) return;
+    if (!isPremoveStillValid(fen, myColor, pendingPremove.from, pendingPremove.to)) {
+      setPendingPremove(null);
+    }
+  }, [fen, isMyTurn, pendingPremove, isParticipant, myColor]);
 
   // Start CCA game session when game is loaded and user is participant (once per mount)
   useEffect(() => {
@@ -182,6 +246,7 @@ export default function GamePage() {
       toaster.create({ title: "Game ended", type: "info" });
     }
     setMovePending(false);
+    submittingMoveRef.current = false;
   }, []);
 
   const { connected, error: subError } = useGameSubscription(
@@ -210,15 +275,48 @@ export default function GamePage() {
 
   const handleMove = useCallback(
     (move: string) => {
-      if (!token || movePending || gameEnded) return;
+      if (!token || gameEnded) return;
+      if (submittingMoveRef.current) return;
+      submittingMoveRef.current = true;
       setMovePending(true);
       makeMove(token, id, move).catch((err) => {
         setMovePending(false);
+        submittingMoveRef.current = false;
         toaster.create({ title: err?.message ?? "Move failed", type: "error" });
       });
     },
-    [id, token, movePending, gameEnded]
+    [id, token, gameEnded]
   );
+
+  useEffect(() => {
+    if (!isParticipant || gameEnded || movePending || !isMyTurn || !pendingPremove) return;
+    const chess = new Chess();
+    try {
+      chess.load(fen);
+    } catch {
+      setPendingPremove(null);
+      return;
+    }
+    if (chess.turn() !== myColor) return;
+    const promotion = (pendingPremove.promotion as "q" | "r" | "b" | "n" | undefined) || "q";
+    let m;
+    try {
+      m = chess.move({
+        from: pendingPremove.from,
+        to: pendingPremove.to,
+        promotion,
+      });
+    } catch {
+      m = null;
+    }
+    if (!m) {
+      setPendingPremove(null);
+      return;
+    }
+    const uci = m.promotion ? `${m.from}${m.to}${m.promotion.toLowerCase()}` : `${m.from}${m.to}`;
+    setPendingPremove(null);
+    handleMove(uci);
+  }, [isParticipant, gameEnded, movePending, isMyTurn, pendingPremove, fen, myColor, handleMove]);
 
   const handleResign = () => {
     if (!confirm("Resign this game?")) return;
@@ -312,10 +410,14 @@ export default function GamePage() {
           <GameBoard
             fen={fen}
             orientation={orientation}
-            isMyTurn={isMyTurn && !gameEnded && !movePending}
+            isMyTurn={!!isParticipant && !gameEnded && isMyTurn}
+            movePending={movePending}
             onMove={handleMove}
             allowMove={!gameEnded && !!isParticipant}
             lastMove={lastSq}
+            premoveEnabled={premoveEnabled}
+            pendingPremove={pendingPremove}
+            onPendingPremove={setPendingPremove}
           />
 
           <Box
@@ -337,7 +439,58 @@ export default function GamePage() {
           </Box>
         </VStack>
 
-        <VStack align="stretch" gap={4} minW="200px">
+        <VStack
+          align="stretch"
+          gap={4}
+          minW={{ base: "200px", lg: 0 }}
+          maxW={{ base: "100%", lg: "300px" }}
+          w={{ base: "100%", lg: "100%" }}
+          flexShrink={{ lg: 1 }}
+        >
+          <Box
+            py={3}
+            px={4}
+            borderRadius="soft"
+            borderWidth="1px"
+            borderColor="goldDark"
+            bg="bgCard"
+          >
+            <Text color="gold" fontSize="xs" fontWeight="600" mb={3}>
+              Gameplay
+            </Text>
+            <VStack align="stretch" gap={3}>
+              {isParticipant && !gameEnded && (
+                <HStack justify="space-between" align="center">
+                  <Text color="textSecondary" fontSize="sm">
+                    Premove
+                  </Text>
+                  <Switch.Root
+                    checked={premoveEnabled}
+                    onCheckedChange={(e) => setPremoveEnabled(!!e.checked)}
+                  >
+                    <Switch.HiddenInput />
+                    <Switch.Control bg={premoveEnabled ? "gold" : "bgSurface"} borderWidth="1px" borderColor="whiteAlpha.200">
+                      <Switch.Thumb />
+                    </Switch.Control>
+                  </Switch.Root>
+                </HStack>
+              )}
+              <HStack justify="space-between" align="center">
+                <Text color="textSecondary" fontSize="sm">
+                  Sounds
+                </Text>
+                <Switch.Root
+                  checked={soundsEnabled}
+                  onCheckedChange={(e) => setSoundsEnabled(!!e.checked)}
+                >
+                  <Switch.HiddenInput />
+                  <Switch.Control bg={soundsEnabled ? "gold" : "bgSurface"} borderWidth="1px" borderColor="whiteAlpha.200">
+                    <Switch.Thumb />
+                  </Switch.Control>
+                </Switch.Root>
+              </HStack>
+            </VStack>
+          </Box>
           <MaterialDisplay fen={fen} />
           <Box
             py={3}
@@ -372,7 +525,14 @@ export default function GamePage() {
             <Text color="gold" fontSize="xs" fontWeight="600" mb={2}>
               Moves
             </Text>
-            <Flex gap={2} flexWrap="nowrap" overflowX="auto" pb={1} css={{ scrollbarWidth: "thin" }}>
+            <Flex
+              gap={2}
+              flexWrap="wrap"
+              overflowY="auto"
+              maxW="100%"
+              pb={1}
+              css={{ scrollbarWidth: "thin" }}
+            >
               {moveListFromFen.map((m, i) => (
                 <Text key={i} color="textSecondary" fontSize="sm" whiteSpace="nowrap" flexShrink={0}>
                   {i % 2 === 0 ? `${Math.floor(i / 2) + 1}. ` : ""}
