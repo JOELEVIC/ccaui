@@ -7,6 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "",
     "/about",
     "/login",
+    "/login/email",
     "/register",
     "/rankings",
     "/tournaments",

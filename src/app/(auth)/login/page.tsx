@@ -1,92 +1,85 @@
 "use client";
 
-import { Box, Container, Heading, Text, HStack, Button, VStack } from "@chakra-ui/react";
 import Link from "next/link";
-import { LoginForm } from "@/components/auth/LoginForm";
+import { Box, Button, Container, Heading, Text, VStack, HStack } from "@chakra-ui/react";
 import { APP_NAME } from "@/lib/appName";
 
-function SocialStub({ label }: { label: string }) {
+/**
+ * Login gateway — welcoming step before the email/password form at /login/email.
+ */
+export default function LoginGatewayPage() {
   return (
-    <Button
-      size="sm"
-      w="44px"
-      h="44px"
-      minW="44px"
-      p={0}
-      bg="bgDark"
-      color="gold"
-      borderRadius="soft"
-      fontSize="xs"
-      fontWeight="700"
-      _hover={{ bg: "#1a2238" }}
-      aria-label={label}
-    >
-      {label.slice(0, 2)}
-    </Button>
-  );
-}
+    <Box minH="100vh" bg="bgDark" color="textPrimary" py={{ base: 10, md: 16 }} px={4}>
+      <Container maxW="lg">
+        <VStack gap={10} align="stretch">
+          <Link href="/">
+            <Text fontSize="sm" color="gold" _hover={{ textDecoration: "underline" }}>
+              ← Back to home
+            </Text>
+          </Link>
 
-export default function LoginPage() {
-  return (
-    <Box minH="100vh" bg="gold" color="bgDark" py={{ base: 8, md: 12 }} px={4}>
-      <Container maxW="md">
-        <VStack gap={8} align="stretch">
-          <Box textAlign="center" pt={4}>
-            <svg width="200" height="48" viewBox="0 0 200 48" fill="none" aria-hidden style={{ margin: "0 auto", maxWidth: "100%" }}>
+          <VStack gap={4} textAlign="center" pt={4}>
+            <svg width="180" height="56" viewBox="0 0 200 56" fill="none" aria-hidden style={{ margin: "0 auto" }}>
               <path
-                d="M20 38 L30 8 L40 38 M50 8 L50 38 M60 8 L70 28 L80 8 L80 38 M95 8 L95 38 L110 38 M125 8 L125 38 M140 8 L155 38 L170 8"
-                stroke="currentColor"
+                d="M24 42 L36 10 L48 42 M58 10 L58 42 M70 10 L82 32 L94 10 L94 42 M108 10 L108 42 L126 42 M140 10 L140 42 M152 10 L170 42 L188 10"
+                stroke="#e6a452"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
-            <Heading
-              size="2xl"
-              fontFamily="var(--font-playfair), Georgia, serif"
-              fontWeight="600"
-              mt={4}
-              color="bgDark"
-            >
-              Sign in
+            <Heading fontFamily="var(--font-playfair), Georgia, serif" size="2xl" color="textPrimary" fontWeight="600">
+              Welcome back
             </Heading>
-            <Text fontSize="sm" mt={2} opacity={0.85}>
-              {APP_NAME}
+            <Text color="textSecondary" fontSize="md" maxW="md" mx="auto">
+              You&apos;re a step away from your games, puzzles, and tournaments at <strong style={{ color: "var(--chakra-colors-gold)" }}>{APP_NAME}</strong>.
             </Text>
-          </Box>
-
-          <Box bg="whiteAlpha.400" backdropFilter="blur(8px)" borderRadius="soft" p={{ base: 6, md: 8 }} borderWidth="1px" borderColor="blackAlpha.100">
-            <LoginForm chessPro />
-          </Box>
-
-          <VStack gap={3}>
-            <Text fontSize="xs" textAlign="center" fontWeight="600" opacity={0.8}>
-              Continue with
-            </Text>
-            <HStack justify="center" gap={2} flexWrap="wrap">
-              <SocialStub label="Apple" />
-              <SocialStub label="Twitch" />
-              <SocialStub label="Facebook" />
-              <SocialStub label="Google" />
-              <SocialStub label="Twitter" />
-              <SocialStub label="Discord" />
-            </HStack>
           </VStack>
 
-          <HStack justify="center" gap={6} flexWrap="wrap" fontSize="sm">
+          <Box
+            bg="bgCard"
+            borderRadius="soft"
+            borderWidth="1px"
+            borderColor="whiteAlpha.100"
+            p={{ base: 6, md: 8 }}
+          >
+            <Text fontWeight="600" color="gold" mb={4} fontSize="sm" textTransform="uppercase" letterSpacing="wider">
+              When you sign in you can
+            </Text>
+            <VStack align="stretch" gap={3}>
+              {[
+                "Resume games and see your rating across variants",
+                "Join arena tournaments and track your stats",
+                "Train with puzzles and review past performances",
+              ].map((item) => (
+                <HStack key={item} align="flex-start" gap={2}>
+                  <Text color="accentGreen" mt={0.5} flexShrink={0}>
+                    ✓
+                  </Text>
+                  <Text color="textSecondary" fontSize="sm">
+                    {item}
+                  </Text>
+                </HStack>
+              ))}
+            </VStack>
+          </Box>
+
+          <VStack gap={4} align="stretch">
+            <Link href="/login/email">
+              <Button w="full" size="lg" bg="gold" color="bgDark" borderRadius="soft" _hover={{ bg: "goldLight" }}>
+                Continue with email
+              </Button>
+            </Link>
+            <Text fontSize="xs" color="textMuted" textAlign="center">
+              You&apos;ll enter your email and password on the next screen.
+            </Text>
+          </VStack>
+
+          <HStack justify="center" gap={2} flexWrap="wrap" fontSize="sm" color="textSecondary">
+            <Text>New here?</Text>
             <Link href="/register">
-              <Text as="span" fontWeight="600" textDecoration="underline">
-                Register
-              </Text>
-            </Link>
-            <Link href="/regulations">
-              <Text as="span" opacity={0.8}>
-                Terms
-              </Text>
-            </Link>
-            <Link href="/contact">
-              <Text as="span" opacity={0.8}>
-                Privacy
+              <Text color="gold" fontWeight="600" textDecoration="underline">
+                Create an account
               </Text>
             </Link>
           </HStack>

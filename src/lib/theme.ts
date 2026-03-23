@@ -15,7 +15,7 @@ const ccaTokens = defineTokens({
     stat: { value: "var(--font-oswald), var(--font-inter), sans-serif" },
   },
   colors: {
-    // Chess.Pro navy + gold
+    // DChessAcademy navy + gold
     bgPrimary: { value: "#0a0e1a" },
     bgGradientStart: { value: "#12182a" },
     bgSurface: { value: "#1a2238" },

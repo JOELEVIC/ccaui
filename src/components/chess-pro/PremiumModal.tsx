@@ -24,7 +24,7 @@ export function PremiumModal({ open, onClose }: PremiumModalProps) {
       >
         <VStack gap={4} align="stretch">
           <Text fontFamily="var(--font-playfair), Georgia, serif" fontSize="2xl" fontWeight="600" textAlign="center">
-            Chess Pro Premium
+            DChessAcademy Premium
           </Text>
           <Text fontSize="sm" textAlign="center" opacity={0.9}>
             Unlock unlimited analysis and become PRO faster.

@@ -1,1 +1,1 @@
-export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME ?? "Chess.Pro";
+export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME ?? "DChessAcademy";

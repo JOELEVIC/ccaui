@@ -4,7 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/lib/toaster";
 
-const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "Chess.Pro";
+const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "DChessAcademy";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],

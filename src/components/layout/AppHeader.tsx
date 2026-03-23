@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Box, Flex, HStack, Text, Button, Image } from "@chakra-ui/react";
+import { Box, Flex, HStack, Text, Button, Image, IconButton } from "@chakra-ui/react";
 import { useAuth } from "@/lib/auth";
 import { APP_NAME } from "@/lib/appName";
+import { IconSearch, IconBell, IconMail, IconChevronDown } from "@/components/layout/HeaderIcons";
 
 const CENTER_NAV: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Play" },
@@ -82,55 +83,98 @@ export function AppHeader({ onOpenMore, onOpenSearch }: AppHeaderProps) {
           </HStack>
         </HStack>
 
-        <HStack gap={{ base: 1, md: 3 }} flexShrink={0}>
-          <Button
+        <HStack gap={0} flexShrink={0} alignItems="center">
+          <IconButton
             variant="ghost"
-            size="sm"
-            color="textSecondary"
             aria-label="Search"
             onClick={onOpenSearch}
             display={{ base: "none", sm: "inline-flex" }}
+            size="sm"
+            w="40px"
+            h="40px"
+            minW="40px"
+            color="textSecondary"
+            _hover={{ color: "gold", bg: "whiteAlpha.06" }}
           >
-            ⌕
-          </Button>
-          <Box display={{ base: "none", sm: "block" }} color="textMuted" aria-hidden>
-            🔔
-          </Box>
-          <Box display={{ base: "none", sm: "block" }} color="textMuted" aria-hidden>
-            ✉
-          </Box>
+            <IconSearch />
+          </IconButton>
+          <IconButton
+            variant="ghost"
+            aria-label="Notifications"
+            display={{ base: "none", sm: "inline-flex" }}
+            size="sm"
+            w="40px"
+            h="40px"
+            minW="40px"
+            color="textSecondary"
+            _hover={{ color: "gold", bg: "whiteAlpha.06" }}
+          >
+            <IconBell />
+          </IconButton>
+          <IconButton
+            variant="ghost"
+            aria-label="Messages"
+            display={{ base: "none", sm: "inline-flex" }}
+            size="sm"
+            w="40px"
+            h="40px"
+            minW="40px"
+            color="textSecondary"
+            _hover={{ color: "gold", bg: "whiteAlpha.06" }}
+          >
+            <IconMail />
+          </IconButton>
           <Link href="/profile">
-            <HStack gap={2} px={2} py={1} borderRadius="soft" _hover={{ bg: "whiteAlpha.06" }}>
+            <HStack
+              gap={2}
+              px={2}
+              py={1}
+              h="40px"
+              borderRadius="soft"
+              alignItems="center"
+              _hover={{ bg: "whiteAlpha.06" }}
+            >
               {user?.profile?.avatarUrl ? (
                 <Image
                   src={user.profile.avatarUrl}
                   alt=""
-                  boxSize="32px"
+                  boxSize="28px"
                   borderRadius="full"
                   objectFit="cover"
+                  flexShrink={0}
                 />
               ) : (
                 <Box
-                  w="32px"
-                  h="32px"
+                  w="28px"
+                  h="28px"
                   borderRadius="full"
                   bg="goldDark"
-                  color="bgDark"
+                  color="gold"
+                  borderWidth="1px"
+                  borderColor="whiteAlpha.200"
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
                   fontWeight="bold"
-                  fontSize="sm"
+                  fontSize="xs"
+                  flexShrink={0}
                 >
                   {initial}
                 </Box>
               )}
-              <Text display={{ base: "none", md: "block" }} fontSize="sm" color="textPrimary" maxW="120px" lineClamp={1}>
+              <Text
+                display={{ base: "none", md: "block" }}
+                fontSize="sm"
+                color="textPrimary"
+                maxW="100px"
+                lineClamp={1}
+                fontWeight="500"
+              >
                 {user?.username ?? "Guest"}
               </Text>
-              <Text display={{ base: "none", md: "block" }} color="textMuted" fontSize="xs">
-                ▾
-              </Text>
+              <Box display={{ base: "none", md: "flex" }} color="textMuted" alignItems="center">
+                <IconChevronDown />
+              </Box>
             </HStack>
           </Link>
         </HStack>
