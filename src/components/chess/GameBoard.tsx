@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box } from "@chakra-ui/react";
 import { Chessboard } from "react-chessboard";
+import type { Arrow } from "react-chessboard";
 import { Chess, type Square } from "chess.js";
 import { findPremoveMove, legalMovesIfSideToMove } from "@/lib/chessPremoves";
 
@@ -26,6 +27,10 @@ interface GameBoardProps {
   premoveEnabled?: boolean;
   pendingPremove?: PendingPremove | null;
   onPendingPremove?: (p: PendingPremove) => void;
+  /** Drawn on top of last-move / selection highlights (e.g. review mode). */
+  extraSquareStyles?: Record<string, React.CSSProperties>;
+  /** Engine / review arrows (from → to). */
+  reviewArrows?: Arrow[];
 }
 
 const DARK_SQUARE = "#9ca3af";
@@ -47,6 +52,8 @@ export function GameBoard({
   premoveEnabled = false,
   pendingPremove = null,
   onPendingPremove,
+  extraSquareStyles,
+  reviewArrows,
 }: GameBoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
@@ -257,6 +264,11 @@ export function GameBoard({
         }
       });
     }
+    if (extraSquareStyles) {
+      for (const [sq, st] of Object.entries(extraSquareStyles)) {
+        styles[sq] = { ...styles[sq], ...st };
+      }
+    }
     return styles;
   }, [
     selectedSquare,
@@ -265,6 +277,7 @@ export function GameBoard({
     lastMove,
     pendingPremove,
     canPlayNow,
+    extraSquareStyles,
   ]);
 
   const allowDragging = canPlayNow || premoveActive;
@@ -293,6 +306,8 @@ export function GameBoard({
             lightSquareNotationStyle: { fill: "#6b7280", fontSize: 11 },
             alphaNotationStyle: { fill: "#6b7280", fontSize: 11 },
             numericNotationStyle: { fill: "#6b7280", fontSize: 11 },
+            arrows: reviewArrows ?? [],
+            clearArrowsOnPositionChange: true,
           }}
         />
       </div>

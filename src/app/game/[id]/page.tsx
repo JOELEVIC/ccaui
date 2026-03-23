@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { Box, Button, Text, VStack, HStack, Flex, SimpleGrid, Heading, Switch } from "@chakra-ui/react";
@@ -26,6 +26,15 @@ import {
   type GameUpdatePayload,
 } from "@/lib/game-api";
 import { useGameSubscription } from "@/lib/useGameSubscription";
+import { parseMoveTokens } from "@/lib/gameMoveParsing";
+import {
+  fenAfterMoves,
+  hasMoveReviewData,
+  parseGameAnalysis,
+  sanToArrow,
+} from "@/lib/gameAnalysisReview";
+import { GameOverDialog } from "@/components/chess/GameOverDialog";
+import type { Arrow } from "react-chessboard";
 
 const GAME_QUERY = gql`
   query GamePage($id: ID!) {
@@ -52,14 +61,12 @@ const GAME_QUERY = gql`
 
 function movesToFen(moves: string): string {
   const chess = new Chess();
-  if (moves?.trim()) {
-    const parts = moves.trim().split(/\s+/);
-    for (const m of parts) {
-      try {
-        chess.move(m);
-      } catch {
-        break;
-      }
+  const parts = parseMoveTokens(moves ?? "");
+  for (const m of parts) {
+    try {
+      chess.move(m);
+    } catch {
+      break;
     }
   }
   return chess.fen();
@@ -67,8 +74,8 @@ function movesToFen(moves: string): string {
 
 function lastMoveSquares(moves: string): { from: string; to: string } | null {
   const chess = new Chess();
-  if (!moves?.trim()) return null;
-  const parts = moves.trim().split(/\s+/);
+  const parts = parseMoveTokens(moves ?? "");
+  if (parts.length === 0) return null;
   let last: { from: string; to: string } | null = null;
   for (const m of parts) {
     try {
@@ -79,21 +86,6 @@ function lastMoveSquares(moves: string): { from: string; to: string } | null {
     }
   }
   return last;
-}
-
-interface StoredAnalysis {
-  white: { inaccuracies: number; mistakes: number; blunders: number; acpl: number };
-  black: { inaccuracies: number; mistakes: number; blunders: number; acpl: number };
-  evalSeries: { ply: number; cp: number }[];
-}
-
-function parseAnalysis(json: string | null | undefined): StoredAnalysis | null {
-  if (!json) return null;
-  try {
-    return JSON.parse(json) as StoredAnalysis;
-  } catch {
-    return null;
-  }
 }
 
 const LS_PREMOVE = "dchess-game-premove";
@@ -117,8 +109,10 @@ function resultToScore(result: string | null | undefined): string {
   return "—";
 }
 
-export default function GamePage() {
+function GamePageInner() {
   const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const id = params.id as string;
   const { user, token } = useAuth();
   const [fen, setFen] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -153,7 +147,10 @@ export default function GamePage() {
 
   const game = data?.game;
   const [premiumOpen, setPremiumOpen] = useState(false);
-  const analysis = game ? parseAnalysis(game.analysisJson) : null;
+  const [gameOverModalDismissed, setGameOverModalDismissed] = useState(false);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [reviewStep, setReviewStep] = useState(0);
+  const analysis = game ? parseGameAnalysis(game.analysisJson) : null;
   const lastSq = game ? lastMoveSquares(game.moves ?? "") : null;
   const isParticipant = user && game && (game.white?.id === user.id || game.black?.id === user.id);
   const isWhite = user && game?.white?.id === user.id;
@@ -162,15 +159,83 @@ export default function GamePage() {
   const turnIsWhite = fen.split(" ")[1] === "w";
   const isMyTurn = isWhite ? turnIsWhite : !turnIsWhite;
   const gameEnded = status === "COMPLETED" || status === "ABANDONED";
-  const moveListFromFen = (() => {
-    const c = new Chess();
-    try {
-      c.load(fen);
-    } catch {
-      return [];
+  const sanMoves = useMemo(() => parseMoveTokens(game?.moves ?? ""), [game?.moves]);
+  const hasReview = hasMoveReviewData(analysis);
+  const reviewCount = analysis?.moveReviews?.length ?? 0;
+
+  useEffect(() => {
+    setGameOverModalDismissed(false);
+    setReviewMode(false);
+    setReviewStep(0);
+  }, [id]);
+
+  const wantsReviewUrl = searchParams.get("review") === "1";
+
+  useEffect(() => {
+    if (!gameEnded || !wantsReviewUrl) return;
+    if (hasMoveReviewData(analysis)) setReviewMode(true);
+  }, [gameEnded, wantsReviewUrl, analysis]);
+
+  const showGameOverModal = gameEnded && !gameOverModalDismissed && !wantsReviewUrl;
+  const postGameStatsVisible = gameEnded && !showGameOverModal;
+
+  const reviewBoardFen =
+    reviewMode && sanMoves.length > 0
+      ? fenAfterMoves(sanMoves, Math.min(reviewStep, sanMoves.length))
+      : fen;
+
+  const reviewRow =
+    reviewMode && analysis?.moveReviews && reviewStep >= 0 && reviewStep < analysis.moveReviews.length
+      ? analysis.moveReviews[reviewStep]
+      : null;
+
+  const { reviewArrows, reviewExtraSquares } = useMemo(() => {
+    const empty = { reviewArrows: [] as Arrow[], reviewExtraSquares: {} as Record<string, React.CSSProperties> };
+    if (!reviewMode || !reviewRow || reviewStep >= sanMoves.length) return empty;
+    const posFen = fenAfterMoves(sanMoves, reviewStep);
+    const arrows: Arrow[] = [];
+    const squares: Record<string, React.CSSProperties> = {};
+    const best = sanToArrow(posFen, reviewRow.bestSan);
+    if (best) {
+      arrows.push({
+        startSquare: best.startSquare,
+        endSquare: best.endSquare,
+        color: "rgba(34, 197, 94, 0.95)",
+      });
+      squares[best.startSquare] = { backgroundColor: "rgba(34, 197, 94, 0.2)" };
+      squares[best.endSquare] = { backgroundColor: "rgba(34, 197, 94, 0.28)" };
     }
-    return c.history();
-  })();
+    if (reviewRow.playedSan !== reviewRow.bestSan) {
+      const played = sanToArrow(posFen, reviewRow.playedSan);
+      if (played) {
+        arrows.push({
+          startSquare: played.startSquare,
+          endSquare: played.endSquare,
+          color: "rgba(230, 164, 82, 0.9)",
+        });
+        if (!squares[played.startSquare]) squares[played.startSquare] = { backgroundColor: "rgba(230, 164, 82, 0.15)" };
+        if (!squares[played.endSquare]) squares[played.endSquare] = { backgroundColor: "rgba(230, 164, 82, 0.22)" };
+      }
+    }
+    return { reviewArrows: arrows, reviewExtraSquares: squares };
+  }, [reviewMode, reviewRow, reviewStep, sanMoves]);
+
+  const enterReview = useCallback(() => {
+    setGameOverModalDismissed(true);
+    setReviewMode(true);
+    setReviewStep(0);
+    router.replace(`/game/${id}?review=1`, { scroll: false });
+  }, [id, router]);
+
+  const exitReview = useCallback(() => {
+    setReviewMode(false);
+    setReviewStep(0);
+    router.replace(`/game/${id}`, { scroll: false });
+  }, [id, router]);
+
+  const dismissGameOverModal = useCallback(() => {
+    setGameOverModalDismissed(true);
+  }, []);
 
   useEffect(() => {
     if (!game) return;
@@ -408,16 +473,18 @@ export default function GamePage() {
           </Box>
 
           <GameBoard
-            fen={fen}
+            fen={reviewBoardFen}
             orientation={orientation}
             isMyTurn={!!isParticipant && !gameEnded && isMyTurn}
             movePending={movePending}
             onMove={handleMove}
             allowMove={!gameEnded && !!isParticipant}
-            lastMove={lastSq}
+            lastMove={reviewMode ? null : lastSq}
             premoveEnabled={premoveEnabled}
             pendingPremove={pendingPremove}
             onPendingPremove={setPendingPremove}
+            extraSquareStyles={reviewMode ? reviewExtraSquares : undefined}
+            reviewArrows={reviewMode ? reviewArrows : undefined}
           />
 
           <Box
@@ -491,7 +558,7 @@ export default function GamePage() {
               </HStack>
             </VStack>
           </Box>
-          <MaterialDisplay fen={fen} />
+          <MaterialDisplay fen={reviewBoardFen} />
           <Box
             py={3}
             px={4}
@@ -533,17 +600,140 @@ export default function GamePage() {
               pb={1}
               css={{ scrollbarWidth: "thin" }}
             >
-              {moveListFromFen.map((m, i) => (
-                <Text key={i} color="textSecondary" fontSize="sm" whiteSpace="nowrap" flexShrink={0}>
+              {sanMoves.map((m, i) => (
+                <Text
+                  key={i}
+                  color={
+                    reviewMode && (i === reviewStep || (reviewStep === sanMoves.length && i === sanMoves.length - 1))
+                      ? "gold"
+                      : "textSecondary"
+                  }
+                  fontWeight={
+                    reviewMode && (i === reviewStep || (reviewStep === sanMoves.length && i === sanMoves.length - 1))
+                      ? "700"
+                      : "normal"
+                  }
+                  fontSize="sm"
+                  whiteSpace="nowrap"
+                  flexShrink={0}
+                  cursor={reviewMode && hasReview ? "pointer" : undefined}
+                  onClick={reviewMode && hasReview ? () => setReviewStep(i) : undefined}
+                >
                   {i % 2 === 0 ? `${Math.floor(i / 2) + 1}. ` : ""}
                   {m}
                 </Text>
               ))}
-              {moveListFromFen.length === 0 && (
+              {sanMoves.length === 0 && (
                 <Text color="textMuted" fontSize="sm">—</Text>
               )}
             </Flex>
           </Box>
+
+          {reviewMode && hasReview && (
+            <Box
+              py={3}
+              px={4}
+              borderRadius="soft"
+              borderWidth="1px"
+              borderColor="purple.400"
+              bg="bgCard"
+            >
+              <Text color="gold" fontSize="xs" fontWeight="700" mb={2}>
+                Move review
+              </Text>
+              <Text color="textMuted" fontSize="xs" mb={2}>
+                Green arrow = best move · Gold = played (when different)
+              </Text>
+              <HStack flexWrap="wrap" gap={1} mb={3}>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  borderColor="goldDark"
+                  color="textSecondary"
+                  borderRadius="soft"
+                  onClick={() => setReviewStep(0)}
+                  disabled={reviewStep === 0}
+                >
+                  Start
+                </Button>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  borderColor="goldDark"
+                  color="textSecondary"
+                  borderRadius="soft"
+                  onClick={() => setReviewStep((s) => Math.max(0, s - 1))}
+                  disabled={reviewStep === 0}
+                >
+                  Prev
+                </Button>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  borderColor="goldDark"
+                  color="textSecondary"
+                  borderRadius="soft"
+                  onClick={() => setReviewStep((s) => Math.min(sanMoves.length, s + 1))}
+                  disabled={reviewStep >= sanMoves.length}
+                >
+                  Next
+                </Button>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  borderColor="goldDark"
+                  color="textSecondary"
+                  borderRadius="soft"
+                  onClick={() => setReviewStep(sanMoves.length)}
+                  disabled={reviewStep >= sanMoves.length}
+                >
+                  End
+                </Button>
+              </HStack>
+              {reviewStep >= sanMoves.length ? (
+                <Text color="textSecondary" fontSize="sm">
+                  Final position — end of game.
+                </Text>
+              ) : reviewRow ? (
+                <VStack align="stretch" gap={1}>
+                  <Text color="textSecondary" fontSize="sm">
+                    <Text as="span" fontWeight="700" color="textPrimary">
+                      {reviewStep % 2 === 0 ? "White" : "Black"}
+                    </Text>{" "}
+                    played{" "}
+                    <Text as="span" color="gold" fontWeight="700">
+                      {reviewRow.playedSan}
+                    </Text>
+                  </Text>
+                  <Text color="textSecondary" fontSize="sm">
+                    Best:{" "}
+                    <Text as="span" color="green.400" fontWeight="700">
+                      {reviewRow.bestSan}
+                    </Text>
+                    {reviewRow.playedSan === reviewRow.bestSan ? (
+                      <Text as="span" color="textMuted" fontSize="xs" ml={1}>
+                        (same move)
+                      </Text>
+                    ) : null}
+                  </Text>
+                </VStack>
+              ) : (
+                <Text color="textMuted" fontSize="sm">
+                  No best-move data for this ply.
+                </Text>
+              )}
+              <Button mt={3} size="sm" width="full" variant="outline" borderColor="gold" color="gold" borderRadius="soft" onClick={exitReview}>
+                Exit review
+              </Button>
+            </Box>
+          )}
+
+          {gameEnded && hasReview && !reviewMode && (
+            <Button size="sm" bg="gold" color="bgDark" borderRadius="soft" onClick={enterReview}>
+              Review moves
+            </Button>
+          )}
+
           {opponentOfferedDraw && !gameEnded && (
             <HStack gap={2}>
               <Text color="gold" fontSize="sm">Draw offered</Text>
@@ -612,7 +802,7 @@ export default function GamePage() {
         </Text>
       )}
 
-      {gameEnded && game && (
+      {gameEnded && game && postGameStatsVisible && (
         <VStack align="stretch" gap={6} maxW="900px" mx="auto" mt={10} px={2}>
           <Heading textAlign="center" fontFamily="var(--font-playfair), Georgia, serif" color="textPrimary" size="lg">
             Game review
@@ -670,8 +860,31 @@ export default function GamePage() {
         </VStack>
       )}
 
+      <GameOverDialog
+        open={showGameOverModal}
+        onDismiss={dismissGameOverModal}
+        onReview={enterReview}
+        resultLabel={resultToScore(result)}
+        resultDetail={result ? `${result} · ${status}` : status}
+        hasReviewData={hasReview}
+      />
+
       <PremiumModal open={premiumOpen} onClose={() => setPremiumOpen(false)} />
     </Box>
+  );
+}
+
+export default function GamePage() {
+  return (
+    <Suspense
+      fallback={
+        <Box minH="100vh" bg="bgDark" display="flex" alignItems="center" justifyContent="center">
+          <Text color="gold">Loading game...</Text>
+        </Box>
+      }
+    >
+      <GamePageInner />
+    </Suspense>
   );
 }
 
