@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     "DChessAcademy (Chess Group Cameroon) uses the philosophy of chess for intellectual development, ethical leadership, and community building. Founded by Desmond. Discipline. Strategy. Excellence.",
 };
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://cameroonchessacademy.com";
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://dchessacademy.com";
 
 const organizationJsonLd = {
   "@context": "https://schema.org",

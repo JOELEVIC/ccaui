@@ -84,10 +84,10 @@ export function LandingFooter() {
               Discipline. Strategy. Excellence.
             </Text>
             <Text color="textMuted" fontSize="xs">
-              Cameroon Chess Academy · Fédération Camerounaise des Échecs
+              DChessAcademy · Fédération Camerounaise des Échecs
             </Text>
             <Text color="textMuted" fontSize="xs">
-              © Cameroon Chess Academy
+              © DChessAcademy
             </Text>
           </VStack>
         </Box>

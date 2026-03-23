@@ -219,7 +219,7 @@ export default function PlayBotPage() {
         </Text>
         {botThinking && (
           <Text color="textMuted" fontSize="sm">
-            Bot is thinking...
+            Thinking...
           </Text>
         )}
         <HStack gap={2}>

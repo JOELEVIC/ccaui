@@ -38,7 +38,7 @@ export function LandingNav() {
                 color="textPrimary"
                 fontFamily="var(--font-playfair), Georgia, serif"
               >
-                Cameroon Chess Academy
+                DChessAcademy
               </Text>
             </HStack>
           </Link>

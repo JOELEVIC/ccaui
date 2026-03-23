@@ -71,7 +71,7 @@ export default function RegisterPage() {
           <Heading size="xl" color="gold" fontFamily="serif">
             Create Account
           </Heading>
-          <Text color="goldLight">Join Cameroon Chess Academy</Text>
+          <Text color="goldLight">Join DChessAcademy</Text>
           <Box w="full">
             <Text as="label" display="block" color="whiteAlpha.900" mb={2}>Email</Text>
             <Input
