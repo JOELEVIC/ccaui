@@ -161,7 +161,6 @@ function GamePageInner() {
   const gameEnded = status === "COMPLETED" || status === "ABANDONED";
   const sanMoves = useMemo(() => parseMoveTokens(game?.moves ?? ""), [game?.moves]);
   const hasReview = hasMoveReviewData(analysis);
-  const reviewCount = analysis?.moveReviews?.length ?? 0;
 
   useEffect(() => {
     setGameOverModalDismissed(false);
