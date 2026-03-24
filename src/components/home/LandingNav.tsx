@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Container, HStack, Text, Button, VStack } from "@chakra-ui/react";
+import { Box, Container, Flex, Heading, HStack, Text, Button, VStack } from "@chakra-ui/react";
 import Link from "next/link";
+import { APP_NAME } from "@/lib/appName";
 
 const NAV_LINKS = [
   { label: "About", href: "/about" },
@@ -18,68 +19,43 @@ export function LandingNav() {
 
   return (
     <Box
+      as="header"
       position="sticky"
       top={0}
       zIndex={10}
-      bg="bgDark"
       borderBottomWidth="1px"
-      borderColor="whiteAlpha.06"
-      backdropFilter="saturate(180%) blur(8px)"
+      borderColor="whiteAlpha.100"
+      bg="rgba(10, 14, 26, 0.92)"
+      backdropFilter="blur(8px)"
     >
       <Container maxW="6xl" py={4}>
-        <HStack justify="space-between">
+        <Flex align="center" justify="space-between" gap={4} flexWrap="wrap">
           <Link href="/">
-            <HStack gap={2}>
-              <Text fontSize="xl" color="gold" aria-hidden>
-                ♔
-              </Text>
-              <Text
-                fontWeight="600"
-                color="textPrimary"
-                fontFamily="var(--font-playfair), Georgia, serif"
-              >
-                DChessAcademy
-              </Text>
-            </HStack>
+            <Heading size="md" fontFamily="var(--font-playfair), Georgia, serif" color="gold" fontWeight="600">
+              {APP_NAME}
+            </Heading>
           </Link>
-          <HStack gap={3} display={{ base: "none", md: "flex" }}>
+          <HStack gap={{ base: 2, md: 6 }} flexWrap="wrap" justify="flex-end">
             {NAV_LINKS.map(({ label, href }) => (
               <Link key={href} href={href}>
-                <Button
-                  size="sm"
-                  variant="ghost"
+                <Text
+                  fontSize="sm"
                   color="textSecondary"
-                  borderRadius="soft"
                   _hover={{ color: "gold" }}
-                  transition="color 0.2s"
+                  display={{ base: "none", md: "block" }}
+                  cursor="pointer"
                 >
                   {label}
-                </Button>
+                </Text>
               </Link>
             ))}
-          </HStack>
-          <HStack gap={3}>
             <Link href="/login">
-              <Button
-                size="sm"
-                variant="ghost"
-                color="textSecondary"
-                borderRadius="soft"
-                _hover={{ color: "gold" }}
-                transition="color 0.2s"
-              >
+              <Button variant="ghost" size="sm" color="gold">
                 Sign in
               </Button>
             </Link>
             <Link href="/register">
-              <Button
-                size="sm"
-                bg="gold"
-                color="black"
-                borderRadius="soft"
-                _hover={{ bg: "goldLight" }}
-                transition="all 0.2s"
-              >
+              <Button size="sm" bg="gold" color="bgDark" borderRadius="soft" _hover={{ bg: "goldLight" }}>
                 Register
               </Button>
             </Link>
@@ -94,7 +70,7 @@ export function LandingNav() {
               {mobileMenuOpen ? "✕" : "☰"}
             </Button>
           </HStack>
-        </HStack>
+        </Flex>
       </Container>
       {/* Mobile menu */}
       {mobileMenuOpen && (
@@ -103,34 +79,20 @@ export function LandingNav() {
           py={4}
           px={4}
           borderTopWidth="1px"
-          borderColor="whiteAlpha.06"
-          bg="bgDark"
+          borderColor="whiteAlpha.100"
+          bg="rgba(10, 14, 26, 0.98)"
         >
           <VStack align="stretch" gap={1}>
             {NAV_LINKS.map(({ label, href }) => (
               <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}>
-                <Button
-                  w="full"
-                  justifyContent="flex-start"
-                  size="sm"
-                  variant="ghost"
-                  color="textSecondary"
-                  borderRadius="soft"
-                  _hover={{ color: "gold" }}
-                >
+                <Text w="full" py={2} fontSize="sm" color="textSecondary" _hover={{ color: "gold" }} cursor="pointer">
                   {label}
-                </Button>
+                </Text>
               </Link>
             ))}
           </VStack>
         </Box>
       )}
-      {/* Thin Cameroon stripe */}
-      <Box h="3px" display="flex" gap={0}>
-        <Box flex={1} bg="cameroonGreen" />
-        <Box flex={1} bg="cameroonRed" />
-        <Box flex={1} bg="cameroonYellow" />
-      </Box>
     </Box>
   );
 }

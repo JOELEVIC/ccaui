@@ -11,9 +11,11 @@ import {
   HStack,
   Flex,
   Dialog,
+  Switch,
 } from "@chakra-ui/react";
 import { Chess } from "chess.js";
-import { GameBoard } from "@/components/chess/GameBoard";
+import { GameBoard, type PendingPremove } from "@/components/chess/GameBoard";
+import { isPremoveStillValid } from "@/lib/chessPremoves";
 import { MaterialDisplay } from "@/components/chess/MaterialDisplay";
 import { EvaluationBar } from "@/components/chess/EvaluationBar";
 import { TierLabel } from "@/components/dashboard/TierLabel";
@@ -24,6 +26,19 @@ import { toaster } from "@/lib/toaster";
 const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 const BOT_ELO_PRESETS = [230, 400, 600, 800, 1000, 1200, 1600, 2000, 2400, 2800, 3200];
+
+const LS_PREMOVE = "dchess-game-premove";
+
+function readStoredBool(key: string, defaultVal: boolean): boolean {
+  if (typeof window === "undefined") return defaultVal;
+  try {
+    const v = localStorage.getItem(key);
+    if (v === null) return defaultVal;
+    return v === "1" || v === "true";
+  } catch {
+    return defaultVal;
+  }
+}
 
 function getRandomMove(fen: string): string | null {
   const chess = new Chess(fen);
@@ -73,6 +88,8 @@ export default function PlayBotPage() {
   const [evalLoading, setEvalLoading] = useState(false);
   const [gameResult, setGameResult] = useState<"1-0" | "0-1" | "1/2-1/2" | null>(null);
   const [gameOverReason, setGameOverReason] = useState<string | null>(null);
+  const [premoveEnabled, setPremoveEnabled] = useState(() => readStoredBool(LS_PREMOVE, false));
+  const [pendingPremove, setPendingPremove] = useState<PendingPremove | null>(null);
   const evalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { getBestMove, getEvaluation, ready: stockfishReady, error: stockfishError } = useStockfish(elo);
@@ -155,6 +172,26 @@ export default function PlayBotPage() {
     runBot();
   }, [botThinking, runBot]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(LS_PREMOVE, premoveEnabled ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }, [premoveEnabled]);
+
+  useEffect(() => {
+    if (gameResult || !atHead) setPendingPremove(null);
+  }, [gameResult, atHead]);
+
+  useEffect(() => {
+    if (!pendingPremove || isUserTurn) return;
+    const myColor = orientation === "white" ? "w" : "b";
+    if (!isPremoveStillValid(fen, myColor, pendingPremove.from, pendingPremove.to)) {
+      setPendingPremove(null);
+    }
+  }, [fen, isUserTurn, pendingPremove, orientation]);
+
   const handleMove = useCallback(
     (moveStr: string) => {
       if (!atHead || gameResult) return;
@@ -176,6 +213,17 @@ export default function PlayBotPage() {
     },
     [fen, atHead, gameResult]
   );
+
+  useEffect(() => {
+    if (!atHead || gameResult || botThinking || !pendingPremove || !isUserTurn) return;
+    const uci = `${pendingPremove.from}${pendingPremove.to}${pendingPremove.promotion ?? ""}`;
+    if (!applyMove(fen, uci)) {
+      setPendingPremove(null);
+      return;
+    }
+    setPendingPremove(null);
+    handleMove(uci);
+  }, [atHead, gameResult, botThinking, pendingPremove, fen, isUserTurn, handleMove]);
 
   const handleResign = useCallback(() => {
     if (gameResult) return;
@@ -222,7 +270,21 @@ export default function PlayBotPage() {
             Thinking...
           </Text>
         )}
-        <HStack gap={2}>
+        <HStack gap={2} flexWrap="wrap" align="center">
+          <HStack gap={2} align="center">
+            <Text fontSize="sm" color="textSecondary">
+              Premove
+            </Text>
+            <Switch.Root
+              checked={premoveEnabled}
+              onCheckedChange={(e) => setPremoveEnabled(!!e.checked)}
+            >
+              <Switch.HiddenInput />
+              <Switch.Control bg={premoveEnabled ? "gold" : "bgSurface"} borderWidth="1px" borderColor="whiteAlpha.200">
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch.Root>
+          </HStack>
           <Button
             size="sm"
             variant={showAnalysis ? "solid" : "outline"}
@@ -277,8 +339,12 @@ export default function PlayBotPage() {
               fen={displayFen}
               orientation={orientation}
               isMyTurn={!gameResult && atHead && isUserTurn && !botThinking}
+              movePending={false}
               onMove={handleMove}
               allowMove={!gameResult && atHead && !botThinking}
+              premoveEnabled={premoveEnabled}
+              pendingPremove={pendingPremove}
+              onPendingPremove={setPendingPremove}
             />
           </HStack>
           <Box
