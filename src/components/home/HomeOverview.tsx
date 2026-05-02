@@ -110,7 +110,7 @@ const MY_GAMES = gql`
 `;
 
 export function HomeOverview() {
-  const { user, loading: authLoading, isAdmin } = useAuth();
+  const { user, loading: authLoading, token, isAdmin } = useAuth();
   const { data: meData } = useQuery<{
     me: {
       id: string;
@@ -150,7 +150,10 @@ export function HomeOverview() {
     }>;
   }>(MY_GAMES, { skip: !user });
 
-  if (authLoading) {
+  // For visitors without a token (anonymous), render the landing immediately
+  // — no flash of loading state. Only show the loader when we know we're
+  // actively fetching the user (token present but user not yet resolved).
+  if (authLoading && token) {
     return <ChessLoader message="Loading..." />;
   }
 

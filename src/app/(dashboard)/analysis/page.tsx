@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Heading, Text, VStack, Button } from "@chakra-ui/react";
+import { Box, Heading, Text, VStack, HStack, Button } from "@chakra-ui/react";
 import Link from "next/link";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
@@ -29,12 +29,21 @@ export default function AnalysisHubPage() {
 
   return (
     <VStack align="stretch" gap={8}>
-      <Heading fontFamily="var(--font-playfair), Georgia, serif" size="xl" color="textPrimary">
-        Analysis
-      </Heading>
-      <Text color="textSecondary" maxW="lg">
-        Review finished games with evaluation and accuracy stats. Open a completed game from the list below.
-      </Text>
+      <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={4}>
+        <Box>
+          <Heading fontFamily="var(--font-playfair), Georgia, serif" size="xl" color="textPrimary">
+            Analysis
+          </Heading>
+          <Text color="textSecondary" maxW="lg" mt={1}>
+            Review finished games with evaluation and accuracy stats. Open a completed game from the list below.
+          </Text>
+        </Box>
+        <Link href="/analysis/import">
+          <Button size="sm" bg="gold" color="bgDark" borderRadius="soft" _hover={{ bg: "goldLight" }}>
+            Import from Chess.com
+          </Button>
+        </Link>
+      </HStack>
       <VStack align="stretch" gap={2}>
         {games.length === 0 && <Text color="textMuted">No completed games yet.</Text>}
         {games.slice(0, 15).map((g: { id: string; timeControl: string; white: { username: string }; black: { username: string } }) => (

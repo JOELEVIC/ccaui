@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Box, Heading, Text, VStack, SimpleGrid, HStack, Flex, Switch } from "@chakra-ui/react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { useAuth } from "@/lib/auth";
@@ -10,6 +11,7 @@ import { ActionCard } from "@/components/chess-pro/ActionCard";
 import { PremiumModal } from "@/components/chess-pro/PremiumModal";
 import { PLATFORM_METRICS } from "@/graphql/queries/chessPro";
 import { APP_NAME } from "@/lib/appName";
+import { fadeInUp, staggerContainer, staggerChild } from "@/lib/animations";
 
 const LIVE_GAMES = gql`
   query LiveGamesHome {
@@ -69,26 +71,72 @@ export default function DashboardPage() {
         </HStack>
       </Flex>
 
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4}>
-        <ActionCard
-          href="/games"
-          title="Play with other users"
-          description="Start with someone at your level."
-          icon={<span>👥</span>}
-        />
-        <ActionCard
-          href="/games"
-          title="Play with friend via link"
-          description="Send a link and start a battle."
-          icon={<span>🔗</span>}
-        />
-        <ActionCard
-          href="/play/bot"
-          title="Play with computer"
-          description="Practice with customizable bots."
-          icon={<span>🤖</span>}
-        />
-      </SimpleGrid>
+      <motion.div variants={fadeInUp} initial="hidden" animate="visible">
+      <Link href="/road-to-master">
+        <Box
+          p={5}
+          borderRadius="soft"
+          bg="bgCard"
+          borderWidth="1px"
+          borderColor="goldDark"
+          backgroundImage="linear-gradient(120deg, rgba(230,164,82,0.15) 0%, rgba(20,27,46,0) 60%)"
+          transition="border-color 0.2s, transform 0.2s"
+          _hover={{ borderColor: "gold", transform: "translateY(-1px)" }}
+        >
+          <HStack justify="space-between" align="center" flexWrap="wrap" gap={3}>
+            <Box>
+              <Text
+                fontSize="xs"
+                color="gold"
+                fontWeight="600"
+                letterSpacing="wider"
+                textTransform="uppercase"
+              >
+                Road to Master
+              </Text>
+              <Text fontSize="lg" fontWeight="700" color="textPrimary" mt={0.5}>
+                Today&apos;s quests · skill tree · rank progress
+              </Text>
+              <Text fontSize="sm" color="textSecondary" mt={1}>
+                Climb from E to SS. Drill quests, unlock skills, and turn study into rating.
+              </Text>
+            </Box>
+            <Text color="gold" fontWeight="700" fontSize="2xl">
+              →
+            </Text>
+          </HStack>
+        </Box>
+      </Link>
+      </motion.div>
+
+      <motion.div variants={staggerContainer} initial="hidden" animate="visible">
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={4}>
+          <motion.div variants={staggerChild}>
+            <ActionCard
+              href="/games"
+              title="Play with other users"
+              description="Start with someone at your level."
+              icon={<span>👥</span>}
+            />
+          </motion.div>
+          <motion.div variants={staggerChild}>
+            <ActionCard
+              href="/games"
+              title="Play with friend via link"
+              description="Send a link and start a battle."
+              icon={<span>🔗</span>}
+            />
+          </motion.div>
+          <motion.div variants={staggerChild}>
+            <ActionCard
+              href="/play/bot"
+              title="Play with computer"
+              description="Practice with customizable bots."
+              icon={<span>🤖</span>}
+            />
+          </motion.div>
+        </SimpleGrid>
+      </motion.div>
 
       <SimpleGrid columns={{ base: 1, sm: 2 }} gap={3}>
         <Link href="/play/local">

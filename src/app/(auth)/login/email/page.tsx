@@ -1,30 +1,9 @@
 "use client";
 
-import { Box, Container, Heading, Text, HStack, Button, VStack } from "@chakra-ui/react";
+import { Box, Container, Heading, Text, HStack, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { APP_NAME } from "@/lib/appName";
-
-function SocialStub({ label }: { label: string }) {
-  return (
-    <Button
-      size="sm"
-      w="44px"
-      h="44px"
-      minW="44px"
-      p={0}
-      bg="bgDark"
-      color="gold"
-      borderRadius="soft"
-      fontSize="xs"
-      fontWeight="700"
-      _hover={{ bg: "#1a2238" }}
-      aria-label={label}
-    >
-      {label.slice(0, 2)}
-    </Button>
-  );
-}
 
 export default function LoginEmailPage() {
   return (
@@ -65,19 +44,24 @@ export default function LoginEmailPage() {
             <LoginForm chessPro />
           </Box>
 
-          <VStack gap={3}>
-            <Text fontSize="xs" textAlign="center" fontWeight="600" opacity={0.8}>
-              Continue with
+          <Box
+            mx="auto"
+            px={4}
+            py={2}
+            borderRadius="soft"
+            bg="whiteAlpha.300"
+            borderWidth="1px"
+            borderColor="blackAlpha.100"
+            textAlign="center"
+            maxW="340px"
+          >
+            <Text fontSize="xs" fontWeight="600" mb={1} letterSpacing="0.04em" textTransform="uppercase">
+              Welcome back
             </Text>
-            <HStack justify="center" gap={2} flexWrap="wrap">
-              <SocialStub label="Apple" />
-              <SocialStub label="Twitch" />
-              <SocialStub label="Facebook" />
-              <SocialStub label="Google" />
-              <SocialStub label="Twitter" />
-              <SocialStub label="Discord" />
-            </HStack>
-          </VStack>
+            <Text fontSize="xs" opacity={0.85}>
+              Your rating, games, and tournament history are waiting on the other side.
+            </Text>
+          </Box>
 
           <HStack justify="center" gap={6} flexWrap="wrap" fontSize="sm">
             <Link href="/register">
@@ -92,7 +76,7 @@ export default function LoginEmailPage() {
             </Link>
             <Link href="/contact">
               <Text as="span" opacity={0.8}>
-                Privacy
+                Contact
               </Text>
             </Link>
           </HStack>

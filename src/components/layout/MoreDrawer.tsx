@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { APP_NAME } from "@/lib/appName";
 
 const MORE_LINKS: { href: string; label: string }[] = [
+  { href: "/road-to-master", label: "Road to Master" },
   { href: "/puzzles", label: "Puzzles" },
   { href: "/learn", label: "Learn" },
   { href: "/analysis", label: "Analysis" },

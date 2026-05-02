@@ -73,13 +73,24 @@ export default function PlayBotPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const eloParam = searchParams.get("elo");
+  const fenParam = searchParams.get("fen");
+  const orientationParam = searchParams.get("orientation");
   const elo = useMemo(() => {
     const n = eloParam ? parseInt(eloParam, 10) : 1600;
     return BOT_ELO_PRESETS.includes(n) ? n : 1600;
   }, [eloParam]);
+  const startFen = useMemo(() => {
+    if (!fenParam) return START_FEN;
+    try {
+      new Chess(fenParam);
+      return fenParam;
+    } catch {
+      return START_FEN;
+    }
+  }, [fenParam]);
 
-  const [fen, setFen] = useState(START_FEN);
-  const [orientation] = useState<"white" | "black">("white");
+  const [fen, setFen] = useState(startFen);
+  const [orientation] = useState<"white" | "black">(orientationParam === "black" ? "black" : "white");
   const [botThinking, setBotThinking] = useState(false);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [viewingIndex, setViewingIndex] = useState(0);
@@ -95,12 +106,12 @@ export default function PlayBotPage() {
   const { getBestMove, getEvaluation, ready: stockfishReady, error: stockfishError } = useStockfish(elo);
 
   const displayFen = useMemo(
-    () => buildFenAtMove(START_FEN, moveHistory, viewingIndex),
-    [moveHistory, viewingIndex]
+    () => buildFenAtMove(startFen, moveHistory, viewingIndex),
+    [startFen, moveHistory, viewingIndex]
   );
 
   const turnIsWhite = displayFen.split(" ")[1] === "w";
-  const isUserTurn = turnIsWhite;
+  const isUserTurn = orientation === "white" ? turnIsWhite : !turnIsWhite;
   const atHead = viewingIndex === moveHistory.length;
 
   useEffect(() => {
@@ -172,6 +183,15 @@ export default function PlayBotPage() {
     runBot();
   }, [botThinking, runBot]);
 
+  // Fire the bot on initial load when the loaded FEN starts on the bot's turn.
+  useEffect(() => {
+    if (moveHistory.length > 0 || gameResult || botThinking) return;
+    const turnIsWhite = startFen.split(" ")[1] === "w";
+    const startIsBotTurn = orientation === "white" ? !turnIsWhite : turnIsWhite;
+    if (startIsBotTurn) setBotThinking(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startFen, orientation]);
+
   useEffect(() => {
     try {
       localStorage.setItem(LS_PREMOVE, premoveEnabled ? "1" : "0");
@@ -203,15 +223,20 @@ export default function PlayBotPage() {
 
       const c = new Chess(newFen);
       if (c.isGameOver()) {
-        if (c.isCheckmate()) setGameResult("1-0");
-        else if (c.isStalemate() || c.isDraw()) setGameResult("1/2-1/2");
+        if (c.isCheckmate()) {
+          // The side that just moved (the user, here) delivered mate.
+          setGameResult(orientation === "white" ? "1-0" : "0-1");
+        } else if (c.isStalemate() || c.isDraw()) {
+          setGameResult("1/2-1/2");
+        }
         setGameOverReason(c.isCheckmate() ? "Checkmate" : "Draw");
       } else {
-        const turnIsBlack = newFen.split(" ")[1] === "b";
-        if (turnIsBlack) setBotThinking(true);
+        const newTurnIsWhite = newFen.split(" ")[1] === "w";
+        const isBotTurn = orientation === "white" ? !newTurnIsWhite : newTurnIsWhite;
+        if (isBotTurn) setBotThinking(true);
       }
     },
-    [fen, atHead, gameResult]
+    [fen, atHead, gameResult, orientation]
   );
 
   useEffect(() => {
@@ -227,10 +252,10 @@ export default function PlayBotPage() {
 
   const handleResign = useCallback(() => {
     if (gameResult) return;
-    setGameResult("0-1");
+    setGameResult(orientation === "white" ? "0-1" : "1-0");
     setGameOverReason("Resignation");
     setBotThinking(false);
-  }, [gameResult]);
+  }, [gameResult, orientation]);
 
   const handleOfferDraw = useCallback(() => {
     if (gameResult) return;
@@ -244,13 +269,17 @@ export default function PlayBotPage() {
   }, [fen, gameResult]);
 
   const handleRematch = useCallback(() => {
-    setFen(START_FEN);
+    setFen(startFen);
     setMoveHistory([]);
     setViewingIndex(0);
     setGameResult(null);
     setGameOverReason(null);
     setBotThinking(false);
-  }, []);
+    // If the position to defend / drill starts on the bot's turn, fire it.
+    const startTurnIsWhite = startFen.split(" ")[1] === "w";
+    const startIsBotTurn = orientation === "white" ? !startTurnIsWhite : startTurnIsWhite;
+    if (startIsBotTurn) setBotThinking(true);
+  }, [startFen, orientation]);
 
   const handlePlayNewGame = useCallback(() => {
     router.push("/games");
