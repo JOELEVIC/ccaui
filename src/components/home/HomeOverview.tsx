@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { Box, Container, Heading, Text, VStack, SimpleGrid, Card, Button, HStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { useQuery } from "@apollo/client/react";
@@ -9,11 +8,6 @@ import { useAuth } from "@/lib/auth";
 import { LandingNav } from "./LandingNav";
 import { LandingHeroMinimal } from "./LandingHeroMinimal";
 import { LandingRankingsPreview } from "./LandingRankingsPreview";
-
-const ChessBoard3D = dynamic(() => import("./ChessBoard3D").then((m) => ({ default: m.ChessBoard3D })), {
-  ssr: false,
-  loading: () => <Box h="100vh" w="full" bg="bgDark" display="flex" alignItems="center" justifyContent="center"><Text color="textMuted">Loading...</Text></Box>,
-});
 import { LandingIconFeatures } from "./LandingIconFeatures";
 import { LandingCameroonChess } from "./LandingCameroonChess";
 import { LandingStats } from "./LandingStats";
@@ -26,6 +20,7 @@ import { ChessDivider } from "./ChessDivider";
 import { LandingAcademy } from "./LandingAcademy";
 import { LandingCta } from "./LandingCta";
 import { LandingFooter } from "./LandingFooter";
+import { LandingRoadToMaster } from "./LandingRoadToMaster";
 import { ChessLoader } from "@/components/common/ChessLoader";
 
 const ME_FULL = gql`
@@ -162,17 +157,17 @@ export function HomeOverview() {
       <Box minH="100vh" bg="bgDark" color="white">
         <LandingNav />
         <LandingHeroMinimal />
-        <ChessBoard3D />
-        <LandingRankingsPreview />
         <LandingIconFeatures />
+        <LandingPlayCompete />
+        <LandingRoadToMaster />
+        <LandingRankingsPreview />
         <LandingCameroonChess />
         <LandingStats />
-        <LandingPlayCompete />
         <LandingEventsPreview />
         <LandingCoursesPreview />
+        <ChessDivider />
         <LandingTestimonialsCarousel />
         <LandingGallery />
-        <ChessDivider />
         <LandingAcademy />
         <ChessDivider />
         <LandingCta />
