@@ -34,6 +34,15 @@ const ccaTokens = defineTokens({
     textMuted: { value: "#6b728e" },
     statusSuccess: { value: "#1b3d24" },
     statusWarning: { value: "#5A1F1F" },
+    // ── "The System" palette (Solo-Leveling lobby UI) ─────────────────
+    sysCyan: { value: "#00F0FF" },
+    sysCyanDim: { value: "#0FA8B5" },
+    sysPurple: { value: "#8A2BE2" },
+    sysPurpleDim: { value: "#5C1AA8" },
+    sysEpic: { value: "#B197FC" },
+    sysThreat: { value: "#F06595" },
+    sysVoid: { value: "#050505" },
+    sysGlass: { value: "rgba(10, 11, 14, 0.7)" },
   },
   radii: {
     cca: { value: "10px" },
