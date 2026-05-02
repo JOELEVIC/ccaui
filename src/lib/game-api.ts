@@ -91,6 +91,8 @@ async function ccaRequest<T>(token: string, query: string, variables: Record<str
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      // Required by Apollo Server's CSRF protection.
+      "Apollo-Require-Preflight": "true",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ query, variables }),
