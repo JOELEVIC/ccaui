@@ -122,6 +122,17 @@ interface SystemButtonProps extends Omit<BoxProps, "border" | "as"> {
   /** Renders as an <a> if href provided. */
   href?: string;
   disabled?: boolean;
+  /**
+   * Visual emphasis:
+   *   • undefined / "primary"  — strong glow + pulse, the obvious next action
+   *   • "secondary"            — same chamfer, dimmer glow, no pulse
+   *   • "ghost"                — outline-only, no fill (used for tertiary)
+   */
+  emphasis?: "primary" | "secondary" | "ghost";
+  /** Optional left-side glyph (e.g. "▶", "✦", "←") for a quicker squint read. */
+  glyph?: string;
+  /** When true, takes the full available width — useful in vertical CTA stacks. */
+  full?: boolean;
 }
 
 /** Chamfered "RPG menu" button. */
@@ -131,6 +142,9 @@ export function SystemButton({
   onClick,
   href,
   disabled,
+  emphasis = "primary",
+  glyph,
+  full = false,
   children,
   ...rest
 }: SystemButtonProps) {
@@ -140,33 +154,63 @@ export function SystemButton({
   const padY = size === "xl" ? 5 : size === "lg" ? 4 : 3;
   const fs = size === "xl" ? "lg" : size === "lg" ? "md" : "sm";
 
+  // Squint-test affordance: primary has heavy glow + pulse animation;
+  // secondary is the same chamfer with dimmer halo; ghost is outline-only.
+  const baseFilter =
+    emphasis === "primary"
+      ? `drop-shadow(0 0 10px rgba(${rgb}, 0.55))`
+      : emphasis === "secondary"
+        ? `drop-shadow(0 0 4px rgba(${rgb}, 0.25))`
+        : "none";
+  const hoverFilter =
+    emphasis === "ghost"
+      ? `drop-shadow(0 0 10px rgba(${rgb}, 0.5))`
+      : `drop-shadow(0 0 22px rgba(${rgb}, 0.85)) drop-shadow(0 0 48px rgba(${rgb}, 0.4))`;
+
   const inner = (
     <Box
       style={{ clipPath: BTN_CLIP }}
-      bg={ring}
+      bg={emphasis === "ghost" ? "transparent" : ring}
       transition="all 0.2s"
-      filter={`drop-shadow(0 0 8px rgba(${rgb}, 0.35))`}
+      filter={baseFilter}
+      animation={
+        emphasis === "primary" && !disabled ? "system-cta-pulse 2.6s ease-in-out infinite" : undefined
+      }
       _hover={
         !disabled
           ? {
-              filter: `drop-shadow(0 0 18px rgba(${rgb}, 0.7)) drop-shadow(0 0 36px rgba(${rgb}, 0.35))`,
+              filter: hoverFilter,
               transform: "translateY(-1px)",
+              bg: ring,
             }
+          : undefined
+      }
+      _active={
+        !disabled
+          ? { transform: "translateY(0)", filter: `drop-shadow(0 0 14px rgba(${rgb}, 0.7))` }
           : undefined
       }
       cursor={disabled ? "not-allowed" : "pointer"}
       opacity={disabled ? 0.4 : 1}
+      w={full ? "full" : undefined}
+      display={full ? "block" : "inline-block"}
       onClick={disabled ? undefined : onClick}
       {...rest}
     >
       <Box
         style={{ clipPath: BTN_CLIP_INNER }}
-        bg="sysVoid"
+        bg={emphasis === "ghost" ? "rgba(10,11,14,0.55)" : "sysVoid"}
+        borderWidth={emphasis === "ghost" ? "1px" : undefined}
+        borderColor={emphasis === "ghost" ? ring : undefined}
         px={padX}
         py={padY}
         position="relative"
       >
         <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          gap={glyph ? 2.5 : 0}
           fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
           fontSize={fs}
           fontWeight="700"
@@ -176,7 +220,12 @@ export function SystemButton({
           textAlign="center"
           textShadow={`0 0 6px rgba(${rgb}, 0.6)`}
         >
-          {children}
+          {glyph && (
+            <Box as="span" fontSize={size === "xl" ? "xl" : "md"} lineHeight="1">
+              {glyph}
+            </Box>
+          )}
+          <Box as="span">{children}</Box>
         </Box>
       </Box>
     </Box>
@@ -184,7 +233,7 @@ export function SystemButton({
 
   if (href) {
     return (
-      <a href={href} aria-disabled={disabled} style={{ textDecoration: "none" }}>
+      <a href={href} aria-disabled={disabled} style={{ textDecoration: "none", display: full ? "block" : "inline-block" }}>
         {inner}
       </a>
     );
@@ -262,5 +311,9 @@ export const SYSTEM_KEYFRAMES = `
   0%   { transform: scale(0.6); opacity: 0; filter: blur(20px); }
   60%  { opacity: 1; filter: blur(0); }
   100% { transform: scale(1); opacity: 1; filter: blur(0); }
+}
+@keyframes system-cta-pulse {
+  0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 10px currentColor); }
+  50%      { transform: translateY(-1px); }
 }
 `;

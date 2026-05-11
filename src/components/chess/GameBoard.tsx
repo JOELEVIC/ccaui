@@ -31,15 +31,43 @@ interface GameBoardProps {
   extraSquareStyles?: Record<string, React.CSSProperties>;
   /** Engine / review arrows (from → to). */
   reviewArrows?: Arrow[];
+  /**
+   * Visual variant:
+   *   • "classic" (default) — gray squares, gold highlight (CCA classical)
+   *   • "system"            — dark void squares, cyan/purple highlight (R2M System UI)
+   */
+  variant?: "classic" | "system";
 }
 
-const DARK_SQUARE = "#9ca3af";
-const LIGHT_SQUARE = "#e5e7eb";
-const SELECTED_HIGHLIGHT = "rgba(230, 164, 82, 0.45)";
-const LEGAL_MOVE_HIGHLIGHT = "rgba(230, 164, 82, 0.22)";
-const LAST_MOVE_HIGHLIGHT = "rgba(230, 164, 82, 0.55)";
-const PREMOVE_HIGHLIGHT = "rgba(168, 85, 247, 0.42)";
-const PREMOVE_LEGAL_HIGHLIGHT = "rgba(168, 85, 247, 0.2)";
+/* ── Classic palette — gold accents on neutral gray squares ─────────── */
+const CLASSIC = {
+  darkSq: "#9ca3af",
+  lightSq: "#e5e7eb",
+  selected: "rgba(230, 164, 82, 0.45)",
+  legal: "rgba(230, 164, 82, 0.22)",
+  last: "rgba(230, 164, 82, 0.55)",
+  pre: "rgba(168, 85, 247, 0.42)",
+  preLegal: "rgba(168, 85, 247, 0.2)",
+  notationDark: "#4b5563",
+  notationLight: "#6b7280",
+  borderRadius: 12,
+  ringShadow: "0 0 0 1px rgba(255,255,255,0.12)",
+};
+
+/* ── System palette — chamfered, neon, R2M HUD ──────────────────────── */
+const SYSTEM = {
+  darkSq: "#0e1424",
+  lightSq: "#1a2138",
+  selected: "rgba(0, 240, 255, 0.45)",
+  legal: "rgba(0, 240, 255, 0.22)",
+  last: "rgba(0, 240, 255, 0.55)",
+  pre: "rgba(138, 43, 226, 0.42)",
+  preLegal: "rgba(138, 43, 226, 0.2)",
+  notationDark: "rgba(0, 240, 255, 0.5)",
+  notationLight: "rgba(177, 151, 252, 0.55)",
+  borderRadius: 4,
+  ringShadow: "0 0 0 1px rgba(0,240,255,0.35), 0 0 24px rgba(0,240,255,0.25)",
+};
 
 export function GameBoard({
   fen,
@@ -54,8 +82,15 @@ export function GameBoard({
   onPendingPremove,
   extraSquareStyles,
   reviewArrows,
+  variant = "classic",
 }: GameBoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
+  const palette = variant === "system" ? SYSTEM : CLASSIC;
+  const SELECTED_HIGHLIGHT = palette.selected;
+  const LEGAL_MOVE_HIGHLIGHT = palette.legal;
+  const LAST_MOVE_HIGHLIGHT = palette.last;
+  const PREMOVE_HIGHLIGHT = palette.pre;
+  const PREMOVE_LEGAL_HIGHLIGHT = palette.preLegal;
 
   const game = useMemo(() => {
     const c = new Chess();
@@ -278,6 +313,11 @@ export function GameBoard({
     pendingPremove,
     canPlayNow,
     extraSquareStyles,
+    LAST_MOVE_HIGHLIGHT,
+    LEGAL_MOVE_HIGHLIGHT,
+    PREMOVE_HIGHLIGHT,
+    PREMOVE_LEGAL_HIGHLIGHT,
+    SELECTED_HIGHLIGHT,
   ]);
 
   const allowDragging = canPlayNow || premoveActive;
@@ -299,13 +339,13 @@ export function GameBoard({
               backgroundColor: canPlayNow ? LEGAL_MOVE_HIGHLIGHT : PREMOVE_LEGAL_HIGHLIGHT,
             },
             showNotation: true,
-            darkSquareStyle: { backgroundColor: DARK_SQUARE },
-            lightSquareStyle: { backgroundColor: LIGHT_SQUARE },
-            boardStyle: { borderRadius: 12, boxShadow: "0 0 0 1px rgba(255,255,255,0.12)" },
-            darkSquareNotationStyle: { fill: "#4b5563", fontSize: 11 },
-            lightSquareNotationStyle: { fill: "#6b7280", fontSize: 11 },
-            alphaNotationStyle: { fill: "#6b7280", fontSize: 11 },
-            numericNotationStyle: { fill: "#6b7280", fontSize: 11 },
+            darkSquareStyle: { backgroundColor: palette.darkSq },
+            lightSquareStyle: { backgroundColor: palette.lightSq },
+            boardStyle: { borderRadius: palette.borderRadius, boxShadow: palette.ringShadow },
+            darkSquareNotationStyle: { fill: palette.notationDark, fontSize: 11 },
+            lightSquareNotationStyle: { fill: palette.notationLight, fontSize: 11 },
+            alphaNotationStyle: { fill: palette.notationLight, fontSize: 11 },
+            numericNotationStyle: { fill: palette.notationLight, fontSize: 11 },
             arrows: reviewArrows ?? [],
             clearArrowsOnPositionChange: true,
           }}
