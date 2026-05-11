@@ -127,9 +127,9 @@ export default function PlayBotPage() {
   const {
     getBestMove,
     getEvaluation,
-    error: stockfishError,
     wasmDead,
     warming: engineWarming,
+    lastSource,
   } = useStockfish(elo);
 
   const displayFen = useMemo(
@@ -387,14 +387,28 @@ export default function PlayBotPage() {
             ◇ Engine warming up — first move may take a moment
           </Text>
         )}
-        {wasmDead && stockfishError === "Running on local engine" && (
-          <Text mt={3} fontSize="xs" color="rgba(212,175,55,0.95)" letterSpacing="0.16em" textTransform="uppercase">
-            ◇ Running on local engine — full strength engine unavailable
-          </Text>
-        )}
-        {wasmDead && stockfishError !== "Running on local engine" && (
-          <Text mt={3} fontSize="xs" color="rgba(255,200,120,0.9)" letterSpacing="0.16em" textTransform="uppercase">
-            ◇ Browser engine offline — using server engine
+        {lastSource && (
+          <Text
+            mt={3}
+            fontSize="xs"
+            color={
+              lastSource === "wasm"
+                ? "rgba(212,175,55,0.95)"
+                : lastSource === "backend"
+                  ? "rgba(0,240,255,0.9)"
+                  : "rgba(255,200,120,0.9)"
+            }
+            letterSpacing="0.18em"
+            textTransform="uppercase"
+            fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
+            fontWeight="700"
+          >
+            ◇ Engine ·{" "}
+            {lastSource === "wasm"
+              ? "Stockfish (browser)"
+              : lastSource === "backend"
+                ? "Server engine"
+                : "Local fallback"}
           </Text>
         )}
       </Box>

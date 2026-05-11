@@ -382,6 +382,10 @@ class EngineDriver {
  *      a flag that may never flip.
  * ─────────────────────────────────────────────────────────────────── */
 
+/** Where the last bot move came from — surfaced in the UI so the user
+ *  can see at a glance which engine is doing the work. */
+export type EngineSource = "wasm" | "backend" | "local" | null;
+
 export function useStockfish(elo: number) {
   const driverRef = useRef<EngineDriver | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -389,6 +393,8 @@ export function useStockfish(elo: number) {
   const [wasmDead, setWasmDead] = useState(false);
   /** True while the WASM is downloading + compiling and hasn't said readyok yet. */
   const [warming, setWarming] = useState(false);
+  /** Which engine produced the most recent move. */
+  const [lastSource, setLastSource] = useState<EngineSource>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -459,17 +465,6 @@ export function useStockfish(elo: number) {
     driverRef.current?.setElo(elo);
   }, [elo]);
 
-  /** Final synchronous local fallback when WASM + backend are both
-   *  unreachable. Pure JS negamax — always returns a legal move. */
-  const localFallback = useCallback((fen: string): string | null => {
-    const move = getBestMoveJS(fen, elo);
-    if (move) {
-      // eslint-disable-next-line no-console
-      console.info("[engine] move from local JS engine");
-    }
-    return move;
-  }, [elo]);
-
   const getBestMove = useCallback(
     async (fen: string): Promise<string | null> => {
       setError(null);
@@ -478,7 +473,12 @@ export function useStockfish(elo: number) {
       if (driver && !wasmDead && !driver.isDead()) {
         try {
           const move = await driver.bestMove(fen);
-          if (move) return move;
+          if (move) {
+            // eslint-disable-next-line no-console
+            console.info(`[engine] move via WASM: ${move}`);
+            setLastSource("wasm");
+            return move;
+          }
         } catch (err) {
           // eslint-disable-next-line no-console
           console.warn("[engine] WASM bestMove failed, falling back", err);
@@ -487,17 +487,28 @@ export function useStockfish(elo: number) {
       }
       // 2. Backend.
       const backendMove = await backendBestMove(fen, elo);
-      if (backendMove) return backendMove;
-      // 3. Local JS engine — last line of defence, always returns a legal move.
-      const localMove = localFallback(fen);
+      if (backendMove) {
+        // eslint-disable-next-line no-console
+        console.info(`[engine] move via backend: ${backendMove}`);
+        setLastSource("backend");
+        return backendMove;
+      }
+      // 3. Local JS engine — last line of defence, always returns a legal move
+      //    unless the game is genuinely over.
+      const localMove = getBestMoveJS(fen, elo);
       if (localMove) {
-        setError("Running on local engine");
+        // eslint-disable-next-line no-console
+        console.info(`[engine] move via local JS: ${localMove}`);
+        setLastSource("local");
+        if (!error) setError("Running on local engine");
         return localMove;
       }
+      // eslint-disable-next-line no-console
+      console.warn("[engine] all engines returned null — game may be over");
       setError("Engine unavailable");
       return null;
     },
-    [wasmDead, elo, localFallback],
+    [wasmDead, elo, error],
   );
 
   const getEvaluation = useCallback(
@@ -515,5 +526,5 @@ export function useStockfish(elo: number) {
     [wasmDead],
   );
 
-  return { getBestMove, getEvaluation, ready, error, wasmDead, warming };
+  return { getBestMove, getEvaluation, ready, error, wasmDead, warming, lastSource };
 }
