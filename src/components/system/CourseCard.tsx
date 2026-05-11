@@ -391,8 +391,8 @@ function FeatureCard(p: {
             </Text>
           )}
         </VStack>
-        <Box flexShrink={0}>
-          <BigEnterCta accentVar={p.accentVar} rgb={p.rgb} />
+        <Box flexShrink={0} display={{ base: "none", md: "block" }}>
+          <EnterPill accentVar={p.accentVar} rgb={p.rgb} />
         </Box>
       </HStack>
     </Box>
@@ -433,7 +433,7 @@ function GlyphBlock({
         bg={accentVar}
         style={{ filter: `drop-shadow(0 0 10px rgba(${rgb}, 0.7))` }}
       />
-      <Box position="absolute" inset="2px" className="sys-clip-hex" bg="sys.void" />
+      <Box position="absolute" inset="2px" className="sys-clip-hex" bg="var(--sys-void)" />
       <Text
         position="relative"
         zIndex={1}
@@ -506,36 +506,6 @@ function EnterPill({
   );
 }
 
-function BigEnterCta({ accentVar, rgb }: { accentVar: string; rgb: string }) {
-  return (
-    <Box
-      px={6}
-      py={3}
-      bg={accentVar}
-      className="sys-clip-panel-sm"
-      style={{ boxShadow: `0 0 22px rgba(${rgb}, 0.7), 0 0 44px rgba(${rgb}, 0.35)` }}
-    >
-      <Box className="sys-clip-panel-sm" bg="sys.void" px={5} py={2.5}>
-        <HStack gap={2}>
-          <Text fontSize="lg" color={accentVar} lineHeight="1" style={{ textShadow: `0 0 8px ${accentVar}` }}>
-            ▶
-          </Text>
-          <Text
-            fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-            fontSize="md"
-            fontWeight="800"
-            color={accentVar}
-            letterSpacing="0.22em"
-            textTransform="uppercase"
-            style={{ textShadow: `0 0 6px ${accentVar}` }}
-          >
-            Enter Gate
-          </Text>
-        </HStack>
-      </Box>
-    </Box>
-  );
-}
 
 function glowAccentForVar(v: string): GlowAccent {
   if (v.includes("cyan")) return "cyan";

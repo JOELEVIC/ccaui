@@ -155,7 +155,7 @@ function GuildRow({
           justifyContent="center"
         >
           <Box className="sys-clip-hex" position="absolute" inset={0} bg={guild.banner} filter={`drop-shadow(0 0 6px ${guild.banner})`} />
-          <Box className="sys-clip-hex" position="absolute" inset="2px" bg="sys.void" />
+          <Box className="sys-clip-hex" position="absolute" inset="2px" bg="var(--sys-void)" />
           <Text
             position="relative"
             fontFamily="var(--font-playfair), Georgia, serif"

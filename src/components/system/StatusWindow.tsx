@@ -246,7 +246,7 @@ function Header({
             bg={tier.color}
             filter={`drop-shadow(0 0 14px ${tier.color}aa)`}
           />
-          <Box position="absolute" inset="2px" className="sys-clip-hex" bg="sys.void" />
+          <Box position="absolute" inset="2px" className="sys-clip-hex" bg="var(--sys-void)" />
           <Box position="absolute" inset={0} display="flex" alignItems="center" justifyContent="center">
             <Text
               fontFamily="var(--font-playfair), Georgia, serif"

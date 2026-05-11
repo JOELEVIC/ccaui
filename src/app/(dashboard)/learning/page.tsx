@@ -1,12 +1,13 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { Box, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { useAuth } from "@/lib/auth";
 import { StreakCounter } from "@/components/dashboard";
-import { defaultViewport, staggerContainer, staggerChild } from "@/lib/animations";
+import { staggerContainer, staggerChild } from "@/lib/animations";
 import { CourseCard } from "@/components/system/CourseCard";
 import {
   SYSTEM_KEYFRAMES,
@@ -95,57 +96,26 @@ export default function LearningPage() {
           </Section>
         )}
 
-        {/* Puzzles */}
+        {/* Puzzles — fixed-height scroll, fade top/bottom, ~3 visible */}
         <Section title="Puzzles" accent="cyan">
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={defaultViewport}
-          >
-            <VStack align="stretch" gap={3}>
-              {puzzles.slice(0, 20).map((p, i) => (
-                <motion.div key={p.id} variants={staggerChild}>
-                  <CourseCard
-                    href={`/learning/puzzle/${p.id}`}
-                    variant="module"
-                    accent={i % 5 === 0 ? "threat" : "cyan"}
-                    tag={`#${p.id.slice(-4)}`}
-                    title={p.theme?.length ? toTitle(p.theme[0] ?? "Tactical motif") : "Tactical motif"}
-                    description={
-                      p.theme?.length
-                        ? p.theme.slice(0, 3).map(toTitle).join(" · ")
-                        : "Find the only move."
-                    }
-                    meta={`Elo ${p.difficulty}`}
-                    difficulty={Math.min(3, Math.max(1, Math.ceil((p.difficulty ?? 1000) / 600)))}
-                    glyph={i % 5 === 0 ? "✦" : "◇"}
-                  />
-                </motion.div>
-              ))}
-              {puzzles.length === 0 && !dailyPuzzle && (
-                <Box
-                  p={5}
-                  bg="rgba(10,11,14,0.55)"
-                  borderWidth="1px"
-                  borderColor="rgba(255,255,255,0.1)"
-                  className="sys-clip-panel"
-                >
-                  <Text color="textMuted">No puzzles available right now.</Text>
-                </Box>
-              )}
-            </VStack>
-          </motion.div>
+          {puzzles.length === 0 ? (
+            <Box
+              p={5}
+              bg="rgba(10,11,14,0.55)"
+              borderWidth="1px"
+              borderColor="rgba(255,255,255,0.1)"
+              className="sys-clip-panel"
+            >
+              <Text color="textMuted">No puzzles available right now.</Text>
+            </Box>
+          ) : (
+            <PuzzleScroller puzzles={puzzles.slice(0, 20)} />
+          )}
         </Section>
 
         {/* Openings */}
         <Section title="Openings" accent="purple">
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={defaultViewport}
-          >
+          <motion.div variants={staggerContainer} initial="hidden" animate="visible">
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={3}>
               {OPENINGS.map((o) => (
                 <motion.div key={o.title} variants={staggerChild}>
@@ -166,12 +136,7 @@ export default function LearningPage() {
 
         {/* Endgames */}
         <Section title="Endgames" accent="gold">
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={defaultViewport}
-          >
+          <motion.div variants={staggerContainer} initial="hidden" animate="visible">
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={3}>
               {ENDGAMES.map((e) => (
                 <motion.div key={e.title} variants={staggerChild}>
@@ -263,6 +228,103 @@ function toTitle(s: string): string {
   return s
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/* ─────────── PuzzleScroller (fixed-height, fade, center-zoom) ─────────── */
+
+const PUZZLE_CARD_PX = 92; // approximate row height incl. gap
+const VISIBLE_CARDS = 3;
+
+function PuzzleScroller({
+  puzzles,
+}: {
+  puzzles: Array<{ id: string; difficulty: number; theme: string[] }>;
+}) {
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const [centerKey, setCenterKey] = useState<string | null>(puzzles[0]?.id ?? null);
+
+  // Recompute which card is the visual centre as the user scrolls.
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const update = () => {
+      const containerRect = el.getBoundingClientRect();
+      const mid = containerRect.top + containerRect.height / 2;
+      let closestKey: string | null = null;
+      let closestDist = Infinity;
+      el.querySelectorAll<HTMLDivElement>("[data-puzzle-id]").forEach((child) => {
+        const r = child.getBoundingClientRect();
+        const c = r.top + r.height / 2;
+        const d = Math.abs(c - mid);
+        if (d < closestDist) {
+          closestDist = d;
+          closestKey = child.dataset.puzzleId ?? null;
+        }
+      });
+      if (closestKey) setCenterKey(closestKey);
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    return () => el.removeEventListener("scroll", update);
+  }, [puzzles]);
+
+  return (
+    <Box
+      position="relative"
+      h={`${PUZZLE_CARD_PX * VISIBLE_CARDS}px`}
+      overflow="hidden"
+      style={{
+        // Soft fade at top + bottom of the scroller — the center reads stronger.
+        maskImage:
+          "linear-gradient(180deg, transparent 0%, black 14%, black 86%, transparent 100%)",
+        WebkitMaskImage:
+          "linear-gradient(180deg, transparent 0%, black 14%, black 86%, transparent 100%)",
+      }}
+    >
+      <Box
+        ref={scrollerRef}
+        h="full"
+        overflowY="auto"
+        px={1}
+        py={`${PUZZLE_CARD_PX}px`}
+        style={{ scrollSnapType: "y proximity" }}
+      >
+        <VStack align="stretch" gap={3}>
+          {puzzles.map((p, i) => {
+            const isCenter = centerKey === p.id;
+            return (
+              <Box
+                key={p.id}
+                data-puzzle-id={p.id}
+                style={{
+                  scrollSnapAlign: "center",
+                  transform: isCenter ? "scale(1.02)" : "scale(0.96)",
+                  opacity: isCenter ? 1 : 0.65,
+                  transition: "transform 0.25s ease, opacity 0.25s ease",
+                }}
+              >
+                <CourseCard
+                  href={`/learning/puzzle/${p.id}`}
+                  variant="module"
+                  accent={i % 5 === 0 ? "threat" : "cyan"}
+                  tag={`#${p.id.slice(-4)}`}
+                  title={p.theme?.length ? toTitle(p.theme[0] ?? "Tactical motif") : "Tactical motif"}
+                  description={
+                    p.theme?.length
+                      ? p.theme.slice(0, 3).map(toTitle).join(" · ")
+                      : "Find the only move."
+                  }
+                  meta={`Elo ${p.difficulty}`}
+                  difficulty={Math.min(3, Math.max(1, Math.ceil((p.difficulty ?? 1000) / 600)))}
+                  glyph={i % 5 === 0 ? "✦" : "◇"}
+                />
+              </Box>
+            );
+          })}
+        </VStack>
+      </Box>
+    </Box>
+  );
 }
 
 /* ─────────── Static content ─────────── */

@@ -416,7 +416,7 @@ function PieceBtn({
       bg="rgba(0,240,255,0.06)"
       borderWidth="1px"
       borderColor={disabled ? "whiteAlpha.200" : "rgba(0,240,255,0.35)"}
-      _hover={!disabled ? { borderColor: "sys.cyan", bg: "rgba(0,240,255,0.14)" } : undefined}
+      _hover={!disabled ? { borderColor: "var(--sys-cyan)", bg: "rgba(0,240,255,0.14)" } : undefined}
       transition="all 0.15s"
       cursor={disabled ? "not-allowed" : "pointer"}
       opacity={disabled ? 0.4 : 1}

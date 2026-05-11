@@ -152,43 +152,110 @@ export default function DashboardPage() {
         </Section>
       )}
 
-      {/* Road to Master — demoted */}
+      {/* Road to Master — bold portal card */}
       <Section title="Road to Master" mt={{ base: 7, md: 9 }}>
-        <GlassCard href="/road-to-master" goldWash>
-          <HStack px={{ base: 5, md: 6 }} py={{ base: 4, md: 5 }} justify="space-between" align="center" gap={4}>
-            <HStack gap={4} align="center">
-              <Box
-                w="44px"
-                h="44px"
-                borderRadius="6px"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                bg="rgba(212,175,55,0.1)"
-                borderWidth="1px"
-                borderColor="var(--lux-gold-muted)"
-                color="var(--lux-gold)"
-                fontSize="xl"
-                flexShrink={0}
-              >
-                ✦
-              </Box>
-              <Box>
-                <Text
-                  fontFamily="var(--font-playfair), Georgia, serif"
-                  fontSize="lg"
-                  color="var(--lux-text-primary)"
-                  fontWeight="600"
-                  letterSpacing="0.03em"
+        <GlassCard href="/road-to-master" goldWash hero>
+          <Box position="relative" px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }} overflow="hidden">
+            {/* Background HUD grid */}
+            <Box
+              position="absolute"
+              inset={0}
+              opacity={0.05}
+              backgroundImage="linear-gradient(rgba(0,240,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,0.6) 1px, transparent 1px)"
+              backgroundSize="48px 48px"
+              pointerEvents="none"
+            />
+            {/* Diagonal cyan→purple sheen — hints at the System palette inside */}
+            <Box
+              position="absolute"
+              inset={0}
+              pointerEvents="none"
+              style={{
+                background:
+                  "radial-gradient(ellipse at 90% 20%, rgba(0,240,255,0.12) 0%, transparent 55%), radial-gradient(ellipse at 20% 90%, rgba(138,43,226,0.15) 0%, transparent 55%)",
+              }}
+            />
+            <HStack
+              justify="space-between"
+              align="center"
+              gap={{ base: 4, md: 6 }}
+              flexWrap={{ base: "wrap", md: "nowrap" }}
+              position="relative"
+              zIndex={1}
+            >
+              <HStack gap={{ base: 4, md: 5 }} align="center" flex={1} minW={0}>
+                {/* Hexagonal R2M sigil */}
+                <Box
+                  position="relative"
+                  w={{ base: "56px", md: "68px" }}
+                  h={{ base: "56px", md: "68px" }}
+                  flexShrink={0}
                 >
-                  Quests · status · levels
-                </Text>
+                  <Box
+                    position="absolute"
+                    inset={0}
+                    className="sys-clip-hex"
+                    bg="var(--lux-gold)"
+                    style={{ filter: "drop-shadow(0 0 12px rgba(212,175,55,0.55))" }}
+                  />
+                  <Box position="absolute" inset="2px" className="sys-clip-hex" bg="var(--lux-obsidian)" />
+                  <Box
+                    position="absolute"
+                    inset={0}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Text
+                      fontFamily="var(--font-playfair), Georgia, serif"
+                      fontSize={{ base: "2xl", md: "3xl" }}
+                      color="var(--lux-gold)"
+                      fontWeight="700"
+                      style={{ textShadow: "0 0 12px var(--lux-gold)" }}
+                    >
+                      ◆
+                    </Text>
+                  </Box>
+                </Box>
+
+                <Box minW={0}>
+                  <Text
+                    fontFamily="var(--font-inter), sans-serif"
+                    fontSize="2xs"
+                    fontWeight="700"
+                    color="var(--lux-gold)"
+                    letterSpacing="0.28em"
+                    textTransform="uppercase"
+                    style={{ textShadow: "0 0 4px rgba(212,175,55,0.5)" }}
+                  >
+                    The Path
+                  </Text>
+                  <Text
+                    fontFamily="var(--font-playfair), Georgia, serif"
+                    fontSize={{ base: "xl", md: "2xl" }}
+                    color="var(--lux-text-primary)"
+                    fontWeight="700"
+                    letterSpacing="0.02em"
+                    mt={0.5}
+                    lineHeight="1.05"
+                  >
+                    Road to <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>Master</Text>
+                  </Text>
+                  <HStack mt={2} gap={2} flexWrap="wrap">
+                    <BadgePill>Status</BadgePill>
+                    <BadgePill>Quests</BadgePill>
+                    <BadgePill>Dungeon</BadgePill>
+                  </HStack>
+                </Box>
+              </HStack>
+
+              <Box flexShrink={0}>
+                <LuxuryButton variant="gold" size="md" glyph="▸">
+                  Enter
+                </LuxuryButton>
               </Box>
             </HStack>
-            <LuxuryButton variant="outline" size="sm" glyph="▸">
-              Open
-            </LuxuryButton>
-          </HStack>
+          </Box>
         </GlassCard>
       </Section>
 
@@ -400,6 +467,30 @@ function ProToggle({ on, onToggle }: { on: boolean; onToggle: (on: boolean) => v
           Pro
         </Text>
       </HStack>
+    </Box>
+  );
+}
+
+function BadgePill({ children }: { children: React.ReactNode }) {
+  return (
+    <Box
+      px={2.5}
+      py={0.5}
+      borderRadius="999px"
+      bg="rgba(212,175,55,0.08)"
+      borderWidth="1px"
+      borderColor="rgba(212,175,55,0.3)"
+    >
+      <Text
+        fontFamily="var(--font-inter), sans-serif"
+        fontSize="2xs"
+        fontWeight="600"
+        letterSpacing="0.18em"
+        textTransform="uppercase"
+        color="var(--lux-text-secondary)"
+      >
+        {children}
+      </Text>
     </Box>
   );
 }

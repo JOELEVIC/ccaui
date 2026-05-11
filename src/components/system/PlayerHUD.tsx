@@ -14,6 +14,11 @@ interface PlayerHUDProps {
   xpForLevel: number;
 }
 
+/**
+ * Top-left lobby HUD — single-row identity with rank diamond, username,
+ * and a thin XP bar below. Hierarchy: name first, rank pill second,
+ * XP last. No competing labels.
+ */
 export function PlayerHUD({
   username,
   tier,
@@ -25,13 +30,13 @@ export function PlayerHUD({
   const pct = Math.min(100, (xpInLevel / xpForLevel) * 100);
 
   return (
-    <SystemPanel accent="cyan" glow="soft" brackets w={{ base: "full", md: "320px" }} p={4}>
-      <HStack gap={3} align="flex-start">
+    <SystemPanel accent="cyan" glow="soft" w={{ base: "full", md: "300px" }} p={4}>
+      <HStack gap={3} align="center">
         {/* Rank diamond */}
         <Box
           position="relative"
-          w="56px"
-          h="56px"
+          w="42px"
+          h="42px"
           flexShrink={0}
           style={{
             clipPath:
@@ -41,87 +46,92 @@ export function PlayerHUD({
           display="flex"
           alignItems="center"
           justifyContent="center"
-          filter={`drop-shadow(0 0 12px ${tier.color}aa)`}
+          filter={`drop-shadow(0 0 10px ${tier.color}aa)`}
         >
           <Box
             position="absolute"
-            inset="2px"
+            inset="1.5px"
             style={{
               clipPath:
                 "polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)",
             }}
-            bg="sysVoid"
+            bg="var(--sys-void)"
           />
           <Text
             position="relative"
             zIndex={1}
             fontWeight="800"
-            fontSize="xl"
+            fontSize="md"
             color={tier.color}
             fontFamily="var(--font-playfair), Georgia, serif"
-            letterSpacing="0.04em"
-            textShadow={`0 0 10px ${tier.color}`}
+            textShadow={`0 0 8px ${tier.color}`}
           >
             {tier.rank}
           </Text>
         </Box>
-        <VStack align="stretch" flex={1} gap={1}>
-          <SystemLabel accent="cyan">Hunter</SystemLabel>
-          <Text color="textPrimary" fontWeight="700" fontFamily="var(--font-playfair), Georgia, serif" fontSize="lg" lineHeight="1">
+
+        <VStack align="flex-start" gap={0} flex={1} minW={0}>
+          <Text
+            color="textPrimary"
+            fontWeight="700"
+            fontFamily="var(--font-playfair), Georgia, serif"
+            fontSize="lg"
+            lineHeight="1.1"
+            maxW="170px"
+            lineClamp={1}
+          >
             {username}
           </Text>
-          <HStack gap={3} pt={1}>
-            <Box>
-              <Text fontSize="2xs" color="textMuted" letterSpacing="wider" textTransform="uppercase">
-                LV
-              </Text>
-              <Text color="sysCyan" fontWeight="800" fontSize="md" lineHeight="1">
-                {level}
-              </Text>
-            </Box>
-            <Box>
-              <Text fontSize="2xs" color="textMuted" letterSpacing="wider" textTransform="uppercase">
-                Rating
-              </Text>
-              <Text color="textPrimary" fontWeight="700" fontSize="md" lineHeight="1">
-                {rating}
-              </Text>
-            </Box>
-            <Box>
-              <Text fontSize="2xs" color="textMuted" letterSpacing="wider" textTransform="uppercase">
-                Class
-              </Text>
-              <Text color="sysEpic" fontWeight="700" fontSize="md" lineHeight="1">
-                {tier.label}
-              </Text>
-            </Box>
+          <HStack gap={2} mt={0.5} align="center">
+            <Text
+              fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
+              fontSize="2xs"
+              color="sysCyan"
+              fontWeight="700"
+              letterSpacing="0.18em"
+              textTransform="uppercase"
+            >
+              Lv {level}
+            </Text>
+            <Box w="2px" h="10px" bg="rgba(255,255,255,0.12)" />
+            <Text
+              fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
+              fontSize="2xs"
+              color="textSecondary"
+              fontWeight="700"
+              letterSpacing="0.18em"
+              textTransform="uppercase"
+            >
+              {rating}
+            </Text>
           </HStack>
         </VStack>
       </HStack>
 
-      {/* XP bar */}
-      <Box mt={4}>
-        <HStack justify="space-between" mb={1.5}>
-          <Text fontSize="2xs" color="textMuted" letterSpacing="0.18em" textTransform="uppercase">
-            XP
-          </Text>
-          <Text fontSize="2xs" color="sysCyan" fontWeight="700" fontFamily="var(--font-oswald), var(--font-inter), sans-serif">
-            {xpInLevel} / {xpForLevel}
+      {/* XP bar — single visual hierarchy, no surrounding labels */}
+      <Box mt={3.5}>
+        <HStack justify="space-between" mb={1}>
+          <SystemLabel accent="cyan">XP</SystemLabel>
+          <Text
+            fontSize="2xs"
+            color="textMuted"
+            fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
+            letterSpacing="0.12em"
+          >
+            {xpInLevel}/{xpForLevel}
           </Text>
         </HStack>
         <Box
           position="relative"
-          h="6px"
+          h="4px"
           bg="rgba(0,240,255,0.08)"
           borderRadius="2px"
           overflow="visible"
-          borderWidth="1px"
-          borderColor="rgba(0,240,255,0.25)"
         >
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
-            transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             style={{
               position: "absolute",
               top: 0,
@@ -129,24 +139,7 @@ export function PlayerHUD({
               left: 0,
               background:
                 "linear-gradient(90deg, var(--chakra-colors-sysCyanDim) 0%, var(--chakra-colors-sysCyan) 100%)",
-              boxShadow:
-                "0 0 6px var(--chakra-colors-sysCyan), 0 0 14px rgba(0,240,255,0.5)",
-            }}
-          />
-          {/* glowing tip */}
-          <motion.div
-            initial={{ left: 0, opacity: 0 }}
-            animate={{ left: `${pct}%`, opacity: 1 }}
-            transition={{ duration: 1.0, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              position: "absolute",
-              top: "-3px",
-              width: "10px",
-              height: "12px",
-              transform: "translateX(-5px)",
-              background: "var(--chakra-colors-sysCyan)",
-              boxShadow: "0 0 10px var(--chakra-colors-sysCyan), 0 0 24px rgba(0,240,255,0.7)",
-              clipPath: "polygon(50% 0, 100% 50%, 50% 100%, 0 50%)",
+              boxShadow: "0 0 6px var(--chakra-colors-sysCyan)",
             }}
           />
         </Box>
