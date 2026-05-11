@@ -7,7 +7,6 @@ import { GameBoard } from "@/components/chess/GameBoard";
 import {
   ChessWatermark,
   GlassCard,
-  GoldRule,
   LuxuryButton,
   LuxuryEyebrow,
   LuxuryHeading,
@@ -42,27 +41,19 @@ export default function PlayLocalPage() {
       <ChessWatermark piece="rook" size={380} opacity={0.035} position={{ top: "40px", right: "-50px" }} />
 
       <Box mb={{ base: 5, md: 7 }} position="relative" zIndex={1}>
-        <HStack justify="space-between" align="flex-end" flexWrap="wrap" gap={4}>
-          <Box>
-            <LuxuryEyebrow>At the Board · Local</LuxuryEyebrow>
-            <Box mt={2}>
-              <LuxuryHeading size="lg">
-                Pass <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>and play</Text>.
-              </LuxuryHeading>
-            </Box>
-            <Box mt={3}>
-              <GoldRule />
-            </Box>
-          </Box>
-          <HStack gap={3} flexWrap="wrap">
+        <HStack justify="space-between" align="center" flexWrap="wrap" gap={4}>
+          <LuxuryHeading size="lg">
+            <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>Local</Text>
+          </LuxuryHeading>
+          <HStack gap={2} flexWrap="wrap">
             <LuxuryButton variant="ghost" size="sm" glyph="↺" onClick={() => setOrientation((o) => (o === "white" ? "black" : "white"))}>
-              Flip board
+              Flip
             </LuxuryButton>
             <LuxuryButton variant="gold" size="sm" glyph="↻" onClick={handleNewGame}>
-              New game
+              New
             </LuxuryButton>
             <LuxuryButton variant="ghost" size="sm" glyph="←" href="/games">
-              Back to Play
+              Back
             </LuxuryButton>
           </HStack>
         </HStack>

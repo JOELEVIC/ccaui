@@ -10,7 +10,6 @@ import { CREATE_GAME } from "@/graphql/mutations/games";
 import {
   ChessWatermark,
   GlassCard,
-  GoldRule,
   LuxuryButton,
   LuxuryEyebrow,
   LuxuryHeading,
@@ -106,16 +105,13 @@ export default function GamesPage() {
       <ChessWatermark piece="queen" size={420} opacity={0.035} position={{ top: "-40px", right: "-60px" }} />
 
       {/* Header */}
-      <Box mb={{ base: 6, md: 9 }} position="relative" zIndex={1}>
-        <LuxuryEyebrow>The Arena</LuxuryEyebrow>
-        <Box mt={2}>
+      <Box mb={{ base: 5, md: 7 }} position="relative" zIndex={1}>
+        <HStack align="center" gap={4}>
           <LuxuryHeading size="2xl">
-            Sit down to a <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>game</Text>.
+            <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>Play</Text>
           </LuxuryHeading>
-        </Box>
-        <Box mt={3}>
-          <GoldRule wide />
-        </Box>
+          <Box flex={1} className="lux-divider" />
+        </HStack>
       </Box>
 
       {/* Mode tabs */}

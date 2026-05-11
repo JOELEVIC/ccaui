@@ -315,80 +315,70 @@ export default function PlayBotPage() {
 
       {/* Header strip */}
       <Box mb={{ base: 5, md: 7 }} position="relative" zIndex={1}>
-        <HStack justify="space-between" align="flex-end" flexWrap="wrap" gap={4}>
-          <Box>
-            <LuxuryEyebrow>Training · Solo Sparring</LuxuryEyebrow>
-            <HStack mt={2} gap={3} align="center">
-              <LuxuryHeading size="lg">
-                vs. <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>Engine</Text>
-              </LuxuryHeading>
-              <Box
-                px={3}
-                py={1.5}
-                borderRadius="999px"
-                bg="var(--lux-glass-surface)"
-                borderWidth="1px"
-                borderColor="var(--lux-glass-border)"
-                style={{ backdropFilter: "blur(10px)" }}
+        <HStack justify="space-between" align="center" flexWrap="wrap" gap={4}>
+          <HStack gap={3} align="center" flexWrap="wrap">
+            <LuxuryHeading size="lg">
+              <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>Engine</Text>
+            </LuxuryHeading>
+            <Box
+              px={3}
+              py={1.5}
+              borderRadius="999px"
+              bg="var(--lux-glass-surface)"
+              borderWidth="1px"
+              borderColor="var(--lux-glass-border)"
+              style={{ backdropFilter: "blur(10px)" }}
+            >
+              <Text
+                fontFamily="var(--font-inter), sans-serif"
+                fontSize="xs"
+                fontWeight="700"
+                letterSpacing="0.22em"
+                textTransform="uppercase"
+                color="var(--lux-gold)"
               >
-                <Text
-                  fontFamily="var(--font-inter), sans-serif"
-                  fontSize="xs"
-                  fontWeight="600"
-                  letterSpacing="0.22em"
-                  textTransform="uppercase"
-                  color="var(--lux-gold)"
-                >
-                  {elo} Elo
-                </Text>
-              </Box>
-              {botThinking && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <HStack gap={2} align="center">
-                    <Box
-                      w="6px"
-                      h="6px"
-                      borderRadius="full"
-                      bg="var(--lux-gold)"
-                      style={{ boxShadow: "0 0 6px var(--lux-gold)", animation: "pulse 1.2s ease-in-out infinite" }}
-                    />
-                    <Text fontSize="xs" className="lux-text-muted" letterSpacing="0.18em" textTransform="uppercase">
-                      Engine deliberating
-                    </Text>
-                  </HStack>
-                </motion.div>
-              )}
-            </HStack>
-            <Box mt={3}>
-              <GoldRule />
+                {elo}
+              </Text>
             </Box>
-          </Box>
+            {botThinking && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.25 }}
+                aria-label="Engine thinking"
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: "var(--lux-gold)",
+                  boxShadow: "0 0 8px var(--lux-gold)",
+                  animation: "pulse 1.2s ease-in-out infinite",
+                }}
+              />
+            )}
+          </HStack>
 
-          <HStack gap={3} flexWrap="wrap" align="center">
+          <HStack gap={2} flexWrap="wrap" align="center">
             <ToggleChip
               label="Premove"
               on={premoveEnabled}
               onToggle={() => setPremoveEnabled((v) => !v)}
             />
             <ToggleChip
-              label={showAnalysis ? "Analysis On" : "Analysis"}
+              label="Eval"
               on={showAnalysis}
               onToggle={() => setShowAnalysis((s) => !s)}
               disabled={!!gameResult}
             />
             <LuxuryButton variant="ghost" size="sm" glyph="←" href="/games">
-              Back to Play
+              Back
             </LuxuryButton>
           </HStack>
         </HStack>
 
         {stockfishError && (
           <Text mt={3} fontSize="xs" color="rgba(240,101,149,0.9)" letterSpacing="0.16em" textTransform="uppercase">
-            ⚠ Engine unavailable — falling back to random moves
+            ⚠ Engine unavailable
           </Text>
         )}
       </Box>

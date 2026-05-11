@@ -79,9 +79,6 @@ export default function LearningPage() {
             >
               Strategy Hall
             </Text>
-            <Text mt={2} fontSize="sm" color="textSecondary">
-              Three halls. Every drill cleared sharpens an attribute.
-            </Text>
           </Box>
           <StreakCounter count={streak} size="md" />
         </HStack>
