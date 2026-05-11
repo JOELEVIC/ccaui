@@ -9,6 +9,7 @@ import {
   SystemLabel,
   SYSTEM_KEYFRAMES,
 } from "./SystemPrimitives";
+import { ClassicBoard, fenFromMap } from "./ClassicBoard";
 
 /**
  * Memory Echo — visualization training.
@@ -52,22 +53,24 @@ const PIECE_GLYPH: Record<Piece, string> = {
 };
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;
-const RANKS = [8, 7, 6, 5, 4, 3, 2, 1] as const;
 
 function boardFromFen(fen: string): Board {
-  const c = new Chess(fen);
-  const out: Board = {};
-  // chess.js board() returns rank 8 → rank 1
-  c.board().forEach((row, rIdx) => {
-    row.forEach((sq, fIdx) => {
-      if (!sq) return;
-      const file = FILES[fIdx];
-      const rank = 8 - rIdx;
-      const piece = (sq.color === "w" ? sq.type.toUpperCase() : sq.type) as Piece;
-      out[`${file}${rank}`] = piece;
+  try {
+    const c = new Chess(fen);
+    const out: Board = {};
+    c.board().forEach((row, rIdx) => {
+      row.forEach((sq, fIdx) => {
+        if (!sq) return;
+        const file = FILES[fIdx];
+        const rank = 8 - rIdx;
+        const piece = (sq.color === "w" ? sq.type.toUpperCase() : sq.type) as Piece;
+        out[`${file}${rank}`] = piece;
+      });
     });
-  });
-  return out;
+    return out;
+  } catch {
+    return {};
+  }
 }
 
 type Phase = "preview" | "recall" | "review";
@@ -166,20 +169,18 @@ export function MemoryEcho({
             flexWrap={{ base: "wrap", lg: "nowrap" }}
             justify={{ base: "center", lg: "flex-start" }}
           >
-            <BoardSvg
+            <MemoryBoard
               board={phase === "preview" ? target.board : recall}
               target={target.board}
               phase={phase}
               selected={selected}
-              onSelectSquare={(sq, e) => {
+              onSquareClick={(sq) => {
                 if (phase !== "recall") return;
-                if (e?.shiftKey || e?.metaKey) {
-                  clearSquare(sq);
-                  return;
-                }
                 setSelected((prev) => (prev === sq ? null : sq));
               }}
-              onRightClickSquare={clearSquare}
+              onSquareRightClick={(sq) => {
+                if (phase === "recall") clearSquare(sq);
+              }}
             />
 
             <VStack flex={1} align="stretch" gap={4} minW={{ base: "full", lg: "260px" }}>
@@ -279,115 +280,77 @@ function PhasePill({ phase }: { phase: Phase }) {
   );
 }
 
-function BoardSvg({
+function MemoryBoard({
   board,
   target,
   phase,
   selected,
-  onSelectSquare,
-  onRightClickSquare,
+  onSquareClick,
+  onSquareRightClick,
 }: {
   board: Board;
   target: Board;
   phase: Phase;
   selected: Square | null;
-  onSelectSquare: (sq: Square, e?: React.MouseEvent) => void;
-  onRightClickSquare: (sq: Square) => void;
+  onSquareClick: (sq: Square) => void;
+  onSquareRightClick: (sq: Square) => void;
 }) {
-  const SQ = 44;
-  const W = SQ * 8;
+  const fen = useMemo(() => fenFromMap(board), [board]);
+
+  // squareStyles: highlight the selected square in recall; flash correctness in review.
+  const squareStyles = useMemo<Record<string, React.CSSProperties>>(() => {
+    const styles: Record<string, React.CSSProperties> = {};
+    if (selected) {
+      styles[selected] = {
+        boxShadow: "inset 0 0 0 3px var(--sys-cyan)",
+      };
+    }
+    if (phase === "review") {
+      const all = new Set<string>([...Object.keys(target), ...Object.keys(board)]);
+      all.forEach((sq) => {
+        const expected = target[sq];
+        const actual = board[sq];
+        if (expected && expected === actual) {
+          styles[sq] = { boxShadow: "inset 0 0 0 3px rgba(0,240,255,0.85)" };
+        } else if (expected && actual && expected !== actual) {
+          styles[sq] = { boxShadow: "inset 0 0 0 3px rgba(240,101,149,0.85)" };
+        } else if (expected && !actual) {
+          // missed — a piece should have been here
+          styles[sq] = {
+            background:
+              "repeating-linear-gradient(45deg, rgba(240,101,149,0.25) 0 6px, transparent 6px 12px)",
+            boxShadow: "inset 0 0 0 2px rgba(240,101,149,0.6)",
+          };
+        } else if (!expected && actual) {
+          // wrongly placed
+          styles[sq] = { boxShadow: "inset 0 0 0 3px rgba(240,101,149,0.85)" };
+        }
+      });
+    }
+    return styles;
+  }, [selected, phase, board, target]);
+
   return (
     <Box
       position="relative"
-      w={`${W}px`}
-      h={`${W}px`}
+      p={2}
       borderWidth="1px"
       borderColor="rgba(138,43,226,0.6)"
       bg="rgba(10,11,14,0.6)"
-      style={{ boxShadow: "0 0 18px rgba(138,43,226,0.45)" }}
+      backdropFilter="blur(10px)"
+      className="sys-clip-panel"
+      style={{
+        boxShadow: "0 0 22px rgba(138,43,226,0.35), inset 0 0 22px rgba(138,43,226,0.06)",
+      }}
       flexShrink={0}
     >
-      <svg width={W} height={W} viewBox={`0 0 ${W} ${W}`}>
-        {RANKS.map((rank, rIdx) =>
-          FILES.map((file, fIdx) => {
-            const sq = `${file}${rank}` as Square;
-            const x = fIdx * SQ;
-            const y = rIdx * SQ;
-            const dark = (rIdx + fIdx) % 2 === 1;
-            const isSelected = selected === sq;
-            const placed = board[sq];
-
-            // In review, the square's fill reflects correctness.
-            let fill = dark ? "#0e1424" : "#1a2138";
-            if (phase === "review") {
-              const expected = target[sq];
-              const actual = board[sq];
-              if (expected && expected === actual) fill = "rgba(0,240,255,0.18)";
-              else if (expected && actual && expected !== actual) fill = "rgba(240,101,149,0.28)";
-              else if (expected && !actual) fill = "rgba(240,101,149,0.18)";
-              else if (!expected && actual) fill = "rgba(240,101,149,0.35)";
-            }
-
-            return (
-              <g key={sq}>
-                <rect
-                  x={x}
-                  y={y}
-                  width={SQ}
-                  height={SQ}
-                  fill={fill}
-                  stroke={isSelected ? "var(--sys-cyan)" : "rgba(255,255,255,0.05)"}
-                  strokeWidth={isSelected ? 2 : 0.5}
-                  onClick={(e) => onSelectSquare(sq, e as unknown as React.MouseEvent)}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    onRightClickSquare(sq);
-                  }}
-                  style={{ cursor: phase === "recall" ? "pointer" : "default" }}
-                />
-                {placed && (
-                  <text
-                    x={x + SQ / 2}
-                    y={y + SQ / 2}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fontSize={SQ * 0.78}
-                    fill={placed === placed.toUpperCase() ? "#f0f2f8" : "#1a1f2e"}
-                    stroke={placed === placed.toUpperCase() ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.25)"}
-                    strokeWidth={0.5}
-                    pointerEvents="none"
-                  >
-                    {PIECE_GLYPH[placed]}
-                  </text>
-                )}
-                {/* Coordinate labels */}
-                {fIdx === 0 && (
-                  <text
-                    x={x + 3}
-                    y={y + 11}
-                    fontSize={9}
-                    fill="rgba(255,255,255,0.4)"
-                    pointerEvents="none"
-                  >
-                    {rank}
-                  </text>
-                )}
-                {rIdx === 7 && (
-                  <text
-                    x={x + SQ - 9}
-                    y={y + SQ - 3}
-                    fontSize={9}
-                    fill="rgba(255,255,255,0.4)"
-                    pointerEvents="none"
-                  >
-                    {file}
-                  </text>
-                )}
-              </g>
-            );
-          })
-        )}
-      </svg>
+      <ClassicBoard
+        fen={fen}
+        size={384}
+        onSquareClick={onSquareClick}
+        onSquareRightClick={onSquareRightClick}
+        squareStyles={squareStyles}
+      />
     </Box>
   );
 }

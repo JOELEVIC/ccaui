@@ -11,6 +11,7 @@ import {
   SYSTEM_KEYFRAMES,
 } from "./SystemPrimitives";
 import { ManaBurst } from "./ManaBeam";
+import { ClassicBoard } from "./ClassicBoard";
 
 /**
  * Shadow Extraction — turns a missed "Brilliant Move" into a collectible
@@ -53,10 +54,6 @@ interface ShadowExtractionProps {
 }
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;
-const PIECE_GLYPH: Record<string, string> = {
-  K: "♔", Q: "♕", R: "♖", B: "♗", N: "♘", P: "♙",
-  k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟",
-};
 
 export function ShadowExtraction({ candidate, onExtract, onSkip }: ShadowExtractionProps) {
   const [from, setFrom] = useState<string | null>(null);
@@ -64,9 +61,16 @@ export function ShadowExtraction({ candidate, onExtract, onSkip }: ShadowExtract
   const [wrongFlash, setWrongFlash] = useState(false);
   const [extracted, setExtracted] = useState(false);
 
-  const chess = useMemo(() => new Chess(candidate.fen), [candidate.fen]);
+  const chess = useMemo(() => {
+    try {
+      return new Chess(candidate.fen);
+    } catch {
+      return new Chess();
+    }
+  }, [candidate.fen]);
   const turn = chess.turn(); // 'w' | 'b'
   const boardMatrix = chess.board();
+  const boardOrientation: "white" | "black" = turn === "w" ? "white" : "black";
 
   function tryMove(to: string) {
     if (!from) return;
@@ -161,13 +165,25 @@ export function ShadowExtraction({ candidate, onExtract, onSkip }: ShadowExtract
             flexWrap={{ base: "wrap", lg: "nowrap" }}
             justify={{ base: "center", lg: "flex-start" }}
           >
-            <BoardSvg
-              boardMatrix={boardMatrix}
-              from={from}
-              onSquareClick={onSquareClick}
-              extracted={extracted}
-              wrongFlash={wrongFlash}
-            />
+            <BoardFrame extracted={extracted} wrongFlash={wrongFlash}>
+              <ClassicBoard
+                fen={chess.fen()}
+                orientation={boardOrientation}
+                size={384}
+                onSquareClick={onSquareClick}
+                squareStyles={
+                  from
+                    ? {
+                        [from]: {
+                          background:
+                            "radial-gradient(circle, rgba(177,151,252,0.55) 0%, rgba(177,151,252,0.25) 80%)",
+                          boxShadow: "inset 0 0 0 2px var(--sys-epic)",
+                        },
+                      }
+                    : undefined
+                }
+              />
+            </BoardFrame>
 
             <VStack flex={1} align="stretch" gap={4} minW={{ base: "full", lg: "260px" }}>
               <Box
@@ -216,93 +232,50 @@ export function ShadowExtraction({ candidate, onExtract, onSkip }: ShadowExtract
   );
 }
 
-function BoardSvg({
-  boardMatrix,
-  from,
-  onSquareClick,
+function BoardFrame({
   extracted,
   wrongFlash,
+  children,
 }: {
-  boardMatrix: ReturnType<Chess["board"]>;
-  from: string | null;
-  onSquareClick: (sq: string) => void;
   extracted: boolean;
   wrongFlash: boolean;
+  children: React.ReactNode;
 }) {
-  const SQ = 48;
-  const W = SQ * 8;
   return (
     <Box
       position="relative"
-      w={`${W}px`}
-      h={`${W}px`}
+      p={2}
       borderWidth="1px"
       borderColor={extracted ? "var(--sys-epic)" : wrongFlash ? "var(--sys-threat)" : "rgba(177,151,252,0.6)"}
       bg="rgba(10,11,14,0.6)"
+      backdropFilter="blur(10px)"
       style={{
         boxShadow: extracted
-          ? "0 0 22px var(--sys-epic)"
+          ? "0 0 28px var(--sys-epic)"
           : wrongFlash
-            ? "0 0 22px var(--sys-threat)"
-            : "0 0 18px rgba(177,151,252,0.45)",
+            ? "0 0 28px var(--sys-threat)"
+            : "0 0 22px rgba(177,151,252,0.35), inset 0 0 22px rgba(177,151,252,0.06)",
         transition: "all 0.18s",
       }}
+      className="sys-clip-panel"
       flexShrink={0}
     >
-      <svg width={W} height={W} viewBox={`0 0 ${W} ${W}`}>
-        {boardMatrix.map((row, rIdx) =>
-          row.map((piece, fIdx) => {
-            const file = FILES[fIdx];
-            const rank = 8 - rIdx;
-            const sq = `${file}${rank}`;
-            const x = fIdx * SQ;
-            const y = rIdx * SQ;
-            const dark = (rIdx + fIdx) % 2 === 1;
-            const isFrom = from === sq;
-            return (
-              <g key={sq}>
-                <rect
-                  x={x}
-                  y={y}
-                  width={SQ}
-                  height={SQ}
-                  fill={dark ? "#0e1424" : "#1a2138"}
-                  stroke={isFrom ? "var(--sys-epic)" : "rgba(255,255,255,0.05)"}
-                  strokeWidth={isFrom ? 2 : 0.5}
-                  onClick={() => onSquareClick(sq)}
-                  style={{ cursor: extracted ? "default" : "pointer" }}
-                />
-                {piece && (
-                  <text
-                    x={x + SQ / 2}
-                    y={y + SQ / 2}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fontSize={SQ * 0.78}
-                    fill={piece.color === "w" ? "#f0f2f8" : "#1a1f2e"}
-                    stroke={piece.color === "w" ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.25)"}
-                    strokeWidth={0.5}
-                    pointerEvents="none"
-                  >
-                    {PIECE_GLYPH[piece.color === "w" ? piece.type.toUpperCase() : piece.type]}
-                  </text>
-                )}
-              </g>
-            );
-          })
-        )}
-      </svg>
+      {children}
       <AnimatePresence>
         {extracted && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              pointerEvents: "none",
+            }}
           >
-            <Box position="absolute" left={`${W / 2 - 40}px`} top={`${W / 2 - 40}px`}>
-              <ManaBurst size={80} color="var(--sys-epic)" duration={1.2} />
-            </Box>
+            <ManaBurst size={120} color="var(--sys-epic)" duration={1.2} />
           </motion.div>
         )}
       </AnimatePresence>
