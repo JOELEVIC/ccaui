@@ -387,14 +387,14 @@ export default function PlayBotPage() {
             ◇ Engine warming up — first move may take a moment
           </Text>
         )}
-        {wasmDead && (
-          <Text mt={3} fontSize="xs" color="rgba(255,200,120,0.9)" letterSpacing="0.16em" textTransform="uppercase">
-            ◇ Browser engine offline — running on server
+        {wasmDead && stockfishError === "Running on local engine" && (
+          <Text mt={3} fontSize="xs" color="rgba(212,175,55,0.95)" letterSpacing="0.16em" textTransform="uppercase">
+            ◇ Running on local engine — full strength engine unavailable
           </Text>
         )}
-        {stockfishError && !wasmDead && !engineWarming && (
-          <Text mt={3} fontSize="xs" color="rgba(240,101,149,0.9)" letterSpacing="0.16em" textTransform="uppercase">
-            ⚠ {stockfishError}
+        {wasmDead && stockfishError !== "Running on local engine" && (
+          <Text mt={3} fontSize="xs" color="rgba(255,200,120,0.9)" letterSpacing="0.16em" textTransform="uppercase">
+            ◇ Browser engine offline — using server engine
           </Text>
         )}
       </Box>

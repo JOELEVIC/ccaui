@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { gql } from "@apollo/client";
 import { apolloClient } from "./apollo-client";
+import { getBestMoveJS } from "./jsChessEngine";
 
 export interface Evaluation {
   cp: number | null;
@@ -458,27 +459,45 @@ export function useStockfish(elo: number) {
     driverRef.current?.setElo(elo);
   }, [elo]);
 
+  /** Final synchronous local fallback when WASM + backend are both
+   *  unreachable. Pure JS negamax — always returns a legal move. */
+  const localFallback = useCallback((fen: string): string | null => {
+    const move = getBestMoveJS(fen, elo);
+    if (move) {
+      // eslint-disable-next-line no-console
+      console.info("[engine] move from local JS engine");
+    }
+    return move;
+  }, [elo]);
+
   const getBestMove = useCallback(
     async (fen: string): Promise<string | null> => {
       setError(null);
       const driver = driverRef.current;
-      // If the WASM is alive, try it first.
+      // 1. WASM if alive.
       if (driver && !wasmDead && !driver.isDead()) {
         try {
           const move = await driver.bestMove(fen);
           if (move) return move;
         } catch (err) {
           // eslint-disable-next-line no-console
-          console.warn("[engine] WASM bestMove failed, falling back to backend", err);
+          console.warn("[engine] WASM bestMove failed, falling back", err);
           setError(err instanceof Error ? err.message : "Engine failed");
         }
       }
-      // Backend fallback.
-      const move = await backendBestMove(fen, elo);
-      if (!move) setError("Engine unavailable — random move");
-      return move;
+      // 2. Backend.
+      const backendMove = await backendBestMove(fen, elo);
+      if (backendMove) return backendMove;
+      // 3. Local JS engine — last line of defence, always returns a legal move.
+      const localMove = localFallback(fen);
+      if (localMove) {
+        setError("Running on local engine");
+        return localMove;
+      }
+      setError("Engine unavailable");
+      return null;
     },
-    [wasmDead, elo],
+    [wasmDead, elo, localFallback],
   );
 
   const getEvaluation = useCallback(
