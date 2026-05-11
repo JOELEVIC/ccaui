@@ -9,7 +9,7 @@ import { Chess } from "chess.js";
 import { Box, HStack, Text, VStack } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toaster } from "@/lib/toaster";
-import { GameBoard } from "@/components/chess/GameBoard";
+import { ClassicBoard } from "@/components/system/ClassicBoard";
 import { SystemBoardFrame } from "@/components/system/SystemBoardFrame";
 import {
   SystemPanel,
@@ -50,6 +50,22 @@ const CHECK_SOLUTION = gql`
   }
 `;
 
+/**
+ * Build a UCI string from a from/to square pair. Validates legality
+ * against the current FEN and auto-promotes pawns to queens.
+ */
+function buildUci(fen: string, from: string, to: string): string | null {
+  try {
+    const c = new Chess(fen);
+    const move = c.move({ from, to, promotion: "q" });
+    if (!move) return null;
+    const promo = move.promotion ? move.promotion.toLowerCase() : "";
+    return `${move.from}${move.to}${promo}`;
+  } catch {
+    return null;
+  }
+}
+
 export default function PuzzlePage() {
   const params = useParams();
   const router = useRouter();
@@ -58,6 +74,7 @@ export default function PuzzlePage() {
   const [solved, setSolved] = useState(false);
   const [reward, setReward] = useState<{ xp: number; streak: number } | null>(null);
   const [misses, setMisses] = useState(0);
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
   const { data, loading } = useQuery<{
     puzzle: { id: string; fen: string; solution: string; difficulty: number; theme: string[] };
@@ -238,13 +255,55 @@ export default function PuzzlePage() {
             />
           }
         >
-          <GameBoard
+          <ClassicBoard
             fen={currentFen}
             orientation={orientation}
-            isMyTurn={true}
-            onMove={handleMove}
-            allowMove={!solved}
-            variant="system"
+            size={420}
+            variant="blue"
+            allowDragging={!solved}
+            onPieceDrop={(from, to) => {
+              if (solved) return false;
+              const uci = buildUci(currentFen, from, to);
+              if (!uci) return false;
+              handleMove(uci);
+              setSelectedSquare(null);
+              return true;
+            }}
+            onSquareClick={(sq) => {
+              if (solved) return;
+              if (!selectedSquare) {
+                // Pick up: only my-coloured pieces.
+                const c = new Chess(currentFen);
+                const board = c.board();
+                const file = "abcdefgh".indexOf(sq[0]);
+                const rank = parseInt(sq[1], 10);
+                const piece = board[8 - rank]?.[file];
+                if (!piece) return;
+                if (piece.color !== c.turn()) return;
+                setSelectedSquare(sq);
+                return;
+              }
+              if (sq === selectedSquare) {
+                setSelectedSquare(null);
+                return;
+              }
+              const uci = buildUci(currentFen, selectedSquare, sq);
+              if (uci) {
+                handleMove(uci);
+              }
+              setSelectedSquare(null);
+            }}
+            squareStyles={
+              selectedSquare
+                ? {
+                    [selectedSquare]: {
+                      background:
+                        "radial-gradient(circle, rgba(0,240,255,0.45) 0%, rgba(0,240,255,0.18) 80%)",
+                      boxShadow: "inset 0 0 0 3px var(--sys-cyan)",
+                    },
+                  }
+                : undefined
+            }
           />
         </SystemBoardFrame>
       </Box>

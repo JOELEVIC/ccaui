@@ -13,8 +13,32 @@ import { Chessboard } from "react-chessboard";
  * frame, corner brackets, glow ring) — this component is only the board.
  */
 
-const LIGHT = "#e9d8a3";
-const DARK = "#3a2f24";
+/* Three readable palettes the consumer can opt into. */
+const PALETTES = {
+  /** Warm wood used on the landing showcase + Shadow Extraction. */
+  wood: {
+    light: "#e9d8a3",
+    dark: "#3a2f24",
+    darkNotation: "rgba(255,255,255,0.55)",
+    lightNotation: "rgba(0,0,0,0.55)",
+  },
+  /** Bright sky-blue board — used on the puzzle (Learn) surface. */
+  blue: {
+    light: "#e8eef7",
+    dark: "#7196c0",
+    darkNotation: "rgba(255,255,255,0.7)",
+    lightNotation: "rgba(40,60,90,0.6)",
+  },
+  /** Muted slate — for analysis / review surfaces. */
+  slate: {
+    light: "#d6dbe2",
+    dark: "#5a6878",
+    darkNotation: "rgba(255,255,255,0.6)",
+    lightNotation: "rgba(40,60,90,0.55)",
+  },
+} as const;
+
+export type ClassicBoardVariant = keyof typeof PALETTES;
 
 interface ClassicBoardProps {
   /** Position to render (FEN). Use the empty FEN to render a blank board. */
@@ -29,8 +53,12 @@ interface ClassicBoardProps {
   onSquareClick?: (square: string) => void;
   /** Right-click handler — useful for clearing a square in recall trials. */
   onSquareRightClick?: (square: string) => void;
-  /** Optional override `squareStyles` map ({ "e4": { backgroundColor: ... } }). */
+  /** Optional `onPieceDrop` for drag-and-drop moves. */
+  onPieceDrop?: (from: string, to: string) => boolean;
+  /** Optional override `squareStyles` map. */
   squareStyles?: Record<string, React.CSSProperties>;
+  /** Colour palette — wood (default) / blue / slate. */
+  variant?: ClassicBoardVariant;
 }
 
 export function ClassicBoard({
@@ -40,8 +68,11 @@ export function ClassicBoard({
   allowDragging = false,
   onSquareClick,
   onSquareRightClick,
+  onPieceDrop,
   squareStyles,
+  variant = "wood",
 }: ClassicBoardProps) {
+  const palette = PALETTES[variant];
   return (
     <Box w={`${size}px`} h={`${size}px`} maxW="full">
       <Chessboard
@@ -50,18 +81,22 @@ export function ClassicBoard({
           boardOrientation: orientation,
           allowDragging,
           showNotation: true,
-          darkSquareStyle: { backgroundColor: DARK },
-          lightSquareStyle: { backgroundColor: LIGHT },
+          darkSquareStyle: { backgroundColor: palette.dark },
+          lightSquareStyle: { backgroundColor: palette.light },
           boardStyle: { borderRadius: 6 },
-          darkSquareNotationStyle: { fill: "rgba(255,255,255,0.55)", fontSize: 11 },
-          lightSquareNotationStyle: { fill: "rgba(0,0,0,0.55)", fontSize: 11 },
-          alphaNotationStyle: { fill: "rgba(255,255,255,0.6)", fontSize: 11 },
-          numericNotationStyle: { fill: "rgba(255,255,255,0.6)", fontSize: 11 },
+          darkSquareNotationStyle: { fill: palette.darkNotation, fontSize: 11 },
+          lightSquareNotationStyle: { fill: palette.lightNotation, fontSize: 11 },
+          alphaNotationStyle: { fill: palette.lightNotation, fontSize: 11 },
+          numericNotationStyle: { fill: palette.lightNotation, fontSize: 11 },
           onSquareClick: onSquareClick
             ? ({ square }) => onSquareClick(square)
             : undefined,
           onSquareRightClick: onSquareRightClick
             ? ({ square }) => onSquareRightClick(square)
+            : undefined,
+          onPieceDrop: onPieceDrop
+            ? ({ sourceSquare, targetSquare }) =>
+                targetSquare ? onPieceDrop(sourceSquare, targetSquare) : false
             : undefined,
           squareStyles,
         }}
