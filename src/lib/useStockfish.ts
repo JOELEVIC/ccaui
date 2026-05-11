@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { gql } from "@apollo/client";
+import { apolloClient } from "./apollo-client";
 
 export interface Evaluation {
   cp: number | null;
@@ -11,14 +13,72 @@ const ENGINE_URL = "/stockfish/stockfish-18-lite-single.js";
 const BESTMOVE_DEPTH = 12;
 const EVAL_DEPTH = 14;
 const REQUEST_TIMEOUT_MS = 8000;
+/** How long we wait for the worker to send a UCI "readyok" before giving up. */
+const READY_TIMEOUT_MS = 4000;
 
 type PendingResolver = {
   done: (line: string) => boolean;
   resolve: (value: { lines: string[]; lastInfo: string | null }) => void;
+  reject: (err: Error) => void;
   timeout: ReturnType<typeof setTimeout>;
   buffer: string[];
   lastInfo: string | null;
 };
+
+/* ───────────────────────────────────────────────────────────────────
+ * Backend fallback — invoked when the WASM worker fails to load,
+ * throws, or stops responding. The server runs the native Stockfish
+ * binary via `services/stockfish.service.ts`.
+ * ─────────────────────────────────────────────────────────────────── */
+
+const ENGINE_BEST_MOVE = gql`
+  query EngineBestMove($fen: String!, $elo: Int) {
+    engineBestMove(fen: $fen, elo: $elo)
+  }
+`;
+
+const ENGINE_EVALUATION = gql`
+  query EngineEvaluation($fen: String!) {
+    engineEvaluation(fen: $fen) {
+      cp
+      mate
+    }
+  }
+`;
+
+async function backendBestMove(fen: string, elo: number): Promise<string | null> {
+  try {
+    const { data } = await apolloClient.query<{ engineBestMove: string | null }>({
+      query: ENGINE_BEST_MOVE,
+      variables: { fen, elo },
+      fetchPolicy: "no-cache",
+    });
+    return data?.engineBestMove ?? null;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("[engine] backend fallback failed", err);
+    return null;
+  }
+}
+
+async function backendEvaluation(fen: string): Promise<Evaluation> {
+  try {
+    const { data } = await apolloClient.query<{ engineEvaluation: Evaluation | null }>({
+      query: ENGINE_EVALUATION,
+      variables: { fen },
+      fetchPolicy: "no-cache",
+    });
+    return data?.engineEvaluation ?? { cp: null, mate: null };
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("[engine] backend evaluation fallback failed", err);
+    return { cp: null, mate: null };
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────────
+ * EngineDriver — wraps the Stockfish web worker.
+ * ─────────────────────────────────────────────────────────────────── */
 
 class EngineDriver {
   private worker: Worker | null = null;
@@ -27,19 +87,68 @@ class EngineDriver {
   private running = false;
   private elo: number;
   private eloApplied: number | null = null;
+  /** Set once the worker has either thrown or failed readiness. */
+  private deadReason: string | null = null;
+  private onWorkerError?: (reason: string) => void;
 
-  constructor(elo: number) {
+  constructor(elo: number, onWorkerError?: (reason: string) => void) {
     this.elo = elo;
+    this.onWorkerError = onWorkerError;
   }
 
   setElo(elo: number) {
     this.elo = elo;
   }
 
+  isDead(): boolean {
+    return this.deadReason !== null;
+  }
+
+  private kill(reason: string) {
+    if (this.deadReason) return;
+    this.deadReason = reason;
+    // eslint-disable-next-line no-console
+    console.warn(`[engine] WASM worker disabled: ${reason}. Falling back to backend.`);
+    this.onWorkerError?.(reason);
+    if (this.pending) {
+      clearTimeout(this.pending.timeout);
+      this.pending.reject(new Error(reason));
+      this.pending = null;
+    }
+    if (this.worker) {
+      try {
+        this.worker.terminate();
+      } catch {
+        /* ignore */
+      }
+      this.worker = null;
+    }
+  }
+
   private ensureWorker(): Worker {
     if (this.worker) return this.worker;
-    const w = new Worker(ENGINE_URL);
-    w.onmessage = (e) => this.handleLine(typeof e.data === "string" ? e.data : "");
+    // Construct the worker URL with a hash override so the loader resolves
+    // the WASM path explicitly. The loader script reads
+    // `self.location.hash.substr(1).split(",")` and uses index 0 as the
+    // WASM URL; index 1 must equal "worker" so it identifies itself.
+    const url = `${ENGINE_URL}#${encodeURIComponent(
+      "/stockfish/stockfish-18-lite-single.wasm"
+    )},worker`;
+    let w: Worker;
+    try {
+      w = new Worker(url);
+    } catch (err) {
+      this.kill(err instanceof Error ? err.message : "worker constructor threw");
+      throw err;
+    }
+    w.onmessage = (e) =>
+      this.handleLine(typeof e.data === "string" ? e.data : "");
+    w.onerror = (event) => {
+      const reason =
+        (event as ErrorEvent).message ?? "unknown worker error";
+      this.kill(reason);
+    };
+    w.onmessageerror = () => this.kill("worker messageerror");
     this.worker = w;
     w.postMessage("uci");
     w.postMessage("isready");
@@ -59,24 +168,32 @@ class EngineDriver {
   }
 
   private send(cmd: string) {
-    this.ensureWorker().postMessage(cmd);
+    const w = this.ensureWorker();
+    if (!w) throw new Error("worker unavailable");
+    w.postMessage(cmd);
   }
 
-  private waitFor(predicate: (line: string) => boolean): Promise<{
-    lines: string[];
-    lastInfo: string | null;
-  }> {
+  private waitFor(
+    predicate: (line: string) => boolean,
+    timeoutMs: number = REQUEST_TIMEOUT_MS,
+  ): Promise<{ lines: string[]; lastInfo: string | null }> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         if (this.pending) {
           this.pending = null;
-          this.send("stop");
+          try {
+            this.worker?.postMessage("stop");
+          } catch {
+            /* ignore */
+          }
+          this.kill("engine timeout");
           reject(new Error("Engine timeout"));
         }
-      }, REQUEST_TIMEOUT_MS);
+      }, timeoutMs);
       this.pending = {
         done: predicate,
         resolve,
+        reject,
         timeout,
         buffer: [],
         lastInfo: null,
@@ -122,8 +239,28 @@ class EngineDriver {
     this.eloApplied = this.elo;
   }
 
+  /**
+   * One-time readiness probe — confirms the worker actually responds with
+   * "readyok" within READY_TIMEOUT_MS. If not, we mark the driver dead.
+   */
+  async warmup(): Promise<boolean> {
+    if (this.deadReason) return false;
+    try {
+      this.ensureWorker();
+    } catch {
+      return false;
+    }
+    try {
+      await this.waitFor((line) => line.startsWith("readyok"), READY_TIMEOUT_MS);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   bestMove(fen: string): Promise<string | null> {
     return this.enqueue(async () => {
+      if (this.deadReason) return null;
       this.applyEloIfNeeded();
       this.send(`position fen ${fen}`);
       this.send(`go depth ${BESTMOVE_DEPTH}`);
@@ -139,6 +276,7 @@ class EngineDriver {
 
   evaluate(fen: string): Promise<Evaluation> {
     return this.enqueue(async () => {
+      if (this.deadReason) return { cp: null, mate: null };
       this.send("setoption name UCI_LimitStrength value false");
       this.eloApplied = null;
       this.send(`position fen ${fen}`);
@@ -173,25 +311,58 @@ class EngineDriver {
   }
 }
 
+/* ───────────────────────────────────────────────────────────────────
+ * useStockfish — local WASM with backend fallback.
+ *
+ * Behaviour:
+ *   1. On mount we create an EngineDriver and warm it up (one isready
+ *      round-trip). If that fails we mark `wasmDead` and every future
+ *      call goes to the server.
+ *   2. If the WASM driver throws mid-game we mark it dead and fall back.
+ *   3. The `error` field surfaces the latest reason for the user.
+ *   4. The hook still returns `ready: true` once *either* path is
+ *      usable, so the caller can fire the engine without waiting on
+ *      a flag that may never flip.
+ * ─────────────────────────────────────────────────────────────────── */
+
 export function useStockfish(elo: number) {
   const driverRef = useRef<EngineDriver | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [wasmDead, setWasmDead] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (typeof Worker === "undefined") {
-      setError("Web Workers unavailable");
+      // No worker support → use backend exclusively.
+      setWasmDead(true);
+      setReady(true);
       return;
     }
-    try {
-      driverRef.current = new EngineDriver(elo);
-      setReady(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Engine failed");
-    }
+    let mounted = true;
+    const driver = new EngineDriver(elo, (reason) => {
+      if (!mounted) return;
+      setWasmDead(true);
+      setError(reason);
+    });
+    driverRef.current = driver;
+    // Probe the worker. We mark "ready" as soon as we know which path
+    // we'll use (either WASM warmed up, or it failed and we go server-side).
+    driver
+      .warmup()
+      .then((ok) => {
+        if (!mounted) return;
+        if (!ok) setWasmDead(true);
+        setReady(true);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setWasmDead(true);
+        setReady(true);
+      });
     return () => {
-      driverRef.current?.destroy();
+      mounted = false;
+      driver.destroy();
       driverRef.current = null;
       setReady(false);
     };
@@ -202,27 +373,43 @@ export function useStockfish(elo: number) {
     driverRef.current?.setElo(elo);
   }, [elo]);
 
-  const getBestMove = useCallback(async (fen: string): Promise<string | null> => {
-    setError(null);
-    const driver = driverRef.current;
-    if (!driver) return null;
-    try {
-      return await driver.bestMove(fen);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Engine failed");
-      return null;
-    }
-  }, []);
+  const getBestMove = useCallback(
+    async (fen: string): Promise<string | null> => {
+      setError(null);
+      const driver = driverRef.current;
+      // If the WASM is alive, try it first.
+      if (driver && !wasmDead && !driver.isDead()) {
+        try {
+          const move = await driver.bestMove(fen);
+          if (move) return move;
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.warn("[engine] WASM bestMove failed, falling back to backend", err);
+          setError(err instanceof Error ? err.message : "Engine failed");
+        }
+      }
+      // Backend fallback.
+      const move = await backendBestMove(fen, elo);
+      if (!move) setError("Engine unavailable — random move");
+      return move;
+    },
+    [wasmDead, elo],
+  );
 
-  const getEvaluation = useCallback(async (fen: string): Promise<Evaluation> => {
-    const driver = driverRef.current;
-    if (!driver) return { cp: null, mate: null };
-    try {
-      return await driver.evaluate(fen);
-    } catch {
-      return { cp: null, mate: null };
-    }
-  }, []);
+  const getEvaluation = useCallback(
+    async (fen: string): Promise<Evaluation> => {
+      const driver = driverRef.current;
+      if (driver && !wasmDead && !driver.isDead()) {
+        try {
+          return await driver.evaluate(fen);
+        } catch {
+          /* fall through */
+        }
+      }
+      return backendEvaluation(fen);
+    },
+    [wasmDead],
+  );
 
-  return { getBestMove, getEvaluation, ready, error };
+  return { getBestMove, getEvaluation, ready, error, wasmDead };
 }

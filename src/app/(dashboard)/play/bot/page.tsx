@@ -124,7 +124,13 @@ export default function PlayBotPage() {
   const [pendingPremove, setPendingPremove] = useState<PendingPremove | null>(null);
   const evalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { getBestMove, getEvaluation, ready: stockfishReady, error: stockfishError } = useStockfish(elo);
+  const {
+    getBestMove,
+    getEvaluation,
+    ready: stockfishReady,
+    error: stockfishError,
+    wasmDead,
+  } = useStockfish(elo);
 
   const displayFen = useMemo(
     () => buildFenAtMove(startFen, moveHistory, viewingIndex),
@@ -376,9 +382,14 @@ export default function PlayBotPage() {
           </HStack>
         </HStack>
 
-        {stockfishError && (
+        {wasmDead && (
+          <Text mt={3} fontSize="xs" color="rgba(255,200,120,0.9)" letterSpacing="0.16em" textTransform="uppercase">
+            ◇ Browser engine offline — running on server
+          </Text>
+        )}
+        {stockfishError && !wasmDead && (
           <Text mt={3} fontSize="xs" color="rgba(240,101,149,0.9)" letterSpacing="0.16em" textTransform="uppercase">
-            ⚠ Engine unavailable
+            ⚠ {stockfishError}
           </Text>
         )}
       </Box>
