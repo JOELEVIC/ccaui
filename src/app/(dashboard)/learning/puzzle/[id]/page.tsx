@@ -520,24 +520,45 @@ function SolvedOverlay({
 
 /* ─────────── Small pills ─────────── */
 
-function MetaPill({ label, value, accent }: { label: string; value: string; accent: "cyan" | "purple" }) {
+function MetaPill({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent: "cyan" | "purple";
+}) {
   const c = accent === "cyan" ? "var(--sys-cyan)" : "var(--sys-purple)";
   const rgb = accent === "cyan" ? "0,240,255" : "138,43,226";
   return (
     <Box
-      px={3}
-      py={1.5}
+      px={3.5}
+      py={2}
       borderWidth="1px"
-      borderColor={`rgba(${rgb}, 0.5)`}
-      bg={`rgba(${rgb}, 0.07)`}
+      borderColor={`rgba(${rgb}, 0.65)`}
+      bg={`rgba(${rgb}, 0.10)`}
       className="sys-clip-panel-sm"
-      style={{ boxShadow: `0 0 8px rgba(${rgb}, 0.25)` }}
+      style={{ boxShadow: `0 0 12px rgba(${rgb}, 0.32)` }}
     >
-      <HStack gap={1.5}>
-        <Text fontSize="2xs" color="textMuted" letterSpacing="0.18em" textTransform="uppercase" fontFamily="var(--font-oswald), var(--font-inter), sans-serif">
+      <HStack gap={2}>
+        <Text
+          fontSize="xs"
+          color={`rgba(${rgb}, 0.85)`}
+          fontWeight="800"
+          letterSpacing="0.22em"
+          textTransform="uppercase"
+          fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
+        >
           {label}
         </Text>
-        <Text fontFamily="var(--font-oswald), var(--font-inter), sans-serif" fontWeight="800" fontSize="sm" color={c} style={{ textShadow: `0 0 4px ${c}` }}>
+        <Text
+          fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
+          fontWeight="900"
+          fontSize="md"
+          color={c}
+          style={{ textShadow: `0 0 6px ${c}, 0 0 12px rgba(${rgb}, 0.5)` }}
+        >
           {value}
         </Text>
       </HStack>
@@ -548,20 +569,22 @@ function MetaPill({ label, value, accent }: { label: string; value: string; acce
 function ThemeTag({ label }: { label: string }) {
   return (
     <Box
-      px={2.5}
-      py={1}
-      bg="rgba(177,151,252,0.08)"
+      px={3.5}
+      py={2}
+      bg="rgba(177,151,252,0.14)"
       borderWidth="1px"
-      borderColor="rgba(177,151,252,0.4)"
+      borderColor="rgba(177,151,252,0.65)"
       className="sys-clip-panel-sm"
+      style={{ boxShadow: "0 0 12px rgba(177,151,252,0.3)" }}
     >
       <Text
-        fontSize="2xs"
-        color="sys.epic"
-        fontWeight="700"
-        letterSpacing="0.18em"
+        fontSize="sm"
+        color="var(--sys-epic)"
+        fontWeight="900"
+        letterSpacing="0.22em"
         textTransform="uppercase"
         fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
+        style={{ textShadow: "0 0 6px var(--sys-epic), 0 0 12px rgba(177,151,252,0.5)" }}
       >
         {label.replace(/_/g, " ")}
       </Text>
