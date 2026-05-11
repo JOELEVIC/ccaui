@@ -17,16 +17,16 @@ export default function DashboardLayout({
 
   return (
     <ProtectedRoute>
-      <Flex minH="100vh" bg="bgDark" color="textPrimary">
+      <Flex minH="100vh" bg="var(--lux-obsidian)" color="var(--lux-text-primary)">
         <Flex flex={1} direction="column" minW={0} w="full">
           <AppHeader onOpenMore={() => setMoreOpen(true)} />
           <Box
             flex={1}
-            p={{ base: 3, md: 6 }}
-            pb={{ base: 20, md: 6 }}
+            p={{ base: 3, md: 8 }}
+            pb={{ base: 20, md: 8 }}
             overflow="auto"
             w="full"
-            bg="bgDark"
+            bg="var(--lux-obsidian)"
           >
             <PageTransition>{children}</PageTransition>
           </Box>

@@ -42,6 +42,30 @@
   --animation-duration-slow: 0.6s;
   --animation-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --animation-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ── Luxury Academic palette (dashboard / play) ─────────────────── */
+  --lux-obsidian: #05070a;
+  --lux-obsidian-soft: #0a0d12;
+  --lux-obsidian-elev: #10141a;
+  --lux-gold: #d4af37;
+  --lux-gold-soft: #b88f2a;
+  --lux-gold-bright: #efcf6b;
+  --lux-gold-muted: rgba(212, 175, 55, 0.6);
+  --lux-glass-surface: rgba(255, 255, 255, 0.05);
+  --lux-glass-surface-strong: rgba(255, 255, 255, 0.08);
+  --lux-glass-border: rgba(255, 255, 255, 0.1);
+  --lux-glass-border-strong: rgba(255, 255, 255, 0.18);
+  --lux-text-primary: #f5efe3;
+  --lux-text-secondary: rgba(245, 239, 227, 0.66);
+  --lux-text-muted: rgba(245, 239, 227, 0.38);
+  --lux-shadow-card: 0 18px 48px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  --lux-shadow-card-hover: 0 24px 60px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(212, 175, 55, 0.18) inset;
+  --lux-shadow-button: 0 4px 14px rgba(212, 175, 55, 0.32), 0 1px 0 rgba(255, 255, 255, 0.18) inset;
+  --lux-shadow-button-hover: 0 6px 22px rgba(212, 175, 55, 0.45), 0 1px 0 rgba(255, 255, 255, 0.22) inset;
+  --lux-gradient-gold: linear-gradient(180deg, #efcf6b 0%, #d4af37 52%, #a37e1f 100%);
+  --lux-gradient-ghost: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.03) 100%);
+  --lux-gradient-hero: linear-gradient(135deg, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.02) 38%, transparent 80%);
+  --lux-ring-gold: 0 0 0 1px rgba(212, 175, 55, 0.55), 0 0 22px rgba(212, 175, 55, 0.18);
 }
 
 body {
@@ -114,6 +138,62 @@ body {
 }
 .sys-clip-hex {
   clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+
+/* ── Luxury Academic utility classes ─────────────────────────────── */
+.lux-bg-obsidian { background: var(--lux-obsidian); }
+
+.lux-glass {
+  background: var(--lux-glass-surface);
+  border: 1px solid var(--lux-glass-border);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  box-shadow: var(--lux-shadow-card);
+}
+.lux-glass:hover {
+  border-color: var(--lux-glass-border-strong);
+  box-shadow: var(--lux-shadow-card-hover);
+}
+
+.lux-glass-strong {
+  background: var(--lux-glass-surface-strong);
+  border: 1px solid var(--lux-glass-border-strong);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  box-shadow: var(--lux-shadow-card);
+}
+
+.lux-heading {
+  font-family: var(--font-playfair), Georgia, serif;
+  letter-spacing: 0.05em;
+  color: var(--lux-text-primary);
+  font-weight: 600;
+}
+
+.lux-eyebrow {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lux-gold);
+}
+
+.lux-text-secondary { color: var(--lux-text-secondary); }
+.lux-text-muted     { color: var(--lux-text-muted); }
+.lux-text-gold      { color: var(--lux-gold); }
+
+.lux-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(212,175,55,0.35) 50%, transparent 100%);
+  width: 100%;
+}
+
+.lux-rule-gold {
+  height: 1px;
+  width: 32px;
+  background: var(--lux-gold);
+  box-shadow: 0 0 6px var(--lux-gold-muted);
 }
 
 /* Animated travelling glow on linear paths (e.g. dungeon map spine) */

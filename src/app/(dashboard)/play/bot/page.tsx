@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Box,
-  Button,
   Text,
   VStack,
   HStack,
@@ -14,6 +12,7 @@ import {
   Switch,
 } from "@chakra-ui/react";
 import { Chess } from "chess.js";
+import { motion } from "framer-motion";
 import { GameBoard, type PendingPremove } from "@/components/chess/GameBoard";
 import { isPremoveStillValid } from "@/lib/chessPremoves";
 import { MaterialDisplay } from "@/components/chess/MaterialDisplay";
@@ -22,6 +21,14 @@ import { TierLabel } from "@/components/dashboard/TierLabel";
 import { useStockfish } from "@/lib/useStockfish";
 import type { Evaluation } from "@/lib/useStockfish";
 import { toaster } from "@/lib/toaster";
+import {
+  ChessWatermark,
+  GlassCard,
+  GoldRule,
+  LuxuryButton,
+  LuxuryEyebrow,
+  LuxuryHeading,
+} from "@/components/luxury/LuxuryPrimitives";
 
 const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -289,73 +296,100 @@ export default function PlayBotPage() {
   const canGoForward = viewingIndex < moveHistory.length;
 
   return (
-    <VStack align="stretch" gap={6}>
-      <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
-        <Text color="gold" fontWeight="600" fontSize="lg">
-          Practice vs Bot · {elo} ELO
-        </Text>
-        {botThinking && (
-          <Text color="textMuted" fontSize="sm">
-            Thinking...
+    <Box position="relative" maxW="1280px" mx="auto">
+      <ChessWatermark piece="knight" size={420} opacity={0.035} position={{ top: "60px", right: "-60px" }} />
+
+      {/* Header strip */}
+      <Box mb={{ base: 5, md: 7 }} position="relative" zIndex={1}>
+        <HStack justify="space-between" align="flex-end" flexWrap="wrap" gap={4}>
+          <Box>
+            <LuxuryEyebrow>Training · Solo Sparring</LuxuryEyebrow>
+            <HStack mt={2} gap={3} align="center">
+              <LuxuryHeading size="lg">
+                vs. <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>Engine</Text>
+              </LuxuryHeading>
+              <Box
+                px={3}
+                py={1.5}
+                borderRadius="999px"
+                bg="var(--lux-glass-surface)"
+                borderWidth="1px"
+                borderColor="var(--lux-glass-border)"
+                style={{ backdropFilter: "blur(10px)" }}
+              >
+                <Text
+                  fontFamily="var(--font-inter), sans-serif"
+                  fontSize="xs"
+                  fontWeight="600"
+                  letterSpacing="0.22em"
+                  textTransform="uppercase"
+                  color="var(--lux-gold)"
+                >
+                  {elo} Elo
+                </Text>
+              </Box>
+              {botThinking && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <HStack gap={2} align="center">
+                    <Box
+                      w="6px"
+                      h="6px"
+                      borderRadius="full"
+                      bg="var(--lux-gold)"
+                      style={{ boxShadow: "0 0 6px var(--lux-gold)", animation: "pulse 1.2s ease-in-out infinite" }}
+                    />
+                    <Text fontSize="xs" className="lux-text-muted" letterSpacing="0.18em" textTransform="uppercase">
+                      Engine deliberating
+                    </Text>
+                  </HStack>
+                </motion.div>
+              )}
+            </HStack>
+            <HStack mt={3} gap={3} align="center">
+              <GoldRule />
+              <Text fontSize="sm" className="lux-text-secondary">
+                Stockfish at {elo} Elo. Premove queues your reply during the engine&apos;s think.
+              </Text>
+            </HStack>
+          </Box>
+
+          <HStack gap={3} flexWrap="wrap" align="center">
+            <ToggleChip
+              label="Premove"
+              on={premoveEnabled}
+              onToggle={() => setPremoveEnabled((v) => !v)}
+            />
+            <ToggleChip
+              label={showAnalysis ? "Analysis On" : "Analysis"}
+              on={showAnalysis}
+              onToggle={() => setShowAnalysis((s) => !s)}
+              disabled={!!gameResult}
+            />
+            <LuxuryButton variant="ghost" size="sm" glyph="←" href="/games">
+              Back to Play
+            </LuxuryButton>
+          </HStack>
+        </HStack>
+
+        {stockfishError && (
+          <Text mt={3} fontSize="xs" color="rgba(240,101,149,0.9)" letterSpacing="0.16em" textTransform="uppercase">
+            ⚠ Engine unavailable — falling back to random moves
           </Text>
         )}
-        <HStack gap={2} flexWrap="wrap" align="center">
-          <HStack gap={2} align="center">
-            <Text fontSize="sm" color="textSecondary">
-              Premove
-            </Text>
-            <Switch.Root
-              checked={premoveEnabled}
-              onCheckedChange={(e) => setPremoveEnabled(!!e.checked)}
-            >
-              <Switch.HiddenInput />
-              <Switch.Control bg={premoveEnabled ? "gold" : "bgSurface"} borderWidth="1px" borderColor="whiteAlpha.200">
-                <Switch.Thumb />
-              </Switch.Control>
-            </Switch.Root>
-          </HStack>
-          <Button
-            size="sm"
-            variant={showAnalysis ? "solid" : "outline"}
-            bg={showAnalysis ? "gold" : "transparent"}
-            color={showAnalysis ? "black" : "gold"}
-            borderColor="gold"
-            borderRadius="soft"
-            onClick={() => setShowAnalysis((s) => !s)}
-            disabled={!!gameResult}
-          >
-            {showAnalysis ? "Analysis on" : "Analysis"}
-          </Button>
-          <Link href="/games">
-            <Button size="sm" variant="ghost" color="textMuted" borderRadius="soft">
-              Back to Play
-            </Button>
-          </Link>
-        </HStack>
-      </Flex>
+      </Box>
 
-      {stockfishError && (
-        <Text color="statusWarning" fontSize="xs">
-          Engine unavailable, using random moves
-        </Text>
-      )}
-
-      <Flex direction={{ base: "column", lg: "row" }} justify="center" align="flex-start" gap={6}>
-        <VStack gap={2}>
-          <Box
-            py={2}
-            px={3}
-            borderRadius="soft"
-            bg="bgCard"
-            borderWidth="1px"
-            borderColor="goldDark"
-            minW="200px"
-            textAlign="center"
-          >
-            <Text color="textSecondary" fontSize="sm">
-              You (White)
-            </Text>
-          </Box>
+      {/* Board + side rail */}
+      <Flex direction={{ base: "column", lg: "row" }} justify="center" align="flex-start" gap={{ base: 5, lg: 7 }}>
+        <VStack gap={3} flex="0 0 auto">
+          <PlayerNameplate
+            label="You"
+            colour={orientation === "white" ? "white" : "black"}
+            highlight={isUserTurn && !gameResult && !botThinking}
+          />
           <HStack align="flex-start" gap={2}>
             {showAnalysis && (
               <EvaluationBar
@@ -376,157 +410,326 @@ export default function PlayBotPage() {
               onPendingPremove={setPendingPremove}
             />
           </HStack>
-          <Box
-            py={2}
-            px={3}
-            borderRadius="soft"
-            bg="bgCard"
-            borderWidth="1px"
-            borderColor="goldDark"
-            minW="200px"
-            textAlign="center"
-          >
-            <HStack justify="center" gap={2} flexWrap="wrap">
-              <Text color="textMuted" fontSize="sm">
-                Bot (Black) · {elo} ELO
-              </Text>
-              <TierLabel rating={elo} size="sm" />
-            </HStack>
-          </Box>
+          <PlayerNameplate
+            label={`Engine · ${elo} Elo`}
+            colour={orientation === "white" ? "black" : "white"}
+            highlight={botThinking}
+            tierBadge={<TierLabel rating={elo} size="sm" />}
+          />
         </VStack>
 
-        <VStack align="stretch" gap={4} minW="200px">
+        <VStack align="stretch" gap={4} flex="1 1 280px" minW="260px" maxW={{ lg: "360px" }}>
           <MaterialDisplay fen={displayFen} />
 
-          <Box
-            py={3}
-            px={4}
-            borderRadius="soft"
-            borderWidth="1px"
-            borderColor="goldDark"
-            bg="bgCard"
-          >
-            <Text color="gold" fontSize="xs" fontWeight="600" mb={2}>
-              Moves
-            </Text>
-            <HStack gap={2} mb={2}>
-              <Button
-                size="sm"
-                variant="outline"
-                borderColor="goldDark"
-                color="gold"
-                borderRadius="soft"
-                onClick={() => setViewingIndex((i) => Math.max(0, i - 1))}
-                disabled={!canGoBack}
-                px={2}
-              >
-                ←
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                borderColor="goldDark"
-                color="gold"
-                borderRadius="soft"
-                onClick={() => setViewingIndex((i) => Math.min(moveHistory.length, i + 1))}
-                disabled={!canGoForward}
-                px={2}
-              >
-                →
-              </Button>
-              <Text color="textMuted" fontSize="xs">
-                {viewingIndex} / {moveHistory.length}
-              </Text>
-            </HStack>
-            <Flex gap={2} flexWrap="wrap" maxH="120px" overflowY="auto">
-              {moveHistory.map((m, i) => (
+          <GlassCard>
+            <Box px={5} py={4}>
+              <HStack justify="space-between" align="center" mb={3}>
+                <LuxuryEyebrow>Move Log</LuxuryEyebrow>
                 <Text
-                  key={i}
-                  color={i < viewingIndex ? "gold" : "textMuted"}
-                  fontSize="sm"
-                  fontWeight={i === viewingIndex - 1 ? "600" : "normal"}
+                  fontFamily="var(--font-inter), sans-serif"
+                  fontSize="xs"
+                  className="lux-text-muted"
+                  letterSpacing="0.12em"
                 >
-                  {m}
+                  {viewingIndex} / {moveHistory.length}
                 </Text>
-              ))}
-              {moveHistory.length === 0 && (
-                <Text color="textMuted" fontSize="sm">
-                  —
-                </Text>
-              )}
-            </Flex>
-          </Box>
+              </HStack>
+              <HStack gap={2} mb={3}>
+                <LuxuryButton
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setViewingIndex((i) => Math.max(0, i - 1))}
+                  disabled={!canGoBack}
+                >
+                  ←
+                </LuxuryButton>
+                <LuxuryButton
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setViewingIndex((i) => Math.min(moveHistory.length, i + 1))}
+                  disabled={!canGoForward}
+                >
+                  →
+                </LuxuryButton>
+                <LuxuryButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setViewingIndex(moveHistory.length)}
+                  disabled={atHead}
+                >
+                  Jump to live
+                </LuxuryButton>
+              </HStack>
+              <Flex
+                gap={2}
+                flexWrap="wrap"
+                maxH="140px"
+                overflowY="auto"
+                pr={1}
+                fontFamily="var(--font-inter), sans-serif"
+              >
+                {moveHistory.map((m, i) => (
+                  <Text
+                    key={i}
+                    fontSize="sm"
+                    color={i < viewingIndex ? "var(--lux-text-primary)" : "var(--lux-text-muted)"}
+                    fontWeight={i === viewingIndex - 1 ? "700" : "500"}
+                    px={1.5}
+                    borderRadius="4px"
+                    bg={i === viewingIndex - 1 ? "rgba(212,175,55,0.12)" : "transparent"}
+                    border={i === viewingIndex - 1 ? "1px solid rgba(212,175,55,0.35)" : "1px solid transparent"}
+                    style={{ letterSpacing: "0.04em" }}
+                  >
+                    {m}
+                  </Text>
+                ))}
+                {moveHistory.length === 0 && (
+                  <Text className="lux-text-muted" fontSize="sm" fontStyle="italic">
+                    The board is set. Make the first move.
+                  </Text>
+                )}
+              </Flex>
+            </Box>
+          </GlassCard>
 
           {!gameResult && atHead && (
             <HStack gap={2}>
-              <Button
-                size="sm"
-                variant="outline"
-                borderColor="statusWarning"
-                color="statusWarning"
-                borderRadius="soft"
-                onClick={handleResign}
-              >
+              <LuxuryButton variant="outline" size="sm" onClick={handleResign} full>
                 Resign
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                borderColor="goldDark"
-                color="textSecondary"
-                borderRadius="soft"
-                onClick={handleOfferDraw}
-              >
+              </LuxuryButton>
+              <LuxuryButton variant="ghost" size="sm" onClick={handleOfferDraw} full>
                 Offer draw
-              </Button>
+              </LuxuryButton>
             </HStack>
           )}
         </VStack>
       </Flex>
 
       <Dialog.Root open={!!gameResult} onOpenChange={() => {}}>
-        <Dialog.Backdrop />
+        <Dialog.Backdrop style={{ background: "rgba(5,7,10,0.86)", backdropFilter: "blur(8px)" }} />
         <Dialog.Positioner>
-          <Dialog.Content bg="bgCard" borderWidth="1px" borderColor="goldDark">
-            <Dialog.Body pt={6}>
-              <Dialog.Title>
-                <Text color="gold" fontSize="xl" fontWeight="700" textAlign="center" mb={2}>
-                  {gameResult === "1-0"
-                    ? "You win!"
-                    : gameResult === "0-1"
-                      ? "You lose"
-                      : "Draw"}
-                </Text>
-              </Dialog.Title>
-              <Text color="textMuted" fontSize="sm" textAlign="center">
-                {gameOverReason} · {gameResult}
-              </Text>
-            </Dialog.Body>
-            <Dialog.Footer gap={2} justifyContent="center" pb={6}>
-              <Button
-                size="sm"
-                bg="gold"
-                color="black"
-                borderRadius="soft"
-                _hover={{ bg: "goldLight" }}
-                onClick={handleRematch}
-              >
-                Rematch
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                borderColor="gold"
-                color="gold"
-                borderRadius="soft"
-                onClick={handlePlayNewGame}
-              >
-                Play new game
-              </Button>
-            </Dialog.Footer>
+          <Dialog.Content
+            bg="transparent"
+            border="none"
+            boxShadow="none"
+            maxW="460px"
+            w="full"
+            mx={4}
+          >
+            <GameOverPanel
+              result={gameResult}
+              reason={gameOverReason}
+              onRematch={handleRematch}
+              onNewGame={handlePlayNewGame}
+            />
           </Dialog.Content>
         </Dialog.Positioner>
       </Dialog.Root>
-    </VStack>
+    </Box>
+  );
+}
+
+/* ─────────── PlayerNameplate ─────────── */
+
+function PlayerNameplate({
+  label,
+  colour,
+  highlight,
+  tierBadge,
+}: {
+  label: string;
+  colour: "white" | "black";
+  highlight: boolean;
+  tierBadge?: React.ReactNode;
+}) {
+  return (
+    <Box
+      px={4}
+      py={2.5}
+      borderRadius="8px"
+      bg="var(--lux-glass-surface)"
+      borderWidth="1px"
+      borderColor={highlight ? "rgba(212,175,55,0.6)" : "var(--lux-glass-border)"}
+      style={{
+        backdropFilter: "blur(12px) saturate(120%)",
+        WebkitBackdropFilter: "blur(12px) saturate(120%)",
+        boxShadow: highlight ? "var(--lux-ring-gold)" : "0 8px 22px rgba(0,0,0,0.35)",
+        transition: "all 0.2s ease",
+      }}
+      minW={{ md: "240px" }}
+    >
+      <HStack gap={3} justify="center" align="center">
+        <Box
+          w="14px"
+          h="14px"
+          borderRadius="full"
+          bg={colour === "white" ? "#f5efe3" : "#0a0d12"}
+          borderWidth="1px"
+          borderColor={colour === "white" ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.4)"}
+          style={{
+            boxShadow:
+              colour === "white"
+                ? "0 0 8px rgba(255,255,255,0.5)"
+                : "0 0 8px rgba(0,0,0,0.7), inset 0 0 4px rgba(255,255,255,0.2)",
+          }}
+        />
+        <Text
+          fontFamily="var(--font-playfair), Georgia, serif"
+          fontSize="md"
+          fontWeight="600"
+          color="var(--lux-text-primary)"
+          letterSpacing="0.04em"
+        >
+          {label}
+        </Text>
+        {tierBadge && <Box>{tierBadge}</Box>}
+        {highlight && (
+          <Box
+            w="6px"
+            h="6px"
+            borderRadius="full"
+            bg="var(--lux-gold)"
+            style={{ boxShadow: "0 0 8px var(--lux-gold)" }}
+          />
+        )}
+      </HStack>
+    </Box>
+  );
+}
+
+/* ─────────── ToggleChip ─────────── */
+
+function ToggleChip({
+  label,
+  on,
+  onToggle,
+  disabled,
+}: {
+  label: string;
+  on: boolean;
+  onToggle: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <Box
+      as="button"
+      onClick={disabled ? undefined : onToggle}
+      px={3.5}
+      py={2}
+      borderRadius="999px"
+      bg="var(--lux-glass-surface)"
+      borderWidth="1px"
+      borderColor={on ? "rgba(212,175,55,0.55)" : "var(--lux-glass-border)"}
+      transition="all 0.2s ease"
+      cursor={disabled ? "not-allowed" : "pointer"}
+      opacity={disabled ? 0.45 : 1}
+      _hover={!disabled ? { borderColor: "rgba(212,175,55,0.55)" } : undefined}
+      style={{ backdropFilter: "blur(12px)" }}
+    >
+      <HStack gap={2}>
+        <Box
+          w="6px"
+          h="6px"
+          borderRadius="full"
+          bg={on ? "var(--lux-gold)" : "rgba(255,255,255,0.3)"}
+          style={on ? { boxShadow: "0 0 6px var(--lux-gold)" } : undefined}
+        />
+        <Text
+          fontFamily="var(--font-inter), sans-serif"
+          fontSize="xs"
+          letterSpacing="0.18em"
+          textTransform="uppercase"
+          fontWeight="600"
+          color={on ? "var(--lux-gold)" : "var(--lux-text-secondary)"}
+        >
+          {label}
+        </Text>
+      </HStack>
+      {/* Hidden Switch state — kept for accessibility tooling */}
+      <Switch.Root checked={on} onCheckedChange={() => {}} hidden>
+        <Switch.HiddenInput />
+        <Switch.Control>
+          <Switch.Thumb />
+        </Switch.Control>
+      </Switch.Root>
+    </Box>
+  );
+}
+
+/* ─────────── GameOverPanel ─────────── */
+
+function GameOverPanel({
+  result,
+  reason,
+  onRematch,
+  onNewGame,
+}: {
+  result: "1-0" | "0-1" | "1/2-1/2" | null;
+  reason: string | null;
+  onRematch: () => void;
+  onNewGame: () => void;
+}) {
+  const title =
+    result === "1-0" ? "Victory" : result === "0-1" ? "Defeat" : "Draw";
+  const subtitle =
+    result === "1-0"
+      ? "A clean finish. The board belongs to you."
+      : result === "0-1"
+        ? "The engine had the last word — review the game and return."
+        : "The position would not yield. A composed result.";
+
+  return (
+    <Box
+      position="relative"
+      p={{ base: 6, md: 8 }}
+      borderRadius="12px"
+      bg="var(--lux-obsidian-elev)"
+      borderWidth="1px"
+      borderColor="rgba(212,175,55,0.4)"
+      style={{
+        boxShadow:
+          "0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07), 0 0 60px rgba(212,175,55,0.18)",
+      }}
+    >
+      <Box
+        position="absolute"
+        inset={0}
+        pointerEvents="none"
+        style={{ background: "var(--lux-gradient-hero)", borderRadius: 12 }}
+      />
+      <VStack gap={4} textAlign="center" position="relative" zIndex={1}>
+        <LuxuryEyebrow>{reason ?? "Game complete"} · {result}</LuxuryEyebrow>
+        <Box>
+          <Text
+            fontFamily="var(--font-playfair), Georgia, serif"
+            fontSize={{ base: "5xl", md: "6xl" }}
+            color="var(--lux-gold)"
+            fontWeight="600"
+            lineHeight="1"
+            letterSpacing="0.04em"
+            style={{ textShadow: "0 0 20px rgba(212,175,55,0.4)", fontStyle: "italic" }}
+          >
+            {title}
+          </Text>
+        </Box>
+        <Box display="flex" justifyContent="center">
+          <GoldRule wide />
+        </Box>
+        <Text fontSize="sm" className="lux-text-secondary" maxW="md" lineHeight="1.6">
+          {subtitle}
+        </Text>
+        <HStack mt={3} gap={3} justify="center" flexWrap="wrap">
+          <LuxuryButton variant="gold" size="md" glyph="↻" onClick={onRematch}>
+            Rematch
+          </LuxuryButton>
+          <LuxuryButton variant="outline" size="md" onClick={onNewGame}>
+            New game
+          </LuxuryButton>
+          <LuxuryButton variant="ghost" size="md" href="/road-to-master">
+            Road to Master
+          </LuxuryButton>
+        </HStack>
+      </VStack>
+    </Box>
   );
 }

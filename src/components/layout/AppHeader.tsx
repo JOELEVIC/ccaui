@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Box, Flex, HStack, Text, Button, Image, IconButton } from "@chakra-ui/react";
+import { Box, Flex, HStack, Text, Button, IconButton } from "@chakra-ui/react";
 import { useAuth } from "@/lib/auth";
 import { APP_NAME } from "@/lib/appName";
-import { IconSearch, IconBell, IconMail, IconChevronDown } from "@/components/layout/HeaderIcons";
+import { IconSearch, IconBell, IconMail } from "@/components/layout/HeaderIcons";
+import { MemberBadge } from "@/components/luxury/MemberBadge";
 
 const CENTER_NAV: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Play" },
@@ -22,50 +23,71 @@ export interface AppHeaderProps {
 export function AppHeader({ onOpenMore, onOpenSearch }: AppHeaderProps) {
   const pathname = usePathname();
   const { user } = useAuth();
-  const initial = user?.username?.charAt(0)?.toUpperCase() ?? "?";
 
   return (
     <Box
       as="header"
       w="full"
-      borderBottomWidth="1px"
-      borderColor="whiteAlpha.100"
-      bg="bgDark"
-      px={{ base: 3, md: 6 }}
-      py={3}
+      position="relative"
+      bg="var(--lux-obsidian)"
+      px={{ base: 4, md: 10 }}
+      py={{ base: 3.5, md: 4 }}
+      style={{
+        // Hairline gradient border that fades toward the edges — feels more
+        // premium than a flat 1px line across the full width.
+        boxShadow:
+          "inset 0 -1px 0 rgba(255,255,255,0.05), inset 0 -2px 0 rgba(212,175,55,0.04)",
+      }}
     >
-      <Flex align="center" justify="space-between" gap={3} flexWrap="wrap">
-        <HStack gap={{ base: 2, md: 8 }} flexShrink={0}>
-          <Link href="/dashboard">
-            <Text
-              fontFamily="var(--font-playfair), Georgia, serif"
-              fontSize={{ base: "lg", md: "xl" }}
-              color="gold"
-              fontWeight="600"
-              letterSpacing="tight"
-            >
-              {APP_NAME}
-            </Text>
+      <Flex align="center" justify="space-between" gap={{ base: 3, md: 6 }} flexWrap="wrap">
+        <HStack gap={{ base: 4, md: 10 }} flexShrink={0}>
+          <Link href="/dashboard" style={{ textDecoration: "none" }}>
+            <HStack gap={2.5} align="center">
+              {/* Tiny gold rule before the wordmark */}
+              <Box w="22px" h="1px" bg="var(--lux-gold)" style={{ boxShadow: "0 0 6px var(--lux-gold-muted)" }} />
+              <Text
+                fontFamily="var(--font-playfair), Georgia, serif"
+                fontSize={{ base: "lg", md: "xl" }}
+                color="var(--lux-text-primary)"
+                fontWeight="600"
+                letterSpacing="0.04em"
+              >
+                {APP_NAME}
+              </Text>
+            </HStack>
           </Link>
-          <HStack gap={1} display={{ base: "none", md: "flex" }}>
+          <HStack gap={{ md: 2, lg: 4 }} display={{ base: "none", md: "flex" }}>
             {CENTER_NAV.map((n) => {
               const active =
                 n.href === "/dashboard"
                   ? pathname === "/dashboard" || pathname === "/games" || pathname.startsWith("/game/")
                   : pathname === n.href || pathname.startsWith(n.href + "/");
               return (
-                <Link key={n.href} href={n.href}>
-                  <Box
-                    px={3}
-                    py={1.5}
-                    borderRadius="soft"
-                    color={active ? "gold" : "textSecondary"}
-                    bg={active ? "whiteAlpha.06" : "transparent"}
-                    fontSize="sm"
-                    fontWeight={active ? "600" : "500"}
-                    _hover={{ color: "gold" }}
-                  >
-                    {n.label}
+                <Link key={n.href} href={n.href} style={{ textDecoration: "none" }}>
+                  <Box position="relative" px={3} py={2.5}>
+                    <Text
+                      fontFamily="var(--font-inter), sans-serif"
+                      color={active ? "var(--lux-text-primary)" : "var(--lux-text-secondary)"}
+                      fontSize="sm"
+                      fontWeight={active ? "600" : "500"}
+                      letterSpacing="0.08em"
+                      textTransform="uppercase"
+                      transition="color 0.2s"
+                      _hover={{ color: "var(--lux-gold-bright)" }}
+                    >
+                      {n.label}
+                    </Text>
+                    {active && (
+                      <Box
+                        position="absolute"
+                        left="50%"
+                        bottom="-2px"
+                        w="20px"
+                        h="1.5px"
+                        bg="var(--lux-gold)"
+                        style={{ transform: "translateX(-50%)", boxShadow: "0 0 6px var(--lux-gold-muted)" }}
+                      />
+                    )}
                   </Box>
                 </Link>
               );
@@ -73,17 +95,22 @@ export function AppHeader({ onOpenMore, onOpenSearch }: AppHeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              color="textSecondary"
-              _hover={{ color: "gold" }}
+              color="var(--lux-text-secondary)"
+              _hover={{ color: "var(--lux-gold-bright)", bg: "transparent" }}
               onClick={onOpenMore}
               display={{ base: "none", md: "inline-flex" }}
+              fontFamily="var(--font-inter), sans-serif"
+              fontSize="sm"
+              letterSpacing="0.08em"
+              textTransform="uppercase"
+              px={3}
             >
-              More ▾
+              More
             </Button>
           </HStack>
         </HStack>
 
-        <HStack gap={0} flexShrink={0} alignItems="center">
+        <HStack gap={1} flexShrink={0} alignItems="center">
           <IconButton
             variant="ghost"
             aria-label="Search"
@@ -93,8 +120,9 @@ export function AppHeader({ onOpenMore, onOpenSearch }: AppHeaderProps) {
             w="40px"
             h="40px"
             minW="40px"
-            color="textSecondary"
-            _hover={{ color: "gold", bg: "whiteAlpha.06" }}
+            color="var(--lux-text-secondary)"
+            _hover={{ color: "var(--lux-gold-bright)", bg: "var(--lux-glass-surface)" }}
+            borderRadius="999px"
           >
             <IconSearch />
           </IconButton>
@@ -106,8 +134,9 @@ export function AppHeader({ onOpenMore, onOpenSearch }: AppHeaderProps) {
             w="40px"
             h="40px"
             minW="40px"
-            color="textSecondary"
-            _hover={{ color: "gold", bg: "whiteAlpha.06" }}
+            color="var(--lux-text-secondary)"
+            _hover={{ color: "var(--lux-gold-bright)", bg: "var(--lux-glass-surface)" }}
+            borderRadius="999px"
           >
             <IconBell />
           </IconButton>
@@ -119,64 +148,19 @@ export function AppHeader({ onOpenMore, onOpenSearch }: AppHeaderProps) {
             w="40px"
             h="40px"
             minW="40px"
-            color="textSecondary"
-            _hover={{ color: "gold", bg: "whiteAlpha.06" }}
+            color="var(--lux-text-secondary)"
+            _hover={{ color: "var(--lux-gold-bright)", bg: "var(--lux-glass-surface)" }}
+            borderRadius="999px"
           >
             <IconMail />
           </IconButton>
-          <Link href="/profile">
-            <HStack
-              gap={2}
-              px={2}
-              py={1}
-              h="40px"
-              borderRadius="soft"
-              alignItems="center"
-              _hover={{ bg: "whiteAlpha.06" }}
-            >
-              {user?.profile?.avatarUrl ? (
-                <Image
-                  src={user.profile.avatarUrl}
-                  alt=""
-                  boxSize="28px"
-                  borderRadius="full"
-                  objectFit="cover"
-                  flexShrink={0}
-                />
-              ) : (
-                <Box
-                  w="28px"
-                  h="28px"
-                  borderRadius="full"
-                  bg="goldDark"
-                  color="gold"
-                  borderWidth="1px"
-                  borderColor="whiteAlpha.200"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  fontWeight="bold"
-                  fontSize="xs"
-                  flexShrink={0}
-                >
-                  {initial}
-                </Box>
-              )}
-              <Text
-                display={{ base: "none", md: "block" }}
-                fontSize="sm"
-                color="textPrimary"
-                maxW="100px"
-                lineClamp={1}
-                fontWeight="500"
-              >
-                {user?.username ?? "Guest"}
-              </Text>
-              <Box display={{ base: "none", md: "flex" }} color="textMuted" alignItems="center">
-                <IconChevronDown />
-              </Box>
-            </HStack>
-          </Link>
+          <Box ml={{ base: 1, md: 2 }}>
+            <MemberBadge
+              username={user?.username}
+              rating={user?.rating}
+              avatarUrl={user?.profile?.avatarUrl}
+            />
+          </Box>
         </HStack>
       </Flex>
     </Box>

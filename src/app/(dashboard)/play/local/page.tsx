@@ -1,10 +1,17 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import Link from "next/link";
-import { Box, Button, Text, VStack, HStack, Flex } from "@chakra-ui/react";
+import { Box, Text, VStack, HStack, Flex } from "@chakra-ui/react";
 import { Chess } from "chess.js";
 import { GameBoard } from "@/components/chess/GameBoard";
+import {
+  ChessWatermark,
+  GlassCard,
+  GoldRule,
+  LuxuryButton,
+  LuxuryEyebrow,
+  LuxuryHeading,
+} from "@/components/luxury/LuxuryPrimitives";
 
 const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -28,37 +35,55 @@ export default function PlayLocalPage() {
   const handleNewGame = () => setFen(START_FEN);
 
   return (
-    <VStack align="stretch" gap={6}>
-      <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
-        <Text color="gold" fontWeight="600" fontSize="lg">
-          Play vs Self
-        </Text>
-        <HStack gap={2}>
-          <Button
-            size="sm"
-            variant="outline"
-            borderColor="goldDark"
-            color="textSecondary"
-            borderRadius="soft"
-            onClick={() => setOrientation(o => (o === "white" ? "black" : "white"))}
-          >
-            Flip board
-          </Button>
-          <Button size="sm" borderRadius="soft" bg="gold" color="black" _hover={{ bg: "goldLight" }} onClick={handleNewGame}>
-            New game
-          </Button>
-          <Link href="/games">
-            <Button size="sm" variant="ghost" color="textMuted" borderRadius="soft">
-              Back to Play
-            </Button>
-          </Link>
-        </HStack>
-      </Flex>
+    <Box position="relative" maxW="1180px" mx="auto">
+      <ChessWatermark piece="rook" size={380} opacity={0.035} position={{ top: "40px", right: "-50px" }} />
 
-      <Flex direction={{ base: "column", lg: "row" }} justify="center" align="flex-start" gap={6}>
-        <VStack gap={2}>
-          <Box py={2} px={3} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="goldDark" minW="200px" textAlign="center">
-            <Text color="textMuted" fontSize="xs">You (both sides)</Text>
+      <Box mb={{ base: 5, md: 7 }} position="relative" zIndex={1}>
+        <HStack justify="space-between" align="flex-end" flexWrap="wrap" gap={4}>
+          <Box>
+            <LuxuryEyebrow>At the Board · Local</LuxuryEyebrow>
+            <Box mt={2}>
+              <LuxuryHeading size="lg">
+                Pass <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>and play</Text>.
+              </LuxuryHeading>
+            </Box>
+            <HStack mt={3} gap={3} align="center">
+              <GoldRule />
+              <Text fontSize="sm" className="lux-text-secondary">
+                One device, two players. Flip the board between moves or share a screen at the table.
+              </Text>
+            </HStack>
+          </Box>
+          <HStack gap={3} flexWrap="wrap">
+            <LuxuryButton variant="ghost" size="sm" glyph="↺" onClick={() => setOrientation((o) => (o === "white" ? "black" : "white"))}>
+              Flip board
+            </LuxuryButton>
+            <LuxuryButton variant="gold" size="sm" glyph="↻" onClick={handleNewGame}>
+              New game
+            </LuxuryButton>
+            <LuxuryButton variant="ghost" size="sm" glyph="←" href="/games">
+              Back to Play
+            </LuxuryButton>
+          </HStack>
+        </HStack>
+      </Box>
+
+      <Flex direction={{ base: "column", lg: "row" }} justify="center" align="flex-start" gap={{ base: 4, lg: 7 }}>
+        <VStack gap={3} flex="0 0 auto">
+          <Box
+            px={4}
+            py={2.5}
+            borderRadius="8px"
+            bg="var(--lux-glass-surface)"
+            borderWidth="1px"
+            borderColor="var(--lux-glass-border)"
+            style={{ backdropFilter: "blur(12px)" }}
+            minW="240px"
+            textAlign="center"
+          >
+            <Text fontSize="xs" className="lux-text-muted" letterSpacing="0.2em" textTransform="uppercase">
+              {orientation === "white" ? "Black" : "White"} · top
+            </Text>
           </Box>
           <GameBoard
             fen={fen}
@@ -67,29 +92,82 @@ export default function PlayLocalPage() {
             onMove={handleMove}
             allowMove={!isGameOver}
           />
-          <Box py={2} px={3} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="goldDark" minW="200px" textAlign="center">
-            <Text color="textMuted" fontSize="xs">{turnIsWhite ? "White" : "Black"} to move</Text>
+          <Box
+            px={4}
+            py={2.5}
+            borderRadius="8px"
+            bg="var(--lux-glass-surface)"
+            borderWidth="1px"
+            borderColor={isGameOver ? "rgba(212,175,55,0.55)" : "var(--lux-glass-border)"}
+            style={{
+              backdropFilter: "blur(12px)",
+              boxShadow: isGameOver ? "var(--lux-ring-gold)" : undefined,
+            }}
+            minW="240px"
+            textAlign="center"
+          >
+            <HStack gap={2} justify="center" align="center">
+              <Box
+                w="8px"
+                h="8px"
+                borderRadius="full"
+                bg={turnIsWhite ? "#f5efe3" : "#0a0d12"}
+                borderWidth="1px"
+                borderColor={turnIsWhite ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.45)"}
+              />
+              <Text
+                fontFamily="var(--font-inter), sans-serif"
+                fontSize="xs"
+                letterSpacing="0.2em"
+                textTransform="uppercase"
+                color="var(--lux-text-primary)"
+                fontWeight="600"
+              >
+                {turnIsWhite ? "White" : "Black"} to move
+              </Text>
+            </HStack>
           </Box>
         </VStack>
-        <Box
-          py={3}
-          px={4}
-          borderRadius="soft"
-          borderWidth="1px"
-          borderColor="goldDark"
-          bg="bgCard"
-          maxH="400px"
-          overflowY="auto"
-          minW="200px"
-        >
-          <Text color="gold" fontSize="xs" fontWeight="600" mb={2}>
-            Moves
-          </Text>
-          <Text color="textMuted" fontSize="sm">
-            {isGameOver ? (chess.isCheckmate() ? `Checkmate. ${turnIsWhite ? "Black" : "White"} wins.` : "Game over.") : "—"}
-          </Text>
+
+        <Box flex="1 1 280px" minW="260px" maxW={{ lg: "380px" }}>
+          <GlassCard>
+            <Box px={5} py={4}>
+              <LuxuryEyebrow>Match Status</LuxuryEyebrow>
+              <Box mt={3}>
+                {isGameOver ? (
+                  <VStack align="stretch" gap={2}>
+                    <Text
+                      fontFamily="var(--font-playfair), Georgia, serif"
+                      fontSize="2xl"
+                      color="var(--lux-gold)"
+                      fontWeight="600"
+                      letterSpacing="0.04em"
+                      lineHeight="1.1"
+                      style={{ fontStyle: "italic" }}
+                    >
+                      {chess.isCheckmate()
+                        ? `${turnIsWhite ? "Black" : "White"} wins.`
+                        : "Drawn."}
+                    </Text>
+                    <Text fontSize="sm" className="lux-text-secondary">
+                      {chess.isCheckmate() ? "Checkmate." : "The position is balanced — no decisive line."}
+                    </Text>
+                    <Box pt={2}>
+                      <LuxuryButton variant="gold" size="sm" glyph="↻" onClick={handleNewGame}>
+                        Reset the board
+                      </LuxuryButton>
+                    </Box>
+                  </VStack>
+                ) : (
+                  <Text fontSize="sm" className="lux-text-secondary" lineHeight="1.55">
+                    The board is set. Make a move — the clock starts when the first piece lifts.
+                  </Text>
+                )}
+              </Box>
+            </Box>
+          </GlassCard>
         </Box>
       </Flex>
-    </VStack>
+    </Box>
   );
 }
