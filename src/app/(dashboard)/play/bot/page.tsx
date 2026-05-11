@@ -127,9 +127,9 @@ export default function PlayBotPage() {
   const {
     getBestMove,
     getEvaluation,
-    ready: stockfishReady,
     error: stockfishError,
     wasmDead,
+    warming: engineWarming,
   } = useStockfish(elo);
 
   const displayFen = useMemo(
@@ -177,11 +177,11 @@ export default function PlayBotPage() {
 
   const runBot = useCallback(async () => {
     const nextFen = fen;
-    let moveStr: string | null = null;
-
-    if (stockfishReady) {
-      moveStr = await getBestMove(nextFen);
-    }
+    // Always ask the engine first — getBestMove internally falls through
+    // WASM → backend → null. Only as an absolute last resort do we play
+    // a random legal move (so the game never deadlocks even if both
+    // engines are unreachable).
+    let moveStr: string | null = await getBestMove(nextFen);
     if (!moveStr) {
       moveStr = getRandomMove(nextFen);
     }
@@ -203,7 +203,7 @@ export default function PlayBotPage() {
       }
     }
     setBotThinking(false);
-  }, [fen, stockfishReady, getBestMove]);
+  }, [fen, getBestMove]);
 
   useEffect(() => {
     if (!botThinking) return;
@@ -382,12 +382,17 @@ export default function PlayBotPage() {
           </HStack>
         </HStack>
 
+        {engineWarming && !wasmDead && (
+          <Text mt={3} fontSize="xs" color="rgba(0,240,255,0.85)" letterSpacing="0.16em" textTransform="uppercase">
+            ◇ Engine warming up — first move may take a moment
+          </Text>
+        )}
         {wasmDead && (
           <Text mt={3} fontSize="xs" color="rgba(255,200,120,0.9)" letterSpacing="0.16em" textTransform="uppercase">
             ◇ Browser engine offline — running on server
           </Text>
         )}
-        {stockfishError && !wasmDead && (
+        {stockfishError && !wasmDead && !engineWarming && (
           <Text mt={3} fontSize="xs" color="rgba(240,101,149,0.9)" letterSpacing="0.16em" textTransform="uppercase">
             ⚠ {stockfishError}
           </Text>

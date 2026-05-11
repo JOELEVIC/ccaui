@@ -10,11 +10,18 @@ export interface Evaluation {
 }
 
 const ENGINE_URL = "/stockfish/stockfish-18-lite-single.js";
+const WASM_URL = "/stockfish/stockfish-18-lite-single.wasm";
 const BESTMOVE_DEPTH = 12;
 const EVAL_DEPTH = 14;
-const REQUEST_TIMEOUT_MS = 8000;
-/** How long we wait for the worker to send a UCI "readyok" before giving up. */
-const READY_TIMEOUT_MS = 4000;
+/** Per-search timeout. The first search after warmup may include some
+ *  JIT compilation, hence 15 s. */
+const REQUEST_TIMEOUT_MS = 15_000;
+/** How long we wait for the worker to send a UCI "readyok" before giving
+ *  up. A 7 MB WASM can take 10–20 s to fetch + compile on a cold cache;
+ *  hence 25 s. */
+const READY_TIMEOUT_MS = 25_000;
+/** How long we wait for the HEAD pre-flight on the wasm URL. */
+const PREFLIGHT_TIMEOUT_MS = 5_000;
 
 type PendingResolver = {
   done: (line: string) => boolean;
@@ -46,7 +53,51 @@ const ENGINE_EVALUATION = gql`
   }
 `;
 
+/* ───────────────────────────────────────────────────────────────────
+ * Pre-flight WASM check — HEAD the wasm URL and confirm the response
+ * looks like a wasm payload. Catches the most common cause of "engine
+ * timeout": the wasm 404s and the loader silently fails.
+ * ─────────────────────────────────────────────────────────────────── */
+
+async function preflightWasm(): Promise<{ ok: boolean; reason?: string }> {
+  if (typeof fetch === "undefined") return { ok: true };
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), PREFLIGHT_TIMEOUT_MS);
+  try {
+    const res = await fetch(WASM_URL, { method: "HEAD", signal: ctl.signal });
+    clearTimeout(timer);
+    if (!res.ok) {
+      return { ok: false, reason: `wasm ${res.status} ${res.statusText}` };
+    }
+    const ct = (res.headers.get("content-type") ?? "").toLowerCase();
+    // Accept application/wasm OR octet-stream (some CDNs label it that way).
+    if (ct && !ct.includes("wasm") && !ct.includes("octet-stream")) {
+      return { ok: false, reason: `wasm wrong content-type: ${ct}` };
+    }
+    return { ok: true };
+  } catch (err) {
+    clearTimeout(timer);
+    return {
+      ok: false,
+      reason: err instanceof Error ? `wasm preflight: ${err.message}` : "wasm preflight failed",
+    };
+  }
+}
+
+function describeBackendError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (/cannot query field|unknown field|400/i.test(msg)) {
+    return "backend missing /engine endpoint (needs redeploy)";
+  }
+  return msg;
+}
+
+/** Backend has been confirmed missing the engine endpoint — set after first
+ *  schema-mismatch error so we stop hammering it for the rest of the session. */
+let backendEngineMissing = false;
+
 async function backendBestMove(fen: string, elo: number): Promise<string | null> {
+  if (backendEngineMissing) return null;
   try {
     const { data } = await apolloClient.query<{ engineBestMove: string | null }>({
       query: ENGINE_BEST_MOVE,
@@ -55,13 +106,16 @@ async function backendBestMove(fen: string, elo: number): Promise<string | null>
     });
     return data?.engineBestMove ?? null;
   } catch (err) {
+    const reason = describeBackendError(err);
+    if (reason.includes("backend missing")) backendEngineMissing = true;
     // eslint-disable-next-line no-console
-    console.warn("[engine] backend fallback failed", err);
+    console.warn(`[engine] backend bestMove failed: ${reason}`);
     return null;
   }
 }
 
 async function backendEvaluation(fen: string): Promise<Evaluation> {
+  if (backendEngineMissing) return { cp: null, mate: null };
   try {
     const { data } = await apolloClient.query<{ engineEvaluation: Evaluation | null }>({
       query: ENGINE_EVALUATION,
@@ -70,8 +124,10 @@ async function backendEvaluation(fen: string): Promise<Evaluation> {
     });
     return data?.engineEvaluation ?? { cp: null, mate: null };
   } catch (err) {
+    const reason = describeBackendError(err);
+    if (reason.includes("backend missing")) backendEngineMissing = true;
     // eslint-disable-next-line no-console
-    console.warn("[engine] backend evaluation fallback failed", err);
+    console.warn(`[engine] backend evaluation failed: ${reason}`);
     return { cp: null, mate: null };
   }
 }
@@ -330,41 +386,70 @@ export function useStockfish(elo: number) {
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [wasmDead, setWasmDead] = useState(false);
+  /** True while the WASM is downloading + compiling and hasn't said readyok yet. */
+  const [warming, setWarming] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (typeof Worker === "undefined") {
       // No worker support → use backend exclusively.
+      // eslint-disable-next-line no-console
+      console.info("[engine] Web Workers unsupported, using server engine");
       setWasmDead(true);
       setReady(true);
       return;
     }
     let mounted = true;
-    const driver = new EngineDriver(elo, (reason) => {
+    setWarming(true);
+
+    void (async () => {
+      // 1. Pre-flight: confirm the wasm file is reachable + has a sensible
+      //    content-type. Catches the silent 404→HTML failure that surfaces
+      //    later as a confusing WebAssembly.instantiate error.
+      const preflight = await preflightWasm();
       if (!mounted) return;
-      setWasmDead(true);
-      setError(reason);
-    });
-    driverRef.current = driver;
-    // Probe the worker. We mark "ready" as soon as we know which path
-    // we'll use (either WASM warmed up, or it failed and we go server-side).
-    driver
-      .warmup()
-      .then((ok) => {
-        if (!mounted) return;
-        if (!ok) setWasmDead(true);
+      if (!preflight.ok) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[engine] ${preflight.reason}. WASM unavailable, using server engine.`,
+        );
+        setWasmDead(true);
+        setError(preflight.reason ?? null);
+        setWarming(false);
         setReady(true);
-      })
-      .catch(() => {
+        return;
+      }
+
+      // 2. Create the driver and run a warmup probe.
+      const driver = new EngineDriver(elo, (reason) => {
         if (!mounted) return;
         setWasmDead(true);
-        setReady(true);
+        setError(reason);
       });
+      driverRef.current = driver;
+      const ok = await driver.warmup();
+      if (!mounted) return;
+      if (!ok) {
+        setWasmDead(true);
+        // eslint-disable-next-line no-console
+        console.warn(
+          "[engine] WASM warmup didn't return readyok in time, using server engine. " +
+            "First moves may take a moment.",
+        );
+      } else {
+        // eslint-disable-next-line no-console
+        console.info("[engine] WASM engine ready");
+      }
+      setWarming(false);
+      setReady(true);
+    })();
+
     return () => {
       mounted = false;
-      driver.destroy();
+      driverRef.current?.destroy();
       driverRef.current = null;
       setReady(false);
+      setWarming(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -411,5 +496,5 @@ export function useStockfish(elo: number) {
     [wasmDead],
   );
 
-  return { getBestMove, getEvaluation, ready, error, wasmDead };
+  return { getBestMove, getEvaluation, ready, error, wasmDead, warming };
 }
