@@ -143,7 +143,25 @@ function moveScore(m: Move): number {
   }
   if (m.promotion) s += PIECE_VALUE[m.promotion] ?? 0;
   if ((m.flags ?? "").includes("c")) s += 5; // castling
+  // Checks first — under tight deadlines this guarantees we always look at
+  // mate-delivering moves before quiet moves get evaluated.
+  if (m.san?.endsWith("#")) s += 50_000;
+  else if (m.san?.endsWith("+")) s += 50;
   return s;
+}
+
+/** Scan root moves for an immediate checkmate. Cheap, always runs first. */
+function findMateInOne(c: Chess, moves: Move[]): Move | null {
+  for (const m of moves) {
+    if (m.san?.endsWith("#")) return m;
+    // Some chess.js versions don't suffix '#' until after the move is made;
+    // double-check by playing it.
+    c.move(m);
+    const mate = c.isCheckmate();
+    c.undo();
+    if (mate) return m;
+  }
+  return null;
 }
 
 interface NegamaxResult {
@@ -214,10 +232,21 @@ export function getBestMoveJS(fen: string, elo: number = 1600): string | null {
   if (c.isGameOver()) return null;
 
   const { depth, topK } = configForElo(elo);
-  const deadline = Date.now() + 600;
+  // Generous deadline — Vercel functions have a 10 s budget, no reason to
+  // be tight. Cold-start V8 in serverless can run negamax ~3× slower than
+  // a warm local Node.
+  const deadline = Date.now() + 1500;
+
+  const allMoves = c.moves({ verbose: true });
+
+  // Fast path: if any root move is a forced checkmate, just play it. This
+  // guarantees we never miss mate-in-1 even when the deeper search would
+  // time out before reaching that move in the iteration order.
+  const mate = findMateInOne(c, allMoves);
+  if (mate) return `${mate.from}${mate.to}${mate.promotion ?? ""}`;
 
   // Score every root move (so we can pick from top-K for lower Elo bots).
-  const rootMoves = orderMoves(c.moves({ verbose: true }));
+  const rootMoves = orderMoves(allMoves);
   const scored: { move: Move; score: number }[] = [];
   for (const m of rootMoves) {
     c.move(m);
