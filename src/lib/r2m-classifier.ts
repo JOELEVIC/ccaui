@@ -147,7 +147,6 @@ export function attributesFromGames(games: GameStats[]): Attributes {
   const totalQuiet = games.reduce((s, g) => s + g.quietMoves, 0);
   const totalChecks = games.reduce((s, g) => s + g.checks, 0);
   const wins = games.filter((g) => g.perspectiveWin).length;
-  const losses = games.filter((g) => g.perspectiveLoss).length;
   const mateWins = games.filter((g) => g.endedInMate && g.perspectiveWin).length;
   const longGames = games.filter((g) => g.plies > 60).length;
   const longWins = games.filter((g) => g.plies > 60 && g.perspectiveWin).length;
