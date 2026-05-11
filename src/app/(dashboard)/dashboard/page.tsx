@@ -88,12 +88,9 @@ export default function DashboardPage() {
                   .
                 </LuxuryHeading>
               </Box>
-              <HStack mt={4} gap={3} align="center">
+              <Box mt={4}>
                 <GoldRule wide />
-                <Text fontSize="sm" className="lux-text-secondary" letterSpacing="0.04em" maxW="2xl">
-                  Tonight&apos;s board awaits. Drill a tactic, study a master, or step into the arena.
-                </Text>
-              </HStack>
+              </Box>
             </Box>
 
             <HStack gap={3} align="center" pt={1}>
@@ -139,19 +136,15 @@ export default function DashboardPage() {
               />
               <HStack justify="space-between" align="center" flexWrap="wrap" gap={6} position="relative" zIndex={1}>
                 <VStack align="flex-start" gap={3} maxW="2xl">
-                  <LuxuryEyebrow>The Path · Road to Master</LuxuryEyebrow>
+                  <LuxuryEyebrow>Road to Master</LuxuryEyebrow>
                   <LuxuryHeading size="xl">
                     From <Text as="span" color="var(--lux-gold)">apprentice</Text> to{" "}
                     <Text as="span" color="var(--lux-gold)">monarch</Text>.
                   </LuxuryHeading>
-                  <Text className="lux-text-secondary" fontSize="md" lineHeight="1.65" maxW="lg">
-                    Today&apos;s quests, your Hunter status, and a 100-level dungeon map.
-                    Each gate cleared sharpens an attribute on your radar.
-                  </Text>
                 </VStack>
-                <Box flexShrink={0} pt={2}>
+                <Box flexShrink={0}>
                   <LuxuryButton variant="gold" size="lg" glyph="▸" href="/road-to-master">
-                    Enter the Path
+                    Enter
                   </LuxuryButton>
                 </Box>
               </HStack>
@@ -167,31 +160,31 @@ export default function DashboardPage() {
             <motion.div variants={staggerChild}>
               <ActionTile
                 href="/games"
-                eyebrow="Live · Matchmaking"
+                eyebrow="Matchmaking"
                 title="Play with the field"
-                description="Find an opponent at your level and play a rated game."
+                description="Rated game, opponent at your level."
                 glyph="♚"
-                cta="Find a Match"
+                cta="Find Match"
               />
             </motion.div>
             <motion.div variants={staggerChild}>
               <ActionTile
                 href="/games"
-                eyebrow="Private · Invitation"
-                title="Play with a friend"
-                description="Generate a private link and start a challenge."
+                eyebrow="Private"
+                title="Play a friend"
+                description="Share a link, start a challenge."
                 glyph="♛"
-                cta="Send Invitation"
+                cta="Invite"
               />
             </motion.div>
             <motion.div variants={staggerChild}>
               <ActionTile
                 href="/play/bot"
-                eyebrow="Training · Solo"
+                eyebrow="Solo"
                 title="Spar the engine"
-                description="Practise against Stockfish at any strength from 230 to 3200 Elo."
+                description="Stockfish · 230 to 3200 Elo."
                 glyph="♞"
-                cta="Begin Sparring"
+                cta="Begin"
               />
             </motion.div>
           </SimpleGrid>
@@ -203,14 +196,14 @@ export default function DashboardPage() {
         <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
           <LocalPlayTile
             href="/play/local"
-            title="One device · Two players"
-            description="Pass-and-play with a chess clock."
+            title="Two players · one device"
+            description="Pass and play."
             glyph="♟"
           />
           <LocalPlayTile
             href="/play/local"
-            title="Solo · Chess timer"
-            description="Time a game over the board with a saved clock."
+            title="Chess timer"
+            description="OTB clock."
             glyph="⏱"
           />
         </SimpleGrid>
@@ -272,7 +265,7 @@ export default function DashboardPage() {
       )}
 
       {/* Member Metrics */}
-      <Section eyebrow="The Academy" title="Tonight at Cameroon Chess Academy" mt={{ base: 8, md: 12 }}>
+      <Section eyebrow="The Academy" title="Tonight" mt={{ base: 8, md: 12 }}>
         <GlassCard>
           <HStack
             px={{ base: 5, md: 8 }}
@@ -283,22 +276,20 @@ export default function DashboardPage() {
             align="flex-start"
           >
             <LuxuryStat
-              label="Members in residence"
+              label="Members"
               value={playersTotal.toLocaleString()}
               emphasis="gold"
-              hint="Lifetime registrations across the academy."
             />
             <Box display={{ base: "none", md: "block" }} h="60px" w="1px" bg="var(--lux-glass-border)" />
             <LuxuryStat
-              label="Now at the board"
+              label="Playing now"
               value={playingNow.toLocaleString()}
-              hint="Active games in the last 90 seconds."
             />
             <Box display={{ base: "none", md: "block" }} h="60px" w="1px" bg="var(--lux-glass-border)" />
             <LuxuryStat
               label="Your rating"
               value={String(user?.rating ?? "—")}
-              hint={`${tier.label} · ${tier.rank}-Rank.`}
+              hint={`${tier.label} · ${tier.rank}-Rank`}
             />
           </HStack>
         </GlassCard>

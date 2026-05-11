@@ -2,12 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Box, Heading, Text, VStack, Button, Input, HStack, Flex } from "@chakra-ui/react";
-import Link from "next/link";
+import { Box, Flex, HStack, Input, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { toaster } from "@/lib/toaster";
 import { CREATE_GAME } from "@/graphql/mutations/games";
+import {
+  ChessWatermark,
+  GlassCard,
+  GoldRule,
+  LuxuryButton,
+  LuxuryEyebrow,
+  LuxuryHeading,
+} from "@/components/luxury/LuxuryPrimitives";
+
 const BOT_ELO_PRESETS = [230, 400, 600, 800, 1000, 1200, 1600, 2000, 2400, 2800, 3200];
 
 const LIVE_GAMES = gql`
@@ -16,16 +24,8 @@ const LIVE_GAMES = gql`
       id
       status
       timeControl
-      white {
-        id
-        username
-        rating
-      }
-      black {
-        id
-        username
-        rating
-      }
+      white { id username rating }
+      black { id username rating }
     }
   }
 `;
@@ -37,27 +37,15 @@ const MY_GAMES = gql`
       status
       result
       timeControl
-      white {
-        id
-        username
-        rating
-      }
-      black {
-        id
-        username
-        rating
-      }
+      white { id username rating }
+      black { id username rating }
     }
   }
 `;
 
 const USERS = gql`
   query GamesUsers {
-    users {
-      id
-      username
-      rating
-    }
+    users { id username rating }
   }
 `;
 
@@ -73,8 +61,12 @@ export default function GamesPage() {
   const [blackId, setBlackId] = useState("");
   const [timeControl, setTimeControl] = useState("10+0");
 
-  const { data: liveData } = useQuery<{ liveGames: Array<{ id: string; white: { username: string }; black: { username: string }; timeControl: string }> }>(LIVE_GAMES);
-  const { data: myData } = useQuery<{ myGames: Array<{ id: string; status: string; result?: string; white: { username: string }; black: { username: string } }> }>(MY_GAMES, { variables: { status: null } });
+  const { data: liveData } = useQuery<{
+    liveGames: Array<{ id: string; white: { username: string }; black: { username: string }; timeControl: string }>;
+  }>(LIVE_GAMES);
+  const { data: myData } = useQuery<{
+    myGames: Array<{ id: string; status: string; result?: string; white: { username: string }; black: { username: string } }>;
+  }>(MY_GAMES, { variables: { status: null } });
   const { data: usersData } = useQuery<{ users: Array<{ id: string; username: string; rating: number }> }>(USERS);
   const [createGame, { loading: creating }] = useMutation<{ createGame: { id: string } }>(CREATE_GAME);
 
@@ -94,9 +86,7 @@ export default function GamesPage() {
     }
     try {
       const { data, error } = await createGame({
-        variables: {
-          input: { whiteId, blackId, timeControl },
-        },
+        variables: { input: { whiteId, blackId, timeControl } },
       });
       if (error) {
         toaster.create({ title: error.message || "Failed to create game", type: "error" });
@@ -112,237 +102,394 @@ export default function GamesPage() {
   }
 
   return (
-    <VStack align="stretch" gap={8}>
-      <Box>
-        <Heading
-          size="xl"
-          color="gold"
-          fontFamily="var(--font-playfair), Georgia, serif"
-        >
-          Play
-        </Heading>
-        <Text color="textMuted" fontSize="sm" mt={1}>
-          Earn XP by completing games (win: 20, draw: 10, loss: 5).
-        </Text>
+    <Box position="relative" maxW="1180px" mx="auto">
+      <ChessWatermark piece="queen" size={420} opacity={0.035} position={{ top: "-40px", right: "-60px" }} />
+
+      {/* Header */}
+      <Box mb={{ base: 6, md: 9 }} position="relative" zIndex={1}>
+        <LuxuryEyebrow>The Arena</LuxuryEyebrow>
+        <Box mt={2}>
+          <LuxuryHeading size="2xl">
+            Sit down to a <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>game</Text>.
+          </LuxuryHeading>
+        </Box>
+        <Box mt={3}>
+          <GoldRule wide />
+        </Box>
       </Box>
 
-      {/* Play mode selector */}
-      <HStack gap={2} flexWrap="wrap">
-        {(["human", "self", "bot"] as PlayMode[]).map((mode) => (
-          <Button
-            key={mode}
-            size="sm"
-            variant={playMode === mode ? "solid" : "outline"}
-            bg={playMode === mode ? "gold" : "transparent"}
-            color={playMode === mode ? "black" : "gold"}
-            borderColor="gold"
-            borderRadius="soft"
-            onClick={() => setPlayMode(mode)}
-          >
-            {mode === "human" ? "Vs Human" : mode === "self" ? "Vs Self" : "Vs Bot"}
-          </Button>
+      {/* Mode tabs */}
+      <HStack mb={{ base: 5, md: 7 }} gap={2} flexWrap="wrap" position="relative" zIndex={1}>
+        {(
+          [
+            { id: "human", label: "Vs Human" },
+            { id: "bot", label: "Vs Engine" },
+            { id: "self", label: "Vs Self" },
+          ] as { id: PlayMode; label: string }[]
+        ).map((m) => (
+          <ModeTab
+            key={m.id}
+            label={m.label}
+            active={playMode === m.id}
+            onClick={() => setPlayMode(m.id)}
+          />
         ))}
       </HStack>
 
       {playMode === "self" && (
-        <Box p={6} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="goldDark">
-          <Text color="textPrimary" fontWeight="600" mb={2}>
-            Play vs Self
-          </Text>
-          <Text color="textSecondary" fontSize="sm" mb={4}>
-            Practice by playing both sides on the same device. No rating, no opponent—just you and the board.
-          </Text>
-          <Link href="/play/local">
-            <Button size="md" bg="gold" color="black" borderRadius="soft" _hover={{ bg: "goldLight" }}>
-              Start local game
-            </Button>
-          </Link>
-        </Box>
+        <GlassCard hero>
+          <Box px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }}>
+            <LuxuryEyebrow>Local</LuxuryEyebrow>
+            <Box mt={1.5}>
+              <LuxuryHeading size="md">Two players, one device.</LuxuryHeading>
+            </Box>
+            <Box mt={4}>
+              <LuxuryButton variant="gold" size="md" glyph="▸" href="/play/local">
+                Start
+              </LuxuryButton>
+            </Box>
+          </Box>
+        </GlassCard>
       )}
 
       {playMode === "bot" && (
-        <Box p={6} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="goldDark">
-          <Text color="textPrimary" fontWeight="600" mb={2}>
-            Practice vs Bot
-          </Text>
-          <Text color="textSecondary" fontSize="sm" mb={4}>
-            Choose your opponent. You play as White; the bot plays as Black. No rating—ideal for practice.
-          </Text>
-          <Flex gap={2} flexWrap="wrap" mb={4}>
-            {BOT_ELO_PRESETS.map((elo) => (
-              <Button
-                key={elo}
-                size="sm"
-                variant={selectedBotElo === elo ? "solid" : "outline"}
-                bg={selectedBotElo === elo ? "gold" : "transparent"}
-                color={selectedBotElo === elo ? "black" : "gold"}
-                borderColor="gold"
-                borderRadius="soft"
-                onClick={() => setSelectedBotElo(elo)}
+        <GlassCard hero>
+          <Box px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }}>
+            <LuxuryEyebrow>Engine Sparring</LuxuryEyebrow>
+            <Box mt={1.5}>
+              <LuxuryHeading size="md">Select strength.</LuxuryHeading>
+            </Box>
+            <SimpleGrid mt={4} columns={{ base: 3, sm: 4, md: 6 }} gap={2}>
+              {BOT_ELO_PRESETS.map((elo) => {
+                const active = selectedBotElo === elo;
+                return (
+                  <Box
+                    key={elo}
+                    as="button"
+                    onClick={() => setSelectedBotElo(elo)}
+                    py={2.5}
+                    borderRadius="6px"
+                    bg={active ? "rgba(212,175,55,0.18)" : "var(--lux-glass-surface)"}
+                    borderWidth="1px"
+                    borderColor={active ? "var(--lux-gold)" : "var(--lux-glass-border)"}
+                    transition="all 0.18s"
+                    _hover={{ borderColor: "var(--lux-gold-muted)" }}
+                    style={{ backdropFilter: "blur(10px)" }}
+                  >
+                    <Text
+                      fontFamily="var(--font-inter), sans-serif"
+                      fontSize="xs"
+                      fontWeight="700"
+                      letterSpacing="0.18em"
+                      color={active ? "var(--lux-gold-bright)" : "var(--lux-text-secondary)"}
+                      style={active ? { textShadow: "0 0 6px rgba(212,175,55,0.45)" } : undefined}
+                    >
+                      {elo}
+                    </Text>
+                  </Box>
+                );
+              })}
+            </SimpleGrid>
+            <Box mt={5}>
+              <LuxuryButton
+                variant="gold"
+                size="md"
+                glyph="▸"
+                href={`/play/bot?elo=${selectedBotElo}`}
               >
-                {elo} ELO
-              </Button>
-            ))}
-          </Flex>
-          <Link href={`/play/bot?elo=${selectedBotElo}`}>
-            <Button size="md" bg="gold" color="black" borderRadius="soft" _hover={{ bg: "goldLight" }}>
-              Start vs Bot ({selectedBotElo} ELO)
-            </Button>
-          </Link>
-        </Box>
+                Begin · {selectedBotElo} Elo
+              </LuxuryButton>
+            </Box>
+          </Box>
+        </GlassCard>
       )}
 
       {playMode === "human" && (
-        <>
-      <Box
-        as="form"
-        onSubmit={handleCreateGame}
-        p={6}
-        borderRadius="soft"
-        bg="bgCard"
-        borderWidth="1px"
-        borderColor="goldDark"
-      >
-        <Heading size="md" color="gold" mb={4}>
-          Start a Match
-        </Heading>
-        <VStack align="stretch" gap={3}>
-          <Box>
-            <Text color="textPrimary" mb={1} fontSize="sm">White</Text>
-            <select
-              value={whiteId}
-              onChange={(e) => setWhiteId(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: 6,
-                backgroundColor: "var(--chakra-colors-bgCard)",
-                border: "1px solid var(--chakra-colors-goldDark)",
-                color: "var(--chakra-colors-textPrimary)",
-              }}
-            >
-              <option value="">Select player</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.username} ({u.rating})
-                </option>
-              ))}
-            </select>
-          </Box>
-          <Box>
-            <Text color="textPrimary" mb={1} fontSize="sm">Black</Text>
-            <select
-              value={blackId}
-              onChange={(e) => setBlackId(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: 6,
-                backgroundColor: "var(--chakra-colors-bgCard)",
-                border: "1px solid var(--chakra-colors-goldDark)",
-                color: "var(--chakra-colors-textPrimary)",
-              }}
-            >
-              <option value="">Select player</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.username} ({u.rating})
-                </option>
-              ))}
-            </select>
-          </Box>
-          <Box>
-            <Text color="textPrimary" mb={1} fontSize="sm">Time control (e.g. 10+0)</Text>
-            <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
-              {TIME_PRESETS.map((preset) => (
-                <Button
-                  key={preset}
-                  type="button"
-                  size="sm"
-                  variant={timeControl === preset ? "solid" : "outline"}
-                  bg={timeControl === preset ? "gold" : "transparent"}
-                  color={timeControl === preset ? "black" : "gold"}
-                  borderColor="gold"
-                  onClick={() => setTimeControl(preset)}
-                >
-                  {preset}
-                </Button>
-              ))}
-              <Input
-                value={timeControl}
-                onChange={(e) => setTimeControl(e.target.value)}
-                placeholder="10+0"
-                maxW="24"
-                size="sm"
-                bg="bgCard"
-                borderColor="goldDark"
-                color="textPrimary"
-                borderRadius="soft"
-              />
-            </Box>
-          </Box>
-          <Button type="submit" size="sm" bg="gold" color="black" borderRadius="soft" loading={creating} _hover={{ bg: "goldLight" }}>
-            Create game
-          </Button>
-        </VStack>
-      </Box>
+        <VStack align="stretch" gap={{ base: 6, md: 8 }}>
+          {/* Start a match form */}
+          <GlassCard hero>
+            <Box as="form" onSubmit={handleCreateGame} px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }}>
+              <LuxuryEyebrow>Pairing</LuxuryEyebrow>
+              <Box mt={1.5}>
+                <LuxuryHeading size="md">Start a match.</LuxuryHeading>
+              </Box>
 
-      <Box>
-        <Heading size="md" color="gold" mb={4}>
-          Active games
-        </Heading>
-        {liveGames.length === 0 ? (
-          <Text color="textMuted">No active games.</Text>
-        ) : (
-          <VStack align="stretch" gap={2}>
-            {liveGames.map((g: { id: string; white: { username: string }; black: { username: string }; timeControl: string }) => (
-              <Link key={g.id} href={`/game/${g.id}`}>
-                <Box
-                  p={4}
-                  borderRadius="soft"
-                  bg="bgCard"
-                  borderWidth="1px"
-                  borderColor="goldDark"
-                  _hover={{ borderColor: "gold", boxShadow: "0 0 16px rgba(198, 167, 94, 0.08)" }}
-                  color="gold"
-                  transition="all 0.2s"
-                >
-                  {g.white?.username} vs {g.black?.username} — {g.timeControl}
-                </Box>
-              </Link>
-            ))}
-          </VStack>
-        )}
-      </Box>
-      <Box>
-        <Heading size="md" color="gold" mb={4}>
-          My games
-        </Heading>
-        {myGames.length === 0 ? (
-          <Text color="textMuted">You have no games yet.</Text>
-        ) : (
-          <VStack align="stretch" gap={2}>
-            {myGames.slice(0, 10).map((g: { id: string; status: string; result?: string; white: { username: string }; black: { username: string } }) => (
-              <Link key={g.id} href={`/game/${g.id}`}>
-                <Box
-                  p={4}
-                  borderRadius="soft"
-                  bg="bgCard"
-                  borderWidth="1px"
-                  borderColor="goldDark"
-                  color="textPrimary"
-                  _hover={{ borderColor: "gold" }}
-                >
-                  {g.white?.username} vs {g.black?.username} — {g.status}
-                  {g.result && ` (${g.result})`}
-                </Box>
-              </Link>
-            ))}
-          </VStack>
-        )}
-      </Box>
-        </>
+              <SimpleGrid mt={5} columns={{ base: 1, md: 2 }} gap={4}>
+                <PlayerField
+                  label="White"
+                  value={whiteId}
+                  onChange={setWhiteId}
+                  users={users}
+                />
+                <PlayerField
+                  label="Black"
+                  value={blackId}
+                  onChange={setBlackId}
+                  users={users}
+                />
+              </SimpleGrid>
+
+              <Box mt={5}>
+                <LuxuryEyebrow>Time Control</LuxuryEyebrow>
+                <Flex mt={2} gap={2} flexWrap="wrap" alignItems="center">
+                  {TIME_PRESETS.map((preset) => {
+                    const active = timeControl === preset;
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setTimeControl(preset)}
+                        style={{
+                          padding: "8px 14px",
+                          borderRadius: "999px",
+                          background: active ? "rgba(212,175,55,0.18)" : "var(--lux-glass-surface)",
+                          border: `1px solid ${active ? "var(--lux-gold)" : "var(--lux-glass-border)"}`,
+                          transition: "all 0.18s",
+                          cursor: "pointer",
+                          fontFamily: "var(--font-inter), sans-serif",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          letterSpacing: "0.16em",
+                          color: active ? "var(--lux-gold-bright)" : "var(--lux-text-secondary)",
+                        }}
+                      >
+                        {preset}
+                      </button>
+                    );
+                  })}
+                  <Input
+                    value={timeControl}
+                    onChange={(e) => setTimeControl(e.target.value)}
+                    placeholder="10+0"
+                    maxW="24"
+                    size="sm"
+                    bg="var(--lux-glass-surface)"
+                    borderColor="var(--lux-glass-border)"
+                    color="var(--lux-text-primary)"
+                    borderRadius="6px"
+                    _placeholder={{ color: "var(--lux-text-muted)" }}
+                  />
+                </Flex>
+              </Box>
+
+              <Box mt={6}>
+                <LuxuryButton variant="gold" size="md" glyph="▸" type="submit" disabled={creating}>
+                  {creating ? "Creating…" : "Create match"}
+                </LuxuryButton>
+              </Box>
+            </Box>
+          </GlassCard>
+
+          {/* Active games */}
+          <Box>
+            <HStack mb={4} align="center" gap={3}>
+              <LuxuryEyebrow>Active Tonight</LuxuryEyebrow>
+              <Box flex={1} className="lux-divider" />
+              <Text fontSize="2xs" color="var(--lux-text-muted)" letterSpacing="0.18em" textTransform="uppercase">
+                {liveGames.length} live
+              </Text>
+            </HStack>
+            {liveGames.length === 0 ? (
+              <EmptyState text="No active matches." />
+            ) : (
+              <VStack align="stretch" gap={2.5}>
+                {liveGames.map((g) => (
+                  <GameRow
+                    key={g.id}
+                    href={`/game/${g.id}`}
+                    title={`${g.white?.username ?? "—"} vs ${g.black?.username ?? "—"}`}
+                    meta={g.timeControl}
+                    accent="live"
+                  />
+                ))}
+              </VStack>
+            )}
+          </Box>
+
+          {/* My games */}
+          <Box>
+            <HStack mb={4} align="center" gap={3}>
+              <LuxuryEyebrow>Your Archive</LuxuryEyebrow>
+              <Box flex={1} className="lux-divider" />
+              <Text fontSize="2xs" color="var(--lux-text-muted)" letterSpacing="0.18em" textTransform="uppercase">
+                {myGames.length} games
+              </Text>
+            </HStack>
+            {myGames.length === 0 ? (
+              <EmptyState text="No games yet." />
+            ) : (
+              <VStack align="stretch" gap={2.5}>
+                {myGames.slice(0, 10).map((g) => (
+                  <GameRow
+                    key={g.id}
+                    href={`/game/${g.id}`}
+                    title={`${g.white?.username ?? "—"} vs ${g.black?.username ?? "—"}`}
+                    meta={g.result ? `${g.status} · ${g.result}` : g.status}
+                    accent={g.status === "COMPLETED" ? "done" : "live"}
+                  />
+                ))}
+              </VStack>
+            )}
+          </Box>
+        </VStack>
       )}
-    </VStack>
+    </Box>
+  );
+}
+
+/* ─────────── ModeTab ─────────── */
+
+function ModeTab({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <Box
+      as="button"
+      onClick={onClick}
+      px={4}
+      py={2.5}
+      borderRadius="999px"
+      bg={active ? "rgba(212,175,55,0.14)" : "var(--lux-glass-surface)"}
+      borderWidth="1px"
+      borderColor={active ? "var(--lux-gold)" : "var(--lux-glass-border)"}
+      transition="all 0.18s"
+      _hover={{ borderColor: "var(--lux-gold-muted)" }}
+      style={{ backdropFilter: "blur(12px)" }}
+    >
+      <Text
+        fontFamily="var(--font-inter), sans-serif"
+        fontSize="xs"
+        fontWeight="700"
+        letterSpacing="0.2em"
+        textTransform="uppercase"
+        color={active ? "var(--lux-gold-bright)" : "var(--lux-text-secondary)"}
+        style={active ? { textShadow: "0 0 6px rgba(212,175,55,0.5)" } : undefined}
+      >
+        {label}
+      </Text>
+    </Box>
+  );
+}
+
+/* ─────────── PlayerField ─────────── */
+
+function PlayerField({
+  label,
+  value,
+  onChange,
+  users,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  users: Array<{ id: string; username: string; rating: number }>;
+}) {
+  return (
+    <Box>
+      <Text
+        fontSize="2xs"
+        color="var(--lux-text-muted)"
+        letterSpacing="0.22em"
+        textTransform="uppercase"
+        fontFamily="var(--font-inter), sans-serif"
+        mb={1.5}
+      >
+        {label}
+      </Text>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          width: "100%",
+          padding: "8px 12px",
+          borderRadius: 6,
+          background: "var(--lux-glass-surface)",
+          border: "1px solid var(--lux-glass-border)",
+          color: "var(--lux-text-primary)",
+          fontFamily: "var(--font-inter), sans-serif",
+          fontSize: 14,
+          backdropFilter: "blur(10px)",
+        }}
+      >
+        <option value="">Select player</option>
+        {users.map((u) => (
+          <option key={u.id} value={u.id}>
+            {u.username} ({u.rating})
+          </option>
+        ))}
+      </select>
+    </Box>
+  );
+}
+
+/* ─────────── GameRow ─────────── */
+
+function GameRow({
+  href,
+  title,
+  meta,
+  accent,
+}: {
+  href: string;
+  title: string;
+  meta: string;
+  accent: "live" | "done";
+}) {
+  const dotColor = accent === "live" ? "var(--lux-gold)" : "var(--lux-text-muted)";
+  return (
+    <GlassCard href={href}>
+      <HStack px={5} py={3.5} justify="space-between" align="center" gap={4} flexWrap="wrap">
+        <HStack gap={3} align="center">
+          <Box
+            w="8px"
+            h="8px"
+            borderRadius="full"
+            bg={dotColor}
+            style={accent === "live" ? { boxShadow: "0 0 6px var(--lux-gold)" } : undefined}
+          />
+          <Text
+            fontFamily="var(--font-playfair), Georgia, serif"
+            fontSize="md"
+            color="var(--lux-text-primary)"
+            fontWeight="600"
+            letterSpacing="0.03em"
+          >
+            {title}
+          </Text>
+        </HStack>
+        <HStack gap={3} align="center">
+          <Text
+            fontFamily="var(--font-inter), sans-serif"
+            fontSize="2xs"
+            letterSpacing="0.2em"
+            textTransform="uppercase"
+            color="var(--lux-text-muted)"
+          >
+            {meta}
+          </Text>
+          <Text color="var(--lux-gold-muted)" fontSize="md">→</Text>
+        </HStack>
+      </HStack>
+    </GlassCard>
+  );
+}
+
+/* ─────────── EmptyState ─────────── */
+
+function EmptyState({ text }: { text: string }) {
+  return (
+    <Box
+      py={6}
+      px={5}
+      borderRadius="8px"
+      bg="var(--lux-glass-surface)"
+      borderWidth="1px"
+      borderColor="var(--lux-glass-border)"
+      borderStyle="dashed"
+      textAlign="center"
+      style={{ backdropFilter: "blur(8px)" }}
+    >
+      <Text fontSize="sm" className="lux-text-muted" letterSpacing="0.06em" fontStyle="italic">
+        {text}
+      </Text>
+    </Box>
   );
 }

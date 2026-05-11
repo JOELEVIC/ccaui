@@ -76,7 +76,12 @@ export default function PuzzlePage() {
 
   const currentFen = useMemo(() => {
     if (!puzzle) return "start";
-    const chess = new Chess(puzzle.fen);
+    let chess: Chess;
+    try {
+      chess = new Chess(puzzle.fen);
+    } catch {
+      return "start";
+    }
     for (const m of moves) {
       try {
         if (m.length >= 4) {
@@ -97,8 +102,12 @@ export default function PuzzlePage() {
   }, [puzzle]);
 
   const turn: "white" | "black" = useMemo(() => {
-    const c = new Chess(currentFen);
-    return c.turn() === "w" ? "white" : "black";
+    try {
+      const c = new Chess(currentFen);
+      return c.turn() === "w" ? "white" : "black";
+    } catch {
+      return "white";
+    }
   }, [currentFen]);
 
   const solutionLen = useMemo(

@@ -47,8 +47,17 @@ function readStoredBool(key: string, defaultVal: boolean): boolean {
   }
 }
 
+function safeChess(fen: string): Chess | null {
+  try {
+    return new Chess(fen);
+  } catch {
+    return null;
+  }
+}
+
 function getRandomMove(fen: string): string | null {
-  const chess = new Chess(fen);
+  const chess = safeChess(fen);
+  if (!chess) return null;
   const moves = chess.moves({ verbose: true });
   if (moves.length === 0) return null;
   const move = moves[Math.floor(Math.random() * moves.length)];
@@ -59,9 +68,14 @@ function applyMove(fen: string, moveStr: string): string | null {
   const from = moveStr.slice(0, 2);
   const to = moveStr.slice(2, 4);
   const promotion = (moveStr[4] as "q" | "r" | "b" | "n") || undefined;
-  const c = new Chess(fen);
-  const move = c.move({ from, to, promotion });
-  return move ? c.fen() : null;
+  const c = safeChess(fen);
+  if (!c) return null;
+  try {
+    const move = c.move({ from, to, promotion });
+    return move ? c.fen() : null;
+  } catch {
+    return null;
+  }
 }
 
 function buildFenAtMove(startFen: string, moves: string[], upToIndex: number): string {
@@ -349,12 +363,9 @@ export default function PlayBotPage() {
                 </motion.div>
               )}
             </HStack>
-            <HStack mt={3} gap={3} align="center">
+            <Box mt={3}>
               <GoldRule />
-              <Text fontSize="sm" className="lux-text-secondary">
-                Stockfish at {elo} Elo. Premove queues your reply during the engine&apos;s think.
-              </Text>
-            </HStack>
+            </Box>
           </Box>
 
           <HStack gap={3} flexWrap="wrap" align="center">
@@ -671,12 +682,6 @@ function GameOverPanel({
 }) {
   const title =
     result === "1-0" ? "Victory" : result === "0-1" ? "Defeat" : "Draw";
-  const subtitle =
-    result === "1-0"
-      ? "A clean finish. The board belongs to you."
-      : result === "0-1"
-        ? "The engine had the last word — review the game and return."
-        : "The position would not yield. A composed result.";
 
   return (
     <Box
@@ -715,9 +720,6 @@ function GameOverPanel({
         <Box display="flex" justifyContent="center">
           <GoldRule wide />
         </Box>
-        <Text fontSize="sm" className="lux-text-secondary" maxW="md" lineHeight="1.6">
-          {subtitle}
-        </Text>
         <HStack mt={3} gap={3} justify="center" flexWrap="wrap">
           <LuxuryButton variant="gold" size="md" glyph="↻" onClick={onRematch}>
             Rematch

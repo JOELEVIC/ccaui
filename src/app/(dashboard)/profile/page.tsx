@@ -1,9 +1,17 @@
 "use client";
 
-import { Box, Heading, Text, VStack, SimpleGrid, HStack, Image } from "@chakra-ui/react";
-import Link from "next/link";
+import { Box, HStack, Image, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import { useQuery } from "@apollo/client/react";
 import { PROFILE_FULL } from "@/graphql/queries/chessPro";
+import {
+  ChessWatermark,
+  GlassCard,
+  GoldRule,
+  LuxuryButton,
+  LuxuryEyebrow,
+  LuxuryHeading,
+} from "@/components/luxury/LuxuryPrimitives";
+import { tierForRating } from "@/lib/r2m";
 
 const VARIANT_LABEL: Record<string, string> = {
   ULTRABULLET: "Ultrabullet",
@@ -49,93 +57,274 @@ export default function ProfilePage() {
   const me = data?.me;
 
   if (loading || !me) {
-    return <Text color="textMuted">{loading ? "Loading…" : "Sign in to view profile."}</Text>;
+    return (
+      <Box maxW="1180px" mx="auto" py={10}>
+        <Text
+          className="lux-text-muted"
+          letterSpacing="0.18em"
+          textTransform="uppercase"
+          fontSize="xs"
+        >
+          {loading ? "Loading…" : "Sign in to view profile."}
+        </Text>
+      </Box>
+    );
   }
 
   const p = me.profile;
+  const tier = tierForRating(me.rating ?? 1200);
   const joined = new Date(me.createdAt).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 
   return (
-    <VStack align="stretch" gap={8}>
-      <HStack align="flex-start" gap={6} flexWrap="wrap">
-        {p?.avatarUrl ? (
-          <Image src={p.avatarUrl} alt="" boxSize="88px" borderRadius="full" objectFit="cover" />
-        ) : (
-          <Box
-            boxSize="88px"
-            borderRadius="full"
-            bg="goldDark"
-            color="gold"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            fontSize="2xl"
-            fontWeight="bold"
-          >
-            {me.username.charAt(0).toUpperCase()}
-          </Box>
-        )}
-        <VStack align="start" gap={1}>
-          <Heading size="lg" fontFamily="var(--font-playfair), Georgia, serif" color="textPrimary">
-            {p?.chessTitle ? `${p.chessTitle} ` : ""}
-            {me.username}
-          </Heading>
-          <Text color="textSecondary" fontSize="sm">
-            Member since {joined} · {flagEmoji(p?.country)} {p?.country}
-          </Text>
-          <HStack gap={6} mt={2}>
-            <Text fontSize="sm" color="textMuted">
-              Followers <strong style={{ color: "var(--chakra-colors-gold)" }}>{p?.followerCount ?? 0}</strong>
-            </Text>
-            <Text fontSize="sm" color="textMuted">
-              Friends <strong style={{ color: "var(--chakra-colors-gold)" }}>{p?.friendCount ?? 0}</strong>
-            </Text>
-          </HStack>
-        </VStack>
-      </HStack>
+    <Box position="relative" maxW="1180px" mx="auto">
+      <ChessWatermark piece="bishop" size={420} opacity={0.035} position={{ top: "-40px", right: "-60px" }} />
 
-      <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={3}>
-        {(me.variantRatings ?? []).map(
-          (vr: { variant: string; rating: number; ratingDelta: number; gamesPlayed: number }) => (
-            <Box
-              key={vr.variant}
-              p={4}
-              borderRadius="soft"
-              bg="bgCard"
-              borderWidth="1px"
-              borderColor="whiteAlpha.080"
-            >
-              <Text fontSize="xs" color="textMuted" textTransform="uppercase">
-                {VARIANT_LABEL[vr.variant] ?? vr.variant}
+      {/* Member dossier header */}
+      <Box mb={{ base: 6, md: 9 }} position="relative" zIndex={1}>
+        <LuxuryEyebrow>Member Dossier</LuxuryEyebrow>
+        <HStack mt={4} gap={{ base: 5, md: 7 }} align="flex-start" flexWrap="wrap">
+          <GoldAvatar size={112} tierColor={tier.color} avatarUrl={p?.avatarUrl} initial={me.username.charAt(0).toUpperCase()} />
+
+          <VStack align="flex-start" gap={2} flex={1} minW={0}>
+            <HStack gap={2.5} align="baseline" flexWrap="wrap">
+              {p?.chessTitle && (
+                <Text
+                  fontFamily="var(--font-inter), sans-serif"
+                  fontSize="xs"
+                  fontWeight="700"
+                  color="var(--lux-gold)"
+                  letterSpacing="0.18em"
+                  textTransform="uppercase"
+                  px={2}
+                  py={0.5}
+                  borderWidth="1px"
+                  borderColor="var(--lux-gold-muted)"
+                  borderRadius="4px"
+                  bg="rgba(212,175,55,0.08)"
+                >
+                  {p.chessTitle}
+                </Text>
+              )}
+              <LuxuryHeading size="xl">{me.username}</LuxuryHeading>
+            </HStack>
+
+            <HStack gap={3} mt={1} align="center" flexWrap="wrap">
+              <Box
+                px={3}
+                py={1.5}
+                borderRadius="999px"
+                bg="var(--lux-glass-surface)"
+                borderWidth="1px"
+                borderColor="var(--lux-glass-border)"
+                style={{ backdropFilter: "blur(12px)" }}
+              >
+                <HStack gap={2}>
+                  <Box w="6px" h="6px" borderRadius="full" bg={tier.color} style={{ boxShadow: `0 0 6px ${tier.color}` }} />
+                  <Text
+                    fontFamily="var(--font-inter), sans-serif"
+                    fontSize="2xs"
+                    fontWeight="700"
+                    letterSpacing="0.22em"
+                    textTransform="uppercase"
+                    color="var(--lux-text-primary)"
+                  >
+                    {tier.rank}-Rank · {me.rating}
+                  </Text>
+                </HStack>
+              </Box>
+              <Text fontSize="sm" className="lux-text-secondary">
+                {flagEmoji(p?.country)} {p?.country ?? "—"} · since {joined}
               </Text>
-              <Text fontSize="2xl" fontWeight="800" color="gold">
-                {vr.rating}
+            </HStack>
+
+            <Box mt={2}>
+              <GoldRule wide />
+            </Box>
+
+            <HStack gap={6} mt={1.5}>
+              <KV label="Followers" value={String(p?.followerCount ?? 0)} />
+              <KV label="Friends" value={String(p?.friendCount ?? 0)} />
+              <KV label="Games" value={String(me.totalGamesPlayed)} />
+            </HStack>
+          </VStack>
+
+          <Box>
+            <LuxuryButton variant="outline" size="sm" glyph="✦" href="/road-to-master/status">
+              Status
+            </LuxuryButton>
+          </Box>
+        </HStack>
+      </Box>
+
+      {/* Variant ratings */}
+      {(me.variantRatings?.length ?? 0) > 0 && (
+        <Box mb={{ base: 6, md: 9 }} position="relative" zIndex={1}>
+          <HStack mb={4} align="center" gap={3}>
+            <LuxuryEyebrow>Variant Cabinet</LuxuryEyebrow>
+            <Box flex={1} className="lux-divider" />
+          </HStack>
+          <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={3}>
+            {me.variantRatings.map((vr) => (
+              <GlassCard key={vr.variant}>
+                <Box px={5} py={4}>
+                  <Text
+                    fontSize="2xs"
+                    color="var(--lux-text-muted)"
+                    letterSpacing="0.22em"
+                    textTransform="uppercase"
+                    fontFamily="var(--font-inter), sans-serif"
+                  >
+                    {VARIANT_LABEL[vr.variant] ?? vr.variant}
+                  </Text>
+                  <HStack justify="space-between" align="flex-end" mt={1.5}>
+                    <Text
+                      fontFamily="var(--font-playfair), Georgia, serif"
+                      fontSize="3xl"
+                      fontWeight="600"
+                      color="var(--lux-gold)"
+                      lineHeight="1"
+                      letterSpacing="0.02em"
+                    >
+                      {vr.rating}
+                    </Text>
+                    <Text
+                      fontFamily="var(--font-inter), sans-serif"
+                      fontSize="xs"
+                      fontWeight="600"
+                      color={
+                        vr.ratingDelta > 0
+                          ? "rgba(163,230,53,0.85)"
+                          : vr.ratingDelta < 0
+                            ? "rgba(240,101,149,0.85)"
+                            : "var(--lux-text-muted)"
+                      }
+                      letterSpacing="0.04em"
+                    >
+                      {vr.ratingDelta > 0 ? "▲" : vr.ratingDelta < 0 ? "▼" : "—"}{" "}
+                      {Math.abs(vr.ratingDelta)}
+                    </Text>
+                  </HStack>
+                  <Text
+                    fontSize="2xs"
+                    className="lux-text-muted"
+                    letterSpacing="0.16em"
+                    textTransform="uppercase"
+                    mt={1.5}
+                  >
+                    {vr.gamesPlayed} games
+                  </Text>
+                </Box>
+              </GlassCard>
+            ))}
+          </SimpleGrid>
+        </Box>
+      )}
+
+      {/* Archive entry */}
+      <Box position="relative" zIndex={1}>
+        <HStack mb={4} align="center" gap={3}>
+          <LuxuryEyebrow>Archive</LuxuryEyebrow>
+          <Box flex={1} className="lux-divider" />
+        </HStack>
+        <GlassCard href="/games">
+          <HStack px={5} py={4} justify="space-between" align="center" gap={4} flexWrap="wrap">
+            <Box>
+              <Text
+                fontFamily="var(--font-playfair), Georgia, serif"
+                fontSize="lg"
+                color="var(--lux-text-primary)"
+                fontWeight="600"
+                letterSpacing="0.04em"
+              >
+                Game history
               </Text>
-              <Text fontSize="sm" color={vr.ratingDelta >= 0 ? "accentGreen" : "red.300"}>
-                {vr.ratingDelta >= 0 ? "↑" : "↓"} {Math.abs(vr.ratingDelta)} · {vr.gamesPlayed} games
+              <Text fontSize="xs" className="lux-text-muted" letterSpacing="0.16em" textTransform="uppercase" mt={0.5}>
+                {me.totalGamesPlayed} games
               </Text>
             </Box>
-          )
-        )}
-      </SimpleGrid>
+            <Text color="var(--lux-gold)" fontSize="lg">
+              →
+            </Text>
+          </HStack>
+        </GlassCard>
+      </Box>
+    </Box>
+  );
+}
 
-      <Link href="/games">
-        <Box
-          py={4}
-          px={5}
-          borderRadius="soft"
-          bg="bgSurface"
-          borderWidth="1px"
-          borderColor="whiteAlpha.100"
-        >
-          <Text fontWeight="700" color="textPrimary">
-            {me.totalGamesPlayed} games played
+function GoldAvatar({
+  size,
+  tierColor,
+  avatarUrl,
+  initial,
+}: {
+  size: number;
+  tierColor: string;
+  avatarUrl?: string | null;
+  initial: string;
+}) {
+  return (
+    <Box position="relative" w={`${size}px`} h={`${size}px`} flexShrink={0}>
+      <Box
+        position="absolute"
+        inset={0}
+        borderRadius="full"
+        style={{
+          background: `conic-gradient(from 230deg, var(--lux-gold-bright), var(--lux-gold-soft), ${tierColor}, var(--lux-gold-bright))`,
+          filter: "drop-shadow(0 0 12px rgba(212,175,55,0.45))",
+        }}
+      />
+      <Box position="absolute" inset="3px" borderRadius="full" bg="var(--lux-obsidian)" />
+      <Box
+        position="absolute"
+        inset="3px"
+        borderRadius="full"
+        overflow="hidden"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        {avatarUrl ? (
+          <Image src={avatarUrl} alt="" boxSize={`${size - 6}px`} borderRadius="full" objectFit="cover" />
+        ) : (
+          <Text
+            fontFamily="var(--font-playfair), Georgia, serif"
+            fontSize="4xl"
+            fontWeight="600"
+            color="var(--lux-gold-bright)"
+            letterSpacing="0.04em"
+          >
+            {initial}
           </Text>
-          <Text fontSize="sm" color="textMuted">
-            View history →
-          </Text>
-        </Box>
-      </Link>
-    </VStack>
+        )}
+      </Box>
+    </Box>
+  );
+}
+
+function KV({ label, value }: { label: string; value: string }) {
+  return (
+    <Box>
+      <Text
+        fontSize="2xs"
+        color="var(--lux-text-muted)"
+        letterSpacing="0.22em"
+        textTransform="uppercase"
+        fontFamily="var(--font-inter), sans-serif"
+      >
+        {label}
+      </Text>
+      <Text
+        fontFamily="var(--font-playfair), Georgia, serif"
+        fontSize="lg"
+        color="var(--lux-text-primary)"
+        fontWeight="600"
+        lineHeight="1.1"
+        mt={0.5}
+        letterSpacing="0.02em"
+      >
+        {value}
+      </Text>
+    </Box>
   );
 }

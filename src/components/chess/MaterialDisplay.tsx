@@ -14,7 +14,13 @@ const PIECE_VALUES: Record<string, number> = {
 };
 
 function computeMaterial(fen: string): number {
-  const chess = new Chess(fen);
+  let chess: Chess;
+  try {
+    chess = new Chess(fen);
+  } catch {
+    // A malformed FEN should never crash the page — surface a zero diff.
+    return 0;
+  }
   let white = 0;
   let black = 0;
   const board = chess.board();

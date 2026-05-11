@@ -19,7 +19,10 @@ export default function PlayLocalPage() {
   const [fen, setFen] = useState(START_FEN);
   const [orientation, setOrientation] = useState<"white" | "black">("white");
 
-  const chess = new Chess(fen);
+  const chess = (() => {
+    try { return new Chess(fen); }
+    catch { return new Chess(START_FEN); }
+  })();
   const turnIsWhite = fen.split(" ")[1] === "w";
   const isGameOver = chess.isGameOver();
 
@@ -47,12 +50,9 @@ export default function PlayLocalPage() {
                 Pass <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>and play</Text>.
               </LuxuryHeading>
             </Box>
-            <HStack mt={3} gap={3} align="center">
+            <Box mt={3}>
               <GoldRule />
-              <Text fontSize="sm" className="lux-text-secondary">
-                One device, two players. Flip the board between moves or share a screen at the table.
-              </Text>
-            </HStack>
+            </Box>
           </Box>
           <HStack gap={3} flexWrap="wrap">
             <LuxuryButton variant="ghost" size="sm" glyph="↺" onClick={() => setOrientation((o) => (o === "white" ? "black" : "white"))}>
@@ -135,7 +135,7 @@ export default function PlayLocalPage() {
               <LuxuryEyebrow>Match Status</LuxuryEyebrow>
               <Box mt={3}>
                 {isGameOver ? (
-                  <VStack align="stretch" gap={2}>
+                  <VStack align="stretch" gap={3}>
                     <Text
                       fontFamily="var(--font-playfair), Georgia, serif"
                       fontSize="2xl"
@@ -149,18 +149,15 @@ export default function PlayLocalPage() {
                         ? `${turnIsWhite ? "Black" : "White"} wins.`
                         : "Drawn."}
                     </Text>
-                    <Text fontSize="sm" className="lux-text-secondary">
-                      {chess.isCheckmate() ? "Checkmate." : "The position is balanced — no decisive line."}
-                    </Text>
-                    <Box pt={2}>
+                    <Box pt={1}>
                       <LuxuryButton variant="gold" size="sm" glyph="↻" onClick={handleNewGame}>
-                        Reset the board
+                        Reset
                       </LuxuryButton>
                     </Box>
                   </VStack>
                 ) : (
-                  <Text fontSize="sm" className="lux-text-secondary" lineHeight="1.55">
-                    The board is set. Make a move — the clock starts when the first piece lifts.
+                  <Text fontSize="sm" className="lux-text-secondary">
+                    Awaiting first move.
                   </Text>
                 )}
               </Box>

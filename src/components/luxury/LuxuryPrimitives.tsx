@@ -197,7 +197,7 @@ export function LuxuryButton({
       </Link>
     );
   }
-  if (onClick) {
+  if (onClick || type === "submit") {
     return (
       <button
         type={type}
