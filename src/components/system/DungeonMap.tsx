@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Box, HStack, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
@@ -11,6 +11,7 @@ import {
   SystemLabel,
   SYSTEM_KEYFRAMES,
 } from "./SystemPrimitives";
+import { ManaBeam, ManaBurst } from "./ManaBeam";
 
 type NodeType = "tactic" | "strategy" | "endgame" | "boss";
 
@@ -61,12 +62,19 @@ function buildNodes(): DungeonNode[] {
 interface DungeonMapProps {
   /** Override the player level (used for storybook / preview). */
   playerLevel?: number;
+  /**
+   * When provided, the map runs a one-shot "Path Igniting" beam from the
+   * previous level (justClearedLevel) to the current level — and bursts
+   * the lock on the current node. Use this on level-up.
+   */
+  justClearedLevel?: number;
 }
 
 const VISIBLE_AHEAD = 5;
 const FOG_AHEAD = 4;
+const ROW_HEIGHT_PX = 78; // approximate row height incl. gap, used to size mana beams
 
-export function DungeonMap({ playerLevel }: DungeonMapProps) {
+export function DungeonMap({ playerLevel, justClearedLevel }: DungeonMapProps) {
   const { user } = useAuth();
   const xp = user?.profile?.xp ?? 0;
   const level = playerLevel ?? xpProgress(xp).level;
@@ -75,6 +83,20 @@ export function DungeonMap({ playerLevel }: DungeonMapProps) {
 
   const nodes = useMemo(() => NODES, []);
   const cleared = level - 1; // levels strictly below current are cleared
+
+  // Path-ignite animation when a level is freshly cleared. We track the
+  // current node element to drop a burst on top of its marker.
+  const [igniting, setIgniting] = useState<boolean>(false);
+  const currentNodeRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (justClearedLevel === level - 1) {
+      setIgniting(true);
+      const t = setTimeout(() => setIgniting(false), 2200);
+      return () => clearTimeout(t);
+    }
+    return undefined;
+  }, [justClearedLevel, level]);
 
   return (
     <>
@@ -122,7 +144,7 @@ export function DungeonMap({ playerLevel }: DungeonMapProps) {
           </HStack>
 
           <Box position="relative" pl={{ base: "32px", md: "48px" }}>
-            {/* the spine */}
+            {/* Base spine — fades into fog further down */}
             <Box
               position="absolute"
               top="0"
@@ -132,6 +154,40 @@ export function DungeonMap({ playerLevel }: DungeonMapProps) {
               background="linear-gradient(180deg, rgba(0,240,255,0.6) 0%, rgba(138,43,226,0.4) 60%, rgba(255,255,255,0.05) 100%)"
               boxShadow="0 0 8px rgba(0,240,255,0.5)"
             />
+
+            {/* Permanent mana flow on the *cleared* portion */}
+            {cleared > 0 && (
+              <Box
+                position="absolute"
+                top="0"
+                left={{ base: "15px", md: "22px" }}
+                w="4px"
+                h={`${Math.min(cleared, VISIBLE_AHEAD) * ROW_HEIGHT_PX}px`}
+                className="sys-mana-line"
+                opacity={0.55}
+                pointerEvents="none"
+              />
+            )}
+
+            {/* One-shot ignition beam: travels from the prior cleared node
+                down to the current node */}
+            {igniting && (
+              <Box
+                position="absolute"
+                top={`${Math.max(0, (Math.min(cleared, VISIBLE_AHEAD) - 1) * ROW_HEIGHT_PX)}px`}
+                left={{ base: "15px", md: "22px" }}
+                pointerEvents="none"
+              >
+                <ManaBeam
+                  axis="vertical"
+                  length={ROW_HEIGHT_PX}
+                  thickness={3}
+                  duration={1.0}
+                  oneShot
+                />
+              </Box>
+            )}
+
             <VStack align="stretch" gap={3}>
               {nodes.map((n) => {
                 const distance = n.level - level;
@@ -146,6 +202,8 @@ export function DungeonMap({ playerLevel }: DungeonMapProps) {
                     isVisible={isVisible}
                     isCurrent={isCurrent}
                     isCleared={isCleared}
+                    burst={isCurrent && igniting}
+                    nodeRef={isCurrent ? currentNodeRef : undefined}
                   />
                 );
               })}
@@ -162,11 +220,15 @@ function NodeRow({
   isVisible,
   isCurrent,
   isCleared,
+  burst,
+  nodeRef,
 }: {
   node: DungeonNode;
   isVisible: boolean;
   isCurrent: boolean;
   isCleared: boolean;
+  burst?: boolean;
+  nodeRef?: React.Ref<HTMLDivElement>;
 }) {
   const accent =
     node.type === "boss"
@@ -228,7 +290,7 @@ function NodeRow({
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
     >
-      <Box position="relative" pl={{ base: "8px", md: "12px" }}>
+      <Box position="relative" pl={{ base: "8px", md: "12px" }} ref={nodeRef}>
         <NodeMarker
           accent={accent}
           accentRgb={accentRgb}
@@ -236,6 +298,11 @@ function NodeRow({
           isCurrent={isCurrent}
           type={node.type}
         />
+        {burst && (
+          <Box position="absolute" left={{ base: "0", md: "8px" }} top="4px" pointerEvents="none">
+            <ManaBurst size={80} color={accent} duration={0.9} />
+          </Box>
+        )}
         <Box
           ml={{ base: "32px", md: "40px" }}
           opacity={isCleared ? 0.65 : 1}

@@ -15,6 +15,7 @@ import {
 import { PlayerHUD } from "./PlayerHUD";
 import { SystemPrompt } from "./SystemPrompt";
 import { CenterPiece } from "./CenterPiece";
+import { StatusWindow } from "./StatusWindow";
 import {
   SystemButton,
   SystemPanel,
@@ -24,7 +25,7 @@ import {
 } from "./SystemPrimitives";
 import { LevelUpOverlay, type LevelUpStat } from "./LevelUpOverlay";
 
-type LobbyTab = "lobby" | "quests" | "codex" | "inventory";
+type LobbyTab = "lobby" | "status" | "quests" | "codex" | "inventory";
 
 export function Lobby() {
   const { user } = useAuth();
@@ -66,6 +67,7 @@ export function Lobby() {
             {(
               [
                 { id: "lobby", label: "Lobby" },
+                { id: "status", label: "Status" },
                 { id: "quests", label: "Quests" },
                 { id: "codex", label: "Codex" },
                 { id: "inventory", label: "Inventory" },
@@ -96,6 +98,11 @@ export function Lobby() {
               questReward={`+${currentQuest.xp} XP`}
               onTriggerLevelUp={() => setShowLevelUp(true)}
             />
+          )}
+          {tab === "status" && (
+            <Box pt={6} maxW="1080px" mx="auto">
+              <StatusWindow username={username} rating={rating} />
+            </Box>
           )}
           {tab === "quests" && <QuestsView tier={tier} />}
           {tab === "codex" && <CodexView />}
@@ -292,10 +299,13 @@ function LobbyView(p: LobbyViewProps) {
       >
         <SystemPanel accent="purple" glow="soft" p={3} w={{ base: "full", md: "auto" }}>
           <HStack gap={2} flexWrap="wrap">
+            <QuickAction href="/road-to-master/status">Status Window</QuickAction>
+            <QuickAction href="/road-to-master/memory">Memory Echo</QuickAction>
+            <QuickAction href="/road-to-master/shadow">Shadow Extraction</QuickAction>
+            <QuickAction href="/road-to-master/guild">Guild Conclave</QuickAction>
+            <QuickAction href="/road-to-master/pass">Hunter&apos;s Pass</QuickAction>
             <QuickAction href="/play/bot">Spar Engine</QuickAction>
             <QuickAction href="/learning">Tactics</QuickAction>
-            <QuickAction href="/games">Live Arena</QuickAction>
-            <QuickAction href="/analysis/import">Review</QuickAction>
           </HStack>
         </SystemPanel>
       </Box>

@@ -16,6 +16,23 @@
   --status-warning: #5a1f1f;
   --radius-cca: 6px;
   --radius-soft: 10px;
+
+  /* ── R2M "System" palette (Solo-Leveling HUD) ───────────────────── */
+  --sys-cyan: #00f0ff;
+  --sys-cyan-dim: #0fa8b5;
+  --sys-purple: #8a2be2;
+  --sys-purple-dim: #5c1aa8;
+  --sys-epic: #b197fc;
+  --sys-threat: #f06595;
+  --sys-void: #050505;
+  --sys-glass: rgba(10, 11, 14, 0.7);
+  --sys-prestige-gold: #f5c244;
+  --sys-prestige-onyx: #0b0b0f;
+  --sys-glow-cyan: 0 0 8px rgba(0, 240, 255, 0.6), 0 0 24px rgba(0, 240, 255, 0.35);
+  --sys-glow-purple: 0 0 8px rgba(138, 43, 226, 0.6), 0 0 24px rgba(138, 43, 226, 0.35);
+  --sys-glow-threat: 0 0 8px rgba(240, 101, 149, 0.6), 0 0 24px rgba(240, 101, 149, 0.35);
+  --sys-glow-epic: 0 0 8px rgba(177, 151, 252, 0.6), 0 0 24px rgba(177, 151, 252, 0.35);
+  --sys-glow-prestige: 0 0 8px rgba(245, 194, 68, 0.6), 0 0 26px rgba(245, 194, 68, 0.4);
   --shadow-card-soft: 0 4px 24px rgba(0, 0, 0, 0.2);
   --shadow-card-soft-hover: 0 8px 32px rgba(0, 0, 0, 0.25);
   --transition-page: 200ms ease;
@@ -70,6 +87,50 @@ body {
   font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+}
+
+/* ── R2M utility classes ─────────────────────────────────────────── */
+.sys-glow-cyan    { box-shadow: var(--sys-glow-cyan); }
+.sys-glow-purple  { box-shadow: var(--sys-glow-purple); }
+.sys-glow-threat  { box-shadow: var(--sys-glow-threat); }
+.sys-glow-epic    { box-shadow: var(--sys-glow-epic); }
+.sys-glow-prestige{ box-shadow: var(--sys-glow-prestige); }
+
+.sys-text-cyan    { color: var(--sys-cyan);    text-shadow: 0 0 6px rgba(0,240,255,0.55); }
+.sys-text-purple  { color: var(--sys-purple);  text-shadow: 0 0 6px rgba(138,43,226,0.55); }
+.sys-text-threat  { color: var(--sys-threat);  text-shadow: 0 0 6px rgba(240,101,149,0.55); }
+.sys-text-epic    { color: var(--sys-epic);    text-shadow: 0 0 6px rgba(177,151,252,0.55); }
+.sys-text-prestige{ color: var(--sys-prestige-gold); text-shadow: 0 0 6px rgba(245,194,68,0.6); }
+
+/* Chamfered ("clip-path") panel shapes for the System UI */
+.sys-clip-panel {
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+.sys-clip-panel-sm {
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+.sys-clip-diamond {
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+.sys-clip-hex {
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+
+/* Animated travelling glow on linear paths (e.g. dungeon map spine) */
+@keyframes sys-mana-flow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 0% -200%; }
+}
+.sys-mana-line {
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(0,240,255,0.0) 40%,
+    rgba(0,240,255,0.9) 50%,
+    rgba(0,240,255,0.0) 60%,
+    transparent 100%
+  );
+  background-size: 100% 200%;
+  animation: sys-mana-flow 1.6s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
