@@ -9,7 +9,6 @@ import { StreakCounter } from "@/components/dashboard";
 import { defaultViewport, staggerContainer, staggerChild } from "@/lib/animations";
 import { CourseCard } from "@/components/system/CourseCard";
 import {
-  SystemLabel,
   SYSTEM_KEYFRAMES,
   type GlowAccent,
 } from "@/components/system/SystemPrimitives";
@@ -67,39 +66,37 @@ export default function LearningPage() {
         {/* Header */}
         <HStack justify="space-between" align="flex-end" flexWrap="wrap" gap={4}>
           <Box>
-            <SystemLabel accent="cyan">[ The Curriculum ]</SystemLabel>
             <Text
               fontFamily="var(--font-playfair), Georgia, serif"
               fontSize={{ base: "3xl", md: "5xl" }}
               color="textPrimary"
               fontWeight="700"
               lineHeight="1.0"
-              mt={1}
               letterSpacing="-0.01em"
             >
-              Strategy Hall
+              Learn
             </Text>
           </Box>
           <StreakCounter count={streak} size="md" />
         </HStack>
 
-        {/* Daily Gate */}
+        {/* Daily puzzle */}
         {dailyPuzzle && (
-          <Section title="Daily Gate" tag="DAILY" accent="cyan">
+          <Section title="Today's puzzle" accent="cyan">
             <CourseCard
               variant="feature"
               accent="cyan"
               href={`/learning/puzzle/${dailyPuzzle.id}`}
               tag={`Elo · ${dailyPuzzle.difficulty}`}
               title="Today's puzzle"
-              subtitle={dailyPuzzle.theme?.length ? dailyPuzzle.theme.join(" · ") : "One position. One solution."}
+              subtitle={dailyPuzzle.theme?.length ? dailyPuzzle.theme.join(" · ") : ""}
               glyph="◆"
             />
           </Section>
         )}
 
-        {/* Tactical Trials */}
-        <Section title="Tactical Trials" tag="SHARP MOVES" accent="cyan">
+        {/* Puzzles */}
+        <Section title="Puzzles" accent="cyan">
           <motion.div
             variants={staggerContainer}
             initial="hidden"
@@ -141,8 +138,8 @@ export default function LearningPage() {
           </motion.div>
         </Section>
 
-        {/* Opening Archives */}
-        <Section title="Opening Archives" tag="FIRST MOVES" accent="purple">
+        {/* Openings */}
+        <Section title="Openings" accent="purple">
           <motion.div
             variants={staggerContainer}
             initial="hidden"
@@ -167,8 +164,8 @@ export default function LearningPage() {
           </motion.div>
         </Section>
 
-        {/* Endgame Conservatory */}
-        <Section title="Endgame Conservatory" tag="FINAL MOVES" accent="gold">
+        {/* Endgames */}
+        <Section title="Endgames" accent="gold">
           <motion.div
             variants={staggerContainer}
             initial="hidden"
@@ -201,43 +198,29 @@ export default function LearningPage() {
 
 function Section({
   title,
-  tag,
-  subtitle,
   accent,
   children,
 }: {
   title: string;
-  tag: string;
-  subtitle?: string;
   accent: GlowAccent;
   children: React.ReactNode;
 }) {
   return (
     <Box>
-      <HStack mb={4} align="flex-end" gap={3} flexWrap="wrap">
-        <Box>
-          <SystemLabel accent={accent}>[ {tag} ]</SystemLabel>
-          <Text
-            fontFamily="var(--font-playfair), Georgia, serif"
-            fontSize={{ base: "xl", md: "2xl" }}
-            color="textPrimary"
-            fontWeight="700"
-            mt={0.5}
-          >
-            {title}
-          </Text>
-          {subtitle && (
-            <Text fontSize="sm" color="textMuted" mt={1} maxW="2xl">
-              {subtitle}
-            </Text>
-          )}
-        </Box>
-        {/* Glowing separator line */}
+      <HStack mb={4} align="center" gap={3}>
+        <Text
+          fontFamily="var(--font-playfair), Georgia, serif"
+          fontSize={{ base: "xl", md: "2xl" }}
+          color="textPrimary"
+          fontWeight="700"
+          letterSpacing="0.02em"
+        >
+          {title}
+        </Text>
         <Box
           flex={1}
           h="1px"
           minW="80px"
-          mb={1.5}
           style={{
             background:
               accent === "cyan"

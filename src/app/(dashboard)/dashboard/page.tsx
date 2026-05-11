@@ -94,34 +94,34 @@ export default function DashboardPage() {
         </motion.div>
       </Box>
 
-      {/* THE ARENA — primary play actions */}
-      <Section eyebrow="The Arena" title="Play">
+      {/* Play — primary actions */}
+      <Section title="Play">
         <motion.div variants={staggerContainer} initial="hidden" animate="visible">
           <SimpleGrid columns={{ base: 1, md: 3 }} gap={5}>
             <motion.div variants={staggerChild}>
-              <PlayTile href="/games" eyebrow="Matchmaking" title="Play the field" glyph="♚" />
+              <PlayTile href="/games" eyebrow="Matchmaking" title="Find a match" glyph="♚" />
             </motion.div>
             <motion.div variants={staggerChild}>
-              <PlayTile href="/games" eyebrow="Private" title="Friend" glyph="♛" />
+              <PlayTile href="/games" eyebrow="Private" title="Play a friend" glyph="♛" />
             </motion.div>
             <motion.div variants={staggerChild}>
-              <PlayTile href="/play/bot" eyebrow="Solo" title="Engine" glyph="♞" />
+              <PlayTile href="/play/bot" eyebrow="Solo" title="Play the engine" glyph="♞" />
             </motion.div>
           </SimpleGrid>
         </motion.div>
       </Section>
 
-      {/* AT THE BOARD */}
-      <Section eyebrow="At the Board" title="Offline" mt={{ base: 7, md: 9 }}>
+      {/* Offline */}
+      <Section title="Offline" mt={{ base: 7, md: 9 }}>
         <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
           <LocalTile href="/play/local" glyph="♟" title="Two players, one device" />
           <LocalTile href="/play/local" glyph="⏱" title="Chess timer" />
         </SimpleGrid>
       </Section>
 
-      {/* Continue playing — only if any */}
+      {/* Active games — only if any */}
       {liveGames.length > 0 && (
-        <Section eyebrow="Resume" title="Continue" mt={{ base: 7, md: 9 }}>
+        <Section title="Active games" mt={{ base: 7, md: 9 }}>
           <VStack align="stretch" gap={3}>
             {liveGames.slice(0, 3).map((g) => (
               <GlassCard key={g.id} href={`/game/${g.id}`}>
@@ -152,8 +152,8 @@ export default function DashboardPage() {
         </Section>
       )}
 
-      {/* THE PATH — demoted */}
-      <Section eyebrow="The Path" title="Road to Master" mt={{ base: 7, md: 9 }}>
+      {/* Road to Master — demoted */}
+      <Section title="Road to Master" mt={{ base: 7, md: 9 }}>
         <GlassCard href="/road-to-master" goldWash>
           <HStack px={{ base: 5, md: 6 }} py={{ base: 4, md: 5 }} justify="space-between" align="center" gap={4}>
             <HStack gap={4} align="center">
@@ -181,19 +181,19 @@ export default function DashboardPage() {
                   fontWeight="600"
                   letterSpacing="0.03em"
                 >
-                  Hunter status · quests · dungeon
+                  Quests · status · levels
                 </Text>
               </Box>
             </HStack>
             <LuxuryButton variant="outline" size="sm" glyph="▸">
-              Enter
+              Open
             </LuxuryButton>
           </HStack>
         </GlassCard>
       </Section>
 
-      {/* TONIGHT — stats ribbon */}
-      <Section eyebrow="The Academy" title="Tonight" mt={{ base: 7, md: 10 }}>
+      {/* Stats ribbon */}
+      <Section title="Live" mt={{ base: 7, md: 10 }}>
         <GlassCard>
           <HStack
             px={{ base: 5, md: 8 }}
@@ -222,12 +222,10 @@ export default function DashboardPage() {
 /* ─────────── Section header (eyebrow + title + gold rule) ─────────── */
 
 function Section({
-  eyebrow,
   title,
   mt,
   children,
 }: {
-  eyebrow: string;
   title: string;
   mt?: { base: number; md?: number };
   children: React.ReactNode;
@@ -235,10 +233,7 @@ function Section({
   return (
     <Box position="relative" mt={mt}>
       <HStack mb={4} align="center" gap={3}>
-        <Box>
-          <LuxuryEyebrow>{eyebrow}</LuxuryEyebrow>
-          <LuxuryHeading size="sm">{title}</LuxuryHeading>
-        </Box>
+        <LuxuryHeading size="sm">{title}</LuxuryHeading>
         <Box flex={1} className="lux-divider" />
       </HStack>
       {children}

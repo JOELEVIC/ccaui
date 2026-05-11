@@ -8,7 +8,6 @@ import {
   GlassCard,
   GoldRule,
   LuxuryButton,
-  LuxuryEyebrow,
   LuxuryHeading,
 } from "@/components/luxury/LuxuryPrimitives";
 import { tierForRating } from "@/lib/r2m";
@@ -79,10 +78,9 @@ export default function ProfilePage() {
     <Box position="relative" maxW="1180px" mx="auto">
       <ChessWatermark piece="bishop" size={420} opacity={0.035} position={{ top: "-40px", right: "-60px" }} />
 
-      {/* Member dossier header */}
+      {/* Profile header */}
       <Box mb={{ base: 6, md: 9 }} position="relative" zIndex={1}>
-        <LuxuryEyebrow>Member Dossier</LuxuryEyebrow>
-        <HStack mt={4} gap={{ base: 5, md: 7 }} align="flex-start" flexWrap="wrap">
+        <HStack gap={{ base: 5, md: 7 }} align="flex-start" flexWrap="wrap">
           <GoldAvatar size={112} tierColor={tier.color} avatarUrl={p?.avatarUrl} initial={me.username.charAt(0).toUpperCase()} />
 
           <VStack align="flex-start" gap={2} flex={1} minW={0}>
@@ -160,7 +158,7 @@ export default function ProfilePage() {
       {(me.variantRatings?.length ?? 0) > 0 && (
         <Box mb={{ base: 6, md: 9 }} position="relative" zIndex={1}>
           <HStack mb={4} align="center" gap={3}>
-            <LuxuryEyebrow>Variant Cabinet</LuxuryEyebrow>
+            <LuxuryHeading size="sm">Ratings</LuxuryHeading>
             <Box flex={1} className="lux-divider" />
           </HStack>
           <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={3}>
@@ -220,10 +218,10 @@ export default function ProfilePage() {
         </Box>
       )}
 
-      {/* Archive entry */}
+      {/* Games entry */}
       <Box position="relative" zIndex={1}>
         <HStack mb={4} align="center" gap={3}>
-          <LuxuryEyebrow>Archive</LuxuryEyebrow>
+          <LuxuryHeading size="sm">Games</LuxuryHeading>
           <Box flex={1} className="lux-divider" />
         </HStack>
         <GlassCard href="/games">
@@ -236,10 +234,10 @@ export default function ProfilePage() {
                 fontWeight="600"
                 letterSpacing="0.04em"
               >
-                Game history
+                All games
               </Text>
               <Text fontSize="xs" className="lux-text-muted" letterSpacing="0.16em" textTransform="uppercase" mt={0.5}>
-                {me.totalGamesPlayed} games
+                {me.totalGamesPlayed} total
               </Text>
             </Box>
             <Text color="var(--lux-gold)" fontSize="lg">

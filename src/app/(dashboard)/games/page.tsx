@@ -118,9 +118,9 @@ export default function GamesPage() {
       <HStack mb={{ base: 5, md: 7 }} gap={2} flexWrap="wrap" position="relative" zIndex={1}>
         {(
           [
-            { id: "human", label: "Vs Human" },
-            { id: "bot", label: "Vs Engine" },
-            { id: "self", label: "Vs Self" },
+            { id: "human", label: "Human" },
+            { id: "bot", label: "Engine" },
+            { id: "self", label: "Self" },
           ] as { id: PlayMode; label: string }[]
         ).map((m) => (
           <ModeTab
@@ -135,10 +135,7 @@ export default function GamesPage() {
       {playMode === "self" && (
         <GlassCard hero>
           <Box px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }}>
-            <LuxuryEyebrow>Local</LuxuryEyebrow>
-            <Box mt={1.5}>
-              <LuxuryHeading size="md">Two players, one device.</LuxuryHeading>
-            </Box>
+            <LuxuryHeading size="md">Two players, one device.</LuxuryHeading>
             <Box mt={4}>
               <LuxuryButton variant="gold" size="md" glyph="▸" href="/play/local">
                 Start
@@ -151,10 +148,7 @@ export default function GamesPage() {
       {playMode === "bot" && (
         <GlassCard hero>
           <Box px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }}>
-            <LuxuryEyebrow>Engine Sparring</LuxuryEyebrow>
-            <Box mt={1.5}>
-              <LuxuryHeading size="md">Select strength.</LuxuryHeading>
-            </Box>
+            <LuxuryHeading size="md">Select engine strength.</LuxuryHeading>
             <SimpleGrid mt={4} columns={{ base: 3, sm: 4, md: 6 }} gap={2}>
               {BOT_ELO_PRESETS.map((elo) => {
                 const active = selectedBotElo === elo;
@@ -205,10 +199,7 @@ export default function GamesPage() {
           {/* Start a match form */}
           <GlassCard hero>
             <Box as="form" onSubmit={handleCreateGame} px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }}>
-              <LuxuryEyebrow>Pairing</LuxuryEyebrow>
-              <Box mt={1.5}>
-                <LuxuryHeading size="md">Start a match.</LuxuryHeading>
-              </Box>
+              <LuxuryHeading size="md">New match</LuxuryHeading>
 
               <SimpleGrid mt={5} columns={{ base: 1, md: 2 }} gap={4}>
                 <PlayerField
@@ -279,7 +270,7 @@ export default function GamesPage() {
           {/* Active games */}
           <Box>
             <HStack mb={4} align="center" gap={3}>
-              <LuxuryEyebrow>Active Tonight</LuxuryEyebrow>
+              <LuxuryHeading size="sm">Active</LuxuryHeading>
               <Box flex={1} className="lux-divider" />
               <Text fontSize="2xs" color="var(--lux-text-muted)" letterSpacing="0.18em" textTransform="uppercase">
                 {liveGames.length} live
@@ -305,7 +296,7 @@ export default function GamesPage() {
           {/* My games */}
           <Box>
             <HStack mb={4} align="center" gap={3}>
-              <LuxuryEyebrow>Your Archive</LuxuryEyebrow>
+              <LuxuryHeading size="sm">Your games</LuxuryHeading>
               <Box flex={1} className="lux-divider" />
               <Text fontSize="2xs" color="var(--lux-text-muted)" letterSpacing="0.18em" textTransform="uppercase">
                 {myGames.length} games

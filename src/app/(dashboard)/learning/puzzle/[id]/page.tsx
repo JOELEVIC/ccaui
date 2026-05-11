@@ -140,7 +140,7 @@ export default function PuzzlePage() {
       }
     } else {
       setMisses((m) => m + 1);
-      toaster.create({ title: "Not the best move. The shadow slips away.", type: "error" });
+      toaster.create({ title: "Not the best move.", type: "error" });
       setMoves(moves);
     }
   };
@@ -187,7 +187,7 @@ export default function PuzzlePage() {
         <HStack gap={2} fontSize="xs" color="textMuted" mb={3} fontFamily="var(--font-oswald), var(--font-inter), sans-serif" letterSpacing="0.18em" textTransform="uppercase">
           <Link href="/dashboard"><Text _hover={{ color: "sys.cyan" }}>Dashboard</Text></Link>
           <Text>›</Text>
-          <Link href="/learning"><Text _hover={{ color: "sys.cyan" }}>Curriculum</Text></Link>
+          <Link href="/learning"><Text _hover={{ color: "sys.cyan" }}>Learn</Text></Link>
           <Text>›</Text>
           <Text color="sys.cyan" style={{ textShadow: "0 0 6px var(--sys-cyan)" }}>
             Trial #{puzzle.id.slice(-4)}
@@ -197,7 +197,7 @@ export default function PuzzlePage() {
         {/* Header */}
         <HStack justify="space-between" align="flex-end" flexWrap="wrap" gap={4} mb={5}>
           <Box>
-            <SystemLabel accent="cyan">[ Tactical Trial ]</SystemLabel>
+            <SystemLabel accent="cyan">[ Puzzle ]</SystemLabel>
             <Text
               fontFamily="var(--font-playfair), Georgia, serif"
               fontSize={{ base: "3xl", md: "4xl" }}
@@ -206,7 +206,7 @@ export default function PuzzlePage() {
               lineHeight="1.05"
               mt={1}
             >
-              Find the only move
+              Find the best move
             </Text>
             <HStack gap={2} mt={2} flexWrap="wrap">
               <MetaPill label="Elo" value={String(puzzle.difficulty)} accent="cyan" />
@@ -217,7 +217,7 @@ export default function PuzzlePage() {
             </HStack>
           </Box>
           <SystemButton accent="purple" emphasis="ghost" size="md" href="/learning" glyph="←">
-            Curriculum
+            Learn
           </SystemButton>
         </HStack>
 
@@ -225,7 +225,7 @@ export default function PuzzlePage() {
         <SystemBoardFrame
           accent="cyan"
           turn={turn}
-          tag="◆ ACTIVE GATE"
+          tag="◆ PUZZLE"
           topMeta={puzzle.theme?.length ? puzzle.theme.join(" · ") : "Single position"}
           rightRail={
             <RightRail
@@ -234,7 +234,7 @@ export default function PuzzlePage() {
               solutionLen={solutionLen}
               onReset={resetAttempt}
               onSkip={goNext}
-              onCurriculum={() => router.push("/learning")}
+              onLearn={() => router.push("/learning")}
             />
           }
         >
@@ -266,19 +266,19 @@ function RightRail({
   solutionLen,
   onReset,
   onSkip,
-  onCurriculum,
+  onLearn,
 }: {
   moves: string[];
   misses: number;
   solutionLen: number;
   onReset: () => void;
   onSkip: () => void;
-  onCurriculum: () => void;
+  onLearn: () => void;
 }) {
   return (
     <VStack align="stretch" gap={3}>
       <SystemPanel accent="cyan" glow="soft" p={4}>
-        <SystemLabel accent="cyan">Trial Log</SystemLabel>
+        <SystemLabel accent="cyan">Progress</SystemLabel>
         <VStack align="stretch" gap={2.5} mt={2.5}>
           <HStack justify="space-between">
             <Text fontSize="xs" color="textMuted" letterSpacing="0.18em" textTransform="uppercase" fontFamily="var(--font-oswald), var(--font-inter), sans-serif">
@@ -317,7 +317,7 @@ function RightRail({
       </SystemPanel>
 
       <SystemPanel accent="purple" glow="soft" p={4}>
-        <SystemLabel accent="purple">Move Trace</SystemLabel>
+        <SystemLabel accent="purple">Moves</SystemLabel>
         <Text
           mt={2}
           fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
@@ -332,13 +332,13 @@ function RightRail({
 
       <VStack align="stretch" gap={2}>
         <SystemButton accent="cyan" emphasis="primary" size="lg" glyph="↻" onClick={onReset} full>
-          Reset Trial
+          Reset
         </SystemButton>
         <SystemButton accent="threat" emphasis="secondary" size="md" glyph="↷" onClick={onSkip} full>
-          Skip — Next Trial
+          Skip
         </SystemButton>
-        <SystemButton accent="purple" emphasis="ghost" size="md" glyph="←" onClick={onCurriculum} full>
-          Back to Curriculum
+        <SystemButton accent="purple" emphasis="ghost" size="md" glyph="←" onClick={onLearn} full>
+          Back
         </SystemButton>
       </VStack>
     </VStack>
@@ -409,10 +409,10 @@ function SolvedOverlay({
                   animation: "system-glitch 0.45s ease-out 1",
                 }}
               >
-                TRIAL CLEARED
+                SOLVED
               </Text>
               <Text fontSize="sm" color="textSecondary" mt={1}>
-                Shadow extracted — the position is yours.
+                Position cleared.
               </Text>
             </VStack>
 
@@ -443,10 +443,10 @@ function SolvedOverlay({
 
             <HStack gap={3} justify="center" flexWrap="wrap" mt={3}>
               <SystemButton accent="cyan" emphasis="primary" glyph="▶" onClick={onNext}>
-                Next Trial
+                Next
               </SystemButton>
               <SystemButton accent="purple" emphasis="secondary" glyph="←" onClick={onClose}>
-                Review Board
+                Review
               </SystemButton>
               <SystemButton accent="epic" emphasis="ghost" href="/road-to-master">
                 Road to Master
