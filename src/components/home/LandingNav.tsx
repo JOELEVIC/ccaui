@@ -28,14 +28,20 @@ export function LandingNav() {
       bg="rgba(10, 14, 26, 0.92)"
       backdropFilter="blur(8px)"
     >
-      <Container maxW="6xl" py={4}>
-        <Flex align="center" justify="space-between" gap={4} flexWrap="wrap">
+      <Container maxW="6xl" py={{ base: 3, md: 4 }} px={{ base: 3, md: 6 }}>
+        <Flex align="center" justify="space-between" gap={2} flexWrap="nowrap">
           <Link href="/">
-            <Heading size="md" fontFamily="var(--font-playfair), Georgia, serif" color="gold" fontWeight="600">
+            <Heading
+              size={{ base: "sm", md: "md" }}
+              fontFamily="var(--font-playfair), Georgia, serif"
+              color="gold"
+              fontWeight="600"
+              whiteSpace="nowrap"
+            >
               {APP_NAME}
             </Heading>
           </Link>
-          <HStack gap={{ base: 2, md: 6 }} flexWrap="wrap" justify="flex-end">
+          <HStack gap={{ base: 1, md: 6 }} flexWrap="nowrap" justify="flex-end">
             {NAV_LINKS.map(({ label, href }) => (
               <Link key={href} href={href}>
                 <Text
@@ -50,7 +56,7 @@ export function LandingNav() {
               </Link>
             ))}
             <Link href="/login">
-              <Button variant="ghost" size="sm" color="gold">
+              <Button variant="ghost" size="sm" color="gold" display={{ base: "none", md: "inline-flex" }}>
                 Sign in
               </Button>
             </Link>
@@ -66,6 +72,8 @@ export function LandingNav() {
               display={{ base: "flex", md: "none" }}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
+              px={2}
+              minW="auto"
             >
               {mobileMenuOpen ? "✕" : "☰"}
             </Button>
@@ -90,6 +98,11 @@ export function LandingNav() {
                 </Text>
               </Link>
             ))}
+            <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+              <Text w="full" py={2} fontSize="sm" color="gold" cursor="pointer">
+                Sign in
+              </Text>
+            </Link>
           </VStack>
         </Box>
       )}
