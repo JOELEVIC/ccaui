@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { fadeInUp, staggerContainer, staggerChild, defaultViewport } from "@/lib/animations";
 import { KingIcon, TrophyIcon, KnightIcon, RookIcon } from "./ChessIcons";
+import { SectionAtmosphere } from "./SectionAtmosphere";
 
 const FEATURES = [
   {
@@ -44,8 +45,9 @@ const FEATURES = [
 
 export function LandingIconFeatures() {
   return (
-    <Box py={{ base: 16, md: 24 }} bg="bgDark">
-      <Container maxW="6xl">
+    <Box py={{ base: 12, md: 24 }} bg="bgDark" position="relative" overflow="hidden">
+      <SectionAtmosphere variant="scatter" opacity={0.035} />
+      <Container maxW="6xl" position="relative" zIndex={1}>
         <VStack gap={12} align="stretch">
           <motion.div
             variants={fadeInUp}
@@ -76,7 +78,7 @@ export function LandingIconFeatures() {
                       borderRadius="soft"
                       bg="bgCard"
                       borderWidth="1px"
-                      borderColor="whiteAlpha.080"
+                      borderColor="whiteAlpha.200"
                       align="flex-start"
                       gap={3}
                       h="full"

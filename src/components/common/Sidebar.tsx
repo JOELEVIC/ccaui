@@ -44,9 +44,9 @@ const sidebarContent = (
               px={3}
               py={2}
               borderRadius="cca"
-              bg={isActive ? "whiteAlpha.08" : "transparent"}
+              bg={isActive ? "whiteAlpha.200" : "transparent"}
               color={isActive ? "gold" : "textSecondary"}
-              _hover={{ bg: "whiteAlpha.05", color: "gold" }}
+              _hover={{ bg: "whiteAlpha.100", color: "gold" }}
               borderBottomWidth={isActive ? "2px" : "0"}
               borderColor="gold"
               transition="all 0.2s"
@@ -77,7 +77,7 @@ const sidebarContent = (
             color="gold"
             borderRadius="cca"
             onClick={logout}
-            _hover={{ bg: "whiteAlpha.05" }}
+            _hover={{ bg: "whiteAlpha.100" }}
           >
             Sign out
           </Button>
@@ -163,9 +163,9 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   px={3}
                   py={2}
                   borderRadius="cca"
-                  bg={isActive ? "whiteAlpha.08" : "transparent"}
+                  bg={isActive ? "whiteAlpha.200" : "transparent"}
                   color={isActive ? "gold" : "textSecondary"}
-                  _hover={{ bg: "whiteAlpha.05", color: "gold" }}
+                  _hover={{ bg: "whiteAlpha.100", color: "gold" }}
                   borderBottomWidth={isActive ? "2px" : "0"}
                   borderColor="gold"
                 >
@@ -195,7 +195,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 color="gold"
                 borderRadius="cca"
                 onClick={logout}
-                _hover={{ bg: "whiteAlpha.05" }}
+                _hover={{ bg: "whiteAlpha.100" }}
               >
                 Sign out
               </Button>

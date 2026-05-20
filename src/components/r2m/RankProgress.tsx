@@ -19,7 +19,7 @@ export function RankProgress({ rating }: RankProgressProps) {
       borderRadius="soft"
       bg="bgCard"
       borderWidth="1px"
-      borderColor="whiteAlpha.080"
+      borderColor="whiteAlpha.200"
       backgroundImage={`radial-gradient(circle at 0% 0%, ${tier.color}26 0%, transparent 60%)`}
     >
       <Flex align="center" gap={4} flexWrap="wrap">

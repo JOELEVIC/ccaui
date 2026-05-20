@@ -151,7 +151,7 @@ export default function RegulationsPage() {
             </Text>
           </Section>
 
-          <Box mt={10} pt={6} borderTopWidth="1px" borderColor="whiteAlpha.080">
+          <Box mt={10} pt={6} borderTopWidth="1px" borderColor="whiteAlpha.200">
             <Text color="textMuted" fontSize="xs">
               These regulations are reviewed annually by the academy committee. Effective from January 2026. Last
               updated: 2026.

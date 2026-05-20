@@ -27,7 +27,7 @@ export function LandingPlayCompete() {
 
   return (
     <Box
-      py={{ base: 16, md: 24 }}
+      py={{ base: 12, md: 24 }}
       bg="bgDark"
       backgroundImage="radial-gradient(circle at 10% 20%, rgba(230,164,82,0.06) 0%, transparent 60%)"
     >

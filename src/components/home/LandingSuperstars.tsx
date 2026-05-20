@@ -10,7 +10,7 @@ const SUPERSTARS = [
 
 export function LandingSuperstars() {
   return (
-    <Box py={{ base: 16, md: 24 }} bg="bgDark">
+    <Box py={{ base: 12, md: 24 }} bg="bgDark">
       <Container maxW="6xl">
         <VStack gap={10} align="stretch">
           <VStack gap={2}>

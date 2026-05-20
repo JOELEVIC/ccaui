@@ -26,7 +26,7 @@ function GalleryTile({ src, alt }: { src: (typeof GALLERY_ITEMS)[number]["src"];
       overflow="hidden"
       bg="bgSurface"
       borderWidth="1px"
-      borderColor="whiteAlpha.06"
+      borderColor="whiteAlpha.100"
       boxShadow="var(--shadow-card-soft)"
     >
       {!error ? (

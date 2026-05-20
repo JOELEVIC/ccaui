@@ -7,13 +7,15 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { players2 } from "@/assets/images/ubca";
 import { fadeInUp, defaultViewport } from "@/lib/animations";
+import { SectionAtmosphere } from "./SectionAtmosphere";
 
 export function LandingCameroonChess() {
   const [imageError, setImageError] = useState(false);
 
   return (
-    <Box py={{ base: 16, md: 24 }} bg="bgCard">
-      <Container maxW="6xl">
+    <Box py={{ base: 12, md: 24 }} bg="bgCard" position="relative" overflow="hidden">
+      <SectionAtmosphere variant="left" opacity={0.03} />
+      <Container maxW="6xl" position="relative" zIndex={1}>
         <Flex
           direction={{ base: "column", lg: "row" }}
           align="center"
@@ -61,7 +63,7 @@ export function LandingCameroonChess() {
                   borderColor="gold"
                   color="gold"
                   borderRadius="soft"
-                  _hover={{ bg: "whiteAlpha.05" }}
+                  _hover={{ bg: "whiteAlpha.100" }}
                 >
                   Become a member of the CCA family today!
                 </Button>
@@ -82,7 +84,7 @@ export function LandingCameroonChess() {
               overflow="hidden"
               bg="bgSurface"
               borderWidth="1px"
-              borderColor="whiteAlpha.06"
+              borderColor="whiteAlpha.100"
               boxShadow="var(--shadow-card-soft)"
             >
               {!imageError ? (

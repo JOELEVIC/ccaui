@@ -78,7 +78,7 @@ export function LoginForm({ onSuccess, compact = false, chessPro = false }: Logi
           onChange={(e) => setEmail(e.target.value)}
           required
           bg={chessPro ? "whiteAlpha.800" : "bgCard"}
-          borderColor={chessPro ? "blackAlpha.100" : "whiteAlpha.12"}
+          borderColor={chessPro ? "blackAlpha.100" : "whiteAlpha.300"}
           color={chessPro ? "bgDark" : "white"}
           size={compact ? "sm" : "md"}
           _placeholder={{ color: chessPro ? "blackAlpha.400" : "whiteAlpha.500" }}
@@ -94,7 +94,7 @@ export function LoginForm({ onSuccess, compact = false, chessPro = false }: Logi
           onChange={(e) => setPassword(e.target.value)}
           required
           bg={chessPro ? "whiteAlpha.800" : "bgCard"}
-          borderColor={chessPro ? "blackAlpha.100" : "whiteAlpha.12"}
+          borderColor={chessPro ? "blackAlpha.100" : "whiteAlpha.300"}
           color={chessPro ? "bgDark" : "white"}
           size={compact ? "sm" : "md"}
           _placeholder={{ color: chessPro ? "blackAlpha.400" : "whiteAlpha.500" }}

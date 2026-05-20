@@ -206,7 +206,7 @@ export default function TournamentsPage() {
                   borderRadius="soft"
                   bg="bgCard"
                   borderWidth="1px"
-                  borderColor="whiteAlpha.060"
+                  borderColor="whiteAlpha.100"
                 >
                   <HStack gap={3}>
                     <Text color="textMuted" w="24px">

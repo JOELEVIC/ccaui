@@ -29,7 +29,7 @@ const COURSES = [
 
 export function LandingCoursesPreview() {
   return (
-    <Box py={{ base: 16, md: 24 }} bg="bgCard">
+    <Box py={{ base: 12, md: 24 }} bg="bgCard">
       <Container maxW="6xl">
         <VStack gap={10} align="stretch">
           <motion.div
@@ -60,7 +60,7 @@ export function LandingCoursesPreview() {
                     borderRadius="soft"
                     bg="bgSurface"
                     borderWidth="1px"
-                    borderColor="whiteAlpha.06"
+                    borderColor="whiteAlpha.100"
                     h="full"
                     display="flex"
                     flexDir="column"
@@ -86,7 +86,7 @@ export function LandingCoursesPreview() {
                         borderColor="gold"
                         color="gold"
                         borderRadius="soft"
-                        _hover={{ bg: "whiteAlpha.05" }}
+                        _hover={{ bg: "whiteAlpha.100" }}
                       >
                         Start learning →
                       </Button>
@@ -103,7 +103,7 @@ export function LandingCoursesPreview() {
               borderColor="gold"
               color="gold"
               borderRadius="soft"
-              _hover={{ bg: "whiteAlpha.05" }}
+              _hover={{ bg: "whiteAlpha.100" }}
             >
               View All Courses
             </Button>

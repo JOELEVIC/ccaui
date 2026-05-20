@@ -20,9 +20,15 @@ export const toaster = createToaster({
 /** Ark/Chakra ToastTitle only wires a11y props — body text must be passed as children. */
 export function Toaster() {
   return (
-    <ChakraToaster toaster={toaster}>
+    <ChakraToaster toaster={toaster} insetInline={{ base: 3, md: 6 }} insetBlockStart={{ base: 3, md: 6 }}>
       {(t) => (
-        <ToastRoot maxW={{ base: "calc(100vw - 1.5rem)", md: "420px" }} minW={{ md: "260px" }}>
+        <ToastRoot
+          w={{ base: "calc(100vw - 1.5rem)", md: "auto" }}
+          maxW={{ base: "calc(100vw - 1.5rem)", md: "420px" }}
+          minW={{ md: "260px" }}
+          px={4}
+          py={3}
+        >
           <HStack align="flex-start" gap={3} flex={1} minW={0}>
             {t.type === "info" || t.type === "loading" ? (
               <Box

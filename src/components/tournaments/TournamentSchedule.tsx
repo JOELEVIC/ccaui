@@ -110,7 +110,7 @@ export function TournamentSchedule({ day, tournaments, currentUserId }: Tourname
             top={`${((s.min - DAY_START_MIN) / SLOT_MIN) * PX_PER_SLOT + 24}px`}
             h={`${PX_PER_SLOT}px`}
             borderTopWidth="1px"
-            borderColor="whiteAlpha.060"
+            borderColor="whiteAlpha.100"
             pointerEvents="none"
           />
         ))}

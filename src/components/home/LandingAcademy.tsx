@@ -40,7 +40,7 @@ function PillarIcon() {
 export function LandingAcademy() {
   return (
     <Box
-      py={{ base: 16, md: 24 }}
+      py={{ base: 12, md: 24 }}
       position="relative"
       bg="bgDark"
       overflow="hidden"
@@ -104,7 +104,7 @@ export function LandingAcademy() {
           <SimpleGrid columns={{ base: 1, md: 3 }} gap={8} w="full">
             {PILLARS.map((pillar) => (
               <motion.div key={pillar.title} variants={staggerChild}>
-              <VStack align="flex-start" gap={3} p={6} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="whiteAlpha.06" boxShadow="var(--shadow-card-soft)" _hover={{ boxShadow: "var(--shadow-card-soft-hover)" }} transition="all 0.2s">
+              <VStack align="flex-start" gap={3} p={6} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="whiteAlpha.100" boxShadow="var(--shadow-card-soft)" _hover={{ boxShadow: "var(--shadow-card-soft-hover)" }} transition="all 0.2s">
                 <Box display="flex" alignItems="center" gap={2}>
                   <PillarIcon />
                   <Heading size="sm" color="gold" fontWeight="600">

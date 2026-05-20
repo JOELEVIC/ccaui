@@ -41,9 +41,9 @@ export function BottomNav({ onMorePress }: BottomNavProps) {
                 px={3}
                 py={2}
                 borderRadius="cca"
-                bg={isActive ? "whiteAlpha.08" : "transparent"}
+                bg={isActive ? "whiteAlpha.200" : "transparent"}
                 color={isActive ? "gold" : "textSecondary"}
-                _active={{ bg: "whiteAlpha.05" }}
+                _active={{ bg: "whiteAlpha.100" }}
                 borderBottomWidth={isActive ? "2px" : "0"}
                 borderColor="gold"
               >
@@ -61,7 +61,7 @@ export function BottomNav({ onMorePress }: BottomNavProps) {
           py={2}
           borderRadius="cca"
           color="textSecondary"
-          _active={{ bg: "whiteAlpha.05" }}
+          _active={{ bg: "whiteAlpha.100" }}
           onClick={onMorePress}
         >
           <Text fontSize="xs" fontWeight="500">

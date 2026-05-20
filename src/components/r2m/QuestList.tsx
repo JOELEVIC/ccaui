@@ -19,7 +19,7 @@ export function QuestList({ rank }: QuestListProps) {
             borderRadius="soft"
             bg="bgCard"
             borderWidth="1px"
-            borderColor="whiteAlpha.080"
+            borderColor="whiteAlpha.200"
             opacity={unlocked ? 1 : 0.5}
             justify="space-between"
             gap={4}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Button, Container, Flex, Heading, HStack, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Container, Flex, Heading, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
@@ -160,29 +160,37 @@ export function LandingHeroMinimal() {
                   </HStack>
                 </motion.div>
 
-                <motion.div variants={staggerChild}>
-                  <HStack
-                    gap={6}
+                <motion.div variants={staggerChild} style={{ width: "100%" }}>
+                  <SimpleGrid
+                    columns={3}
+                    gap={{ base: 3, md: 6 }}
                     pt={4}
-                    flexWrap="wrap"
-                    justify={{ base: "center", lg: "flex-start" }}
+                    w="full"
+                    maxW={{ base: "full", lg: "md" }}
                   >
                     {STATS.map((s) => (
-                      <VStack key={s.label} align={{ base: "center", lg: "flex-start" }} gap={0}>
+                      <VStack key={s.label} align={{ base: "center", lg: "flex-start" }} gap={0.5}>
                         <Text
-                          fontSize="xl"
+                          fontSize={{ base: "md", md: "xl" }}
                           fontWeight="700"
                           color="gold"
                           fontFamily="var(--font-playfair), Georgia, serif"
+                          lineHeight="1.1"
                         >
                           {s.value}
                         </Text>
-                        <Text fontSize="xs" color="textMuted" letterSpacing="wider">
+                        <Text
+                          fontSize={{ base: "2xs", md: "xs" }}
+                          color="textSecondary"
+                          letterSpacing="wider"
+                          textAlign={{ base: "center", lg: "left" }}
+                          lineHeight="1.3"
+                        >
                           {s.label}
                         </Text>
                       </VStack>
                     ))}
-                  </HStack>
+                  </SimpleGrid>
                 </motion.div>
               </VStack>
             </motion.div>

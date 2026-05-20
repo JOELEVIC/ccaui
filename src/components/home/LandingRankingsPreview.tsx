@@ -83,77 +83,106 @@ export function LandingRankingsPreview() {
           </VStack>
           </motion.div>
 
-          <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 5 }} gap={4} w="full">
-            {top5.map((user, i) => (
-              <Link key={user.id} href="/rankings">
-                <Box
-                  p={4}
+          {top5.length === 0 ? (
+            <Box
+              p={8}
+              borderRadius="soft"
+              bg="bgCard"
+              borderWidth="1px"
+              borderColor="whiteAlpha.100"
+              textAlign="center"
+            >
+              <Text color="textSecondary" fontSize="sm" mb={4}>
+                The national leaderboard is warming up — once players start ranked games, top names land here.
+              </Text>
+              <Link href="/rankings">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  borderColor="gold"
+                  color="gold"
                   borderRadius="soft"
-                  bg="bgSurface"
-                  borderWidth="1px"
-                  borderColor="whiteAlpha.06"
-                  boxShadow="var(--shadow-card-soft)"
-                  _hover={{
-                    borderColor: "gold",
-                    boxShadow: "var(--shadow-card-soft-hover)",
-                    transform: "scale(1.01)",
-                  }}
-                  transition="all 0.2s"
-                  position="relative"
+                  _hover={{ bg: "whiteAlpha.100" }}
                 >
-                  {i === 0 && (
-                    <Box
-                      position="absolute"
-                      top={2}
-                      right={2}
-                      fontSize="lg"
-                      color="gold"
-                      aria-hidden
-                    >
-                      ♔
-                    </Box>
-                  )}
-                  <HStack gap={3}>
-                    <Text color="textMuted" fontWeight="bold" fontSize="2xl">
-                      #{i + 1}
-                    </Text>
-                    <Avatar
-                      name={user.profile ? `${user.profile.firstName} ${user.profile.lastName}` : user.username}
-                      rank={i + 1}
-                    />
-                    <VStack align="flex-start" gap={0} flex={1} minW={0}>
-                      <Text color="textPrimary" fontWeight="600" fontSize="sm" lineClamp={1}>
-                        {user.profile
-                          ? `${user.profile.firstName} ${user.profile.lastName}`
-                          : user.username}
-                      </Text>
-                      <Text color="textMuted" fontSize="xs" lineClamp={1}>
-                        {user.school?.name ?? "—"}
-                      </Text>
-                      <Text color="gold" fontWeight="700" fontSize="lg">
-                        {user.rating}
-                      </Text>
-                    </VStack>
-                  </HStack>
-                </Box>
+                  Browse rankings
+                </Button>
               </Link>
-            ))}
-          </SimpleGrid>
+            </Box>
+          ) : (
+            <>
+              <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 5 }} gap={4} w="full">
+                {top5.map((user, i) => (
+                  <Link key={user.id} href="/rankings">
+                    <Box
+                      p={4}
+                      borderRadius="soft"
+                      bg="bgSurface"
+                      borderWidth="1px"
+                      borderColor="whiteAlpha.100"
+                      boxShadow="var(--shadow-card-soft)"
+                      _hover={{
+                        borderColor: "gold",
+                        boxShadow: "var(--shadow-card-soft-hover)",
+                        transform: "scale(1.01)",
+                      }}
+                      transition="all 0.2s"
+                      position="relative"
+                    >
+                      {i === 0 && (
+                        <Box
+                          position="absolute"
+                          top={2}
+                          right={2}
+                          fontSize="lg"
+                          color="gold"
+                          aria-hidden
+                        >
+                          ♔
+                        </Box>
+                      )}
+                      <HStack gap={3}>
+                        <Text color="textMuted" fontWeight="bold" fontSize="2xl">
+                          #{i + 1}
+                        </Text>
+                        <Avatar
+                          name={user.profile ? `${user.profile.firstName} ${user.profile.lastName}` : user.username}
+                          rank={i + 1}
+                        />
+                        <VStack align="flex-start" gap={0} flex={1} minW={0}>
+                          <Text color="textPrimary" fontWeight="600" fontSize="sm" lineClamp={1}>
+                            {user.profile
+                              ? `${user.profile.firstName} ${user.profile.lastName}`
+                              : user.username}
+                          </Text>
+                          <Text color="textMuted" fontSize="xs" lineClamp={1}>
+                            {user.school?.name ?? "—"}
+                          </Text>
+                          <Text color="gold" fontWeight="700" fontSize="lg">
+                            {user.rating}
+                          </Text>
+                        </VStack>
+                      </HStack>
+                    </Box>
+                  </Link>
+                ))}
+              </SimpleGrid>
 
-          <HStack justify="flex-end" w="full">
-            <Link href="/rankings">
-              <Button
-                size="sm"
-                variant="outline"
-                borderColor="gold"
-                color="gold"
-                borderRadius="soft"
-                _hover={{ bg: "whiteAlpha.05" }}
-              >
-                View Full Rankings
-              </Button>
-            </Link>
-          </HStack>
+              <HStack justify="flex-end" w="full">
+                <Link href="/rankings">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    borderColor="gold"
+                    color="gold"
+                    borderRadius="soft"
+                    _hover={{ bg: "whiteAlpha.100" }}
+                  >
+                    View Full Rankings
+                  </Button>
+                </Link>
+              </HStack>
+            </>
+          )}
         </VStack>
       </Container>
     </Box>

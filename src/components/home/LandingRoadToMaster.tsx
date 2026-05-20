@@ -30,7 +30,7 @@ const QUESTS = [
 export function LandingRoadToMaster() {
   return (
     <Box
-      py={{ base: 16, md: 24 }}
+      py={{ base: 12, md: 24 }}
       bg="bgCard"
       position="relative"
       overflow="hidden"
@@ -125,7 +125,7 @@ export function LandingRoadToMaster() {
                 borderRadius="soft"
                 bg="rgba(10,14,26,0.7)"
                 borderWidth="1px"
-                borderColor="whiteAlpha.080"
+                borderColor="whiteAlpha.200"
                 backdropFilter="blur(8px)"
                 boxShadow="0 24px 80px rgba(0,0,0,0.45)"
               >
@@ -141,7 +141,7 @@ export function LandingRoadToMaster() {
                         borderRadius="md"
                         bg={i === 0 ? `${t.color}24` : "bgDark"}
                         borderWidth="1px"
-                        borderColor={i === 0 ? t.color : "whiteAlpha.080"}
+                        borderColor={i === 0 ? t.color : "whiteAlpha.200"}
                         boxShadow={i === 0 ? `0 0 14px ${t.color}55` : undefined}
                       >
                         <Text fontWeight="700" color={t.color} fontSize="sm">
@@ -165,7 +165,7 @@ export function LandingRoadToMaster() {
                         borderRadius="md"
                         bg="bgDark"
                         borderWidth="1px"
-                        borderColor="whiteAlpha.080"
+                        borderColor="whiteAlpha.200"
                         justify="space-between"
                       >
                         <HStack gap={3} align="flex-start">
@@ -216,7 +216,7 @@ export function LandingRoadToMaster() {
                   borderRadius="md"
                   bg="bgDark"
                   borderWidth="1px"
-                  borderColor="whiteAlpha.080"
+                  borderColor="whiteAlpha.200"
                 >
                   <HStack justify="space-between" mb={2}>
                     <Text fontSize="xs" color="textMuted" letterSpacing="wider" textTransform="uppercase">
@@ -226,7 +226,7 @@ export function LandingRoadToMaster() {
                       24% · 760 pts to go
                     </Text>
                   </HStack>
-                  <Box h="6px" borderRadius="full" bg="whiteAlpha.080" overflow="hidden">
+                  <Box h="6px" borderRadius="full" bg="whiteAlpha.200" overflow="hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       whileInView={{ width: "24%" }}
@@ -258,7 +258,7 @@ export function LandingRoadToMaster() {
                 bg="bgDark"
                 borderRadius="soft"
                 borderWidth="1px"
-                borderColor="whiteAlpha.080"
+                borderColor="whiteAlpha.200"
                 _hover={{ borderColor: "goldDark" }}
                 transition="border-color 0.2s"
               >

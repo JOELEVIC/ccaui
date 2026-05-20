@@ -263,7 +263,7 @@ function NodeRow({
           px={4}
           bg="rgba(10,11,14,0.45)"
           borderWidth="1px"
-          borderColor="whiteAlpha.080"
+          borderColor="whiteAlpha.200"
           borderStyle="dashed"
           backdropFilter="blur(10px)"
         >

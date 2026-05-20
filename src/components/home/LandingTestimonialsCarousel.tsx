@@ -32,7 +32,7 @@ export function LandingTestimonialsCarousel() {
   const testimonial = TESTIMONIALS[index];
 
   return (
-    <Box py={{ base: 16, md: 24 }} bg="bgDark">
+    <Box py={{ base: 12, md: 24 }} bg="bgDark">
       <Container maxW="6xl">
         <VStack gap={10} align="stretch">
           <motion.div
@@ -56,7 +56,7 @@ export function LandingTestimonialsCarousel() {
             borderRadius="soft"
             bg="bgCard"
             borderWidth="1px"
-            borderColor="whiteAlpha.06"
+            borderColor="whiteAlpha.100"
           >
             <AnimatePresence mode="wait">
               <motion.div

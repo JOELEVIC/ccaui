@@ -98,7 +98,7 @@ export default function WatchPage() {
           borderRadius="soft"
           bg="bgCard"
           borderWidth="1px"
-          borderColor={featured ? "goldDark" : "whiteAlpha.080"}
+          borderColor={featured ? "goldDark" : "whiteAlpha.200"}
           backgroundImage="linear-gradient(120deg, rgba(230,164,82,0.10) 0%, rgba(20,27,46,0) 60%)"
         >
           <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
@@ -151,7 +151,7 @@ export default function WatchPage() {
             Loading live boards…
           </Text>
         ) : live.length === 0 ? (
-          <Box p={6} bg="bgCard" borderRadius="soft" borderWidth="1px" borderColor="whiteAlpha.080" textAlign="center">
+          <Box p={6} bg="bgCard" borderRadius="soft" borderWidth="1px" borderColor="whiteAlpha.200" textAlign="center">
             <Text color="textMuted" fontSize="sm">
               Nothing live right now. Try the upcoming events below.
             </Text>
@@ -172,7 +172,7 @@ export default function WatchPage() {
                       bg="bgCard"
                       borderRadius="soft"
                       borderWidth="1px"
-                      borderColor="whiteAlpha.080"
+                      borderColor="whiteAlpha.200"
                       transition="border-color 0.2s, transform 0.2s"
                       _hover={{ borderColor: "gold", transform: "translateY(-1px)" }}
                     >
@@ -220,7 +220,7 @@ export default function WatchPage() {
                   bg="bgCard"
                   borderRadius="soft"
                   borderWidth="1px"
-                  borderColor="whiteAlpha.080"
+                  borderColor="whiteAlpha.200"
                   _hover={{ borderColor: "gold" }}
                   transition="border-color 0.2s"
                 >

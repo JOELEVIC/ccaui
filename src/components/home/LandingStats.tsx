@@ -15,8 +15,8 @@ const STATS = [
 
 export function LandingStats() {
   return (
-    <Box py={{ base: 16, md: 24 }} bg="bgCard">
-      <Container maxW="6xl">
+    <Box py={{ base: 12, md: 24 }} bg="bgCard" position="relative" overflow="hidden">
+      <Container maxW="6xl" position="relative" zIndex={1}>
         <VStack gap={12} align="stretch">
           <motion.div
             variants={fadeInUp}
@@ -46,7 +46,7 @@ export function LandingStats() {
                   borderRadius="soft"
                   bg="bgSurface"
                   borderWidth="1px"
-                  borderColor="whiteAlpha.06"
+                  borderColor="whiteAlpha.100"
                   align="center"
                   gap={2}
                   _hover={{
@@ -62,7 +62,7 @@ export function LandingStats() {
                     fontWeight="700"
                     color="gold"
                   />
-                  <Text color="textMuted" fontSize="sm" textAlign="center">
+                  <Text color="textSecondary" fontSize="sm" textAlign="center" fontWeight="500">
                     {stat.label}
                   </Text>
                 </VStack>

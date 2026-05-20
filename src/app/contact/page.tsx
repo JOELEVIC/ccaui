@@ -83,7 +83,7 @@ export default function ContactPage() {
                     bg="bgCard"
                     borderRadius="soft"
                     borderWidth="1px"
-                    borderColor="whiteAlpha.080"
+                    borderColor="whiteAlpha.200"
                     _hover={{ borderColor: "goldDark" }}
                     transition="border-color 0.2s"
                   >

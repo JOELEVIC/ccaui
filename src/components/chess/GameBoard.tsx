@@ -92,6 +92,15 @@ export function GameBoard({
   const PREMOVE_HIGHLIGHT = palette.pre;
   const PREMOVE_LEGAL_HIGHLIGHT = palette.preLegal;
 
+  /**
+   * Read-only Chess instance for highlight calculations (legal targets).
+   * We rebuild on every fen change. Critically, we do NOT mutate this instance
+   * when the user makes a move — mutation would leave a stale board behind for
+   * subsequent move validations if the parent's fen update is lost or delayed
+   * (which manifested as "move records but pieces don't move" after the engine
+   * replied: executeMove had silently accepted a move computed against a mutated
+   * stale Chess, and react-chessboard's internal piece animation desynced).
+   */
   const game = useMemo(() => {
     const c = new Chess();
     try {
@@ -109,8 +118,16 @@ export function GameBoard({
   const executeMove = useCallback(
     (sourceSquare: string, targetSquare: string) => {
       if (!canPlayNow) return false;
+      // Always validate against a FRESH Chess instance loaded from the current
+      // fen. Never mutate the memoised `game` — see comment above.
+      const probe = new Chess();
       try {
-        const move = game.move({
+        probe.load(fen);
+      } catch {
+        return false;
+      }
+      try {
+        const move = probe.move({
           from: sourceSquare,
           to: targetSquare,
           promotion: "q",
@@ -129,7 +146,7 @@ export function GameBoard({
       }
       return false;
     },
-    [game, canPlayNow, onMove]
+    [fen, canPlayNow, onMove]
   );
 
   const executePremove = useCallback(

@@ -60,7 +60,7 @@ export default function LearnPage() {
                 borderRadius="soft"
                 bg="bgCard"
                 borderWidth="1px"
-                borderColor="whiteAlpha.080"
+                borderColor="whiteAlpha.200"
               >
                 <HStack gap={3}>
                   <Text color={c.completed ? "accentGreen" : "textMuted"}>{c.completed ? "✓" : "○"}</Text>

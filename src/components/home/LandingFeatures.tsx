@@ -51,7 +51,7 @@ function FeatureIcon() {
 
 export function LandingFeatures() {
   return (
-    <Box py={{ base: 16, md: 24 }} bg="bgDark">
+    <Box py={{ base: 12, md: 24 }} bg="bgDark">
       <Container maxW="6xl">
         <VStack gap={12} align="stretch">
           <VStack gap={3} textAlign="center" maxW="2xl" mx="auto">

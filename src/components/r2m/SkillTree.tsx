@@ -62,7 +62,7 @@ function SkillCard({
       borderRadius="soft"
       bg="bgCard"
       borderWidth="1px"
-      borderColor={unlocked ? `${accent}66` : "whiteAlpha.080"}
+      borderColor={unlocked ? `${accent}66` : "whiteAlpha.200"}
       transition="border-color 0.2s, transform 0.2s"
       _hover={unlocked ? { borderColor: accent, transform: "translateY(-1px)" } : undefined}
       opacity={unlocked ? 1 : 0.55}
@@ -76,7 +76,7 @@ function SkillCard({
           px={1.5}
           py={0.5}
           borderRadius="md"
-          bg="whiteAlpha.080"
+          bg="whiteAlpha.200"
           borderWidth="1px"
           borderColor={unlocked ? accent : "whiteAlpha.200"}
         >

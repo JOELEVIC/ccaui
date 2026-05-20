@@ -92,7 +92,7 @@ export default function CommunityPage() {
                 bg="bgCard"
                 borderRadius="soft"
                 borderWidth="1px"
-                borderColor="whiteAlpha.080"
+                borderColor="whiteAlpha.200"
                 _hover={{ borderColor: "goldDark" }}
                 transition="border-color 0.2s"
                 h="full"
@@ -114,7 +114,7 @@ export default function CommunityPage() {
 
       <SimpleGrid columns={{ base: 1, lg: 2 }} gap={6}>
         <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={defaultViewport}>
-          <Box p={5} bg="bgCard" borderRadius="soft" borderWidth="1px" borderColor="whiteAlpha.080">
+          <Box p={5} bg="bgCard" borderRadius="soft" borderWidth="1px" borderColor="whiteAlpha.200">
             <HStack justify="space-between" mb={3}>
               <Heading size="md" color="textPrimary" fontFamily="var(--font-playfair), Georgia, serif">
                 Top of the leaderboard
@@ -140,7 +140,7 @@ export default function CommunityPage() {
                     borderRadius="md"
                     bg="bgDark"
                     borderWidth="1px"
-                    borderColor="whiteAlpha.060"
+                    borderColor="whiteAlpha.100"
                     _hover={{ borderColor: "gold" }}
                     transition="border-color 0.2s"
                   >
@@ -175,7 +175,7 @@ export default function CommunityPage() {
         </motion.div>
 
         <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={defaultViewport}>
-          <Box p={5} bg="bgCard" borderRadius="soft" borderWidth="1px" borderColor="whiteAlpha.080">
+          <Box p={5} bg="bgCard" borderRadius="soft" borderWidth="1px" borderColor="whiteAlpha.200">
             <HStack justify="space-between" mb={3}>
               <Heading size="md" color="textPrimary" fontFamily="var(--font-playfair), Georgia, serif">
                 Next on the calendar
@@ -199,7 +199,7 @@ export default function CommunityPage() {
                     bg="bgDark"
                     borderRadius="md"
                     borderWidth="1px"
-                    borderColor="whiteAlpha.060"
+                    borderColor="whiteAlpha.100"
                     _hover={{ borderColor: "gold" }}
                     transition="border-color 0.2s"
                   >
@@ -219,7 +219,7 @@ export default function CommunityPage() {
       </SimpleGrid>
 
       <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={defaultViewport}>
-        <Box p={5} bg="bgCard" borderRadius="soft" borderWidth="1px" borderColor="whiteAlpha.080">
+        <Box p={5} bg="bgCard" borderRadius="soft" borderWidth="1px" borderColor="whiteAlpha.200">
           <HStack justify="space-between" mb={3}>
             <Heading size="md" color="textPrimary" fontFamily="var(--font-playfair), Georgia, serif">
               Active clubs across Cameroon
@@ -238,7 +238,7 @@ export default function CommunityPage() {
                 bg="bgDark"
                 borderRadius="md"
                 borderWidth="1px"
-                borderColor="whiteAlpha.060"
+                borderColor="whiteAlpha.100"
               >
                 <Text color="textPrimary" fontWeight="600" fontSize="sm">
                   {c.name}

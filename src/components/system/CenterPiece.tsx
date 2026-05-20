@@ -42,10 +42,10 @@ export function CenterPiece({ tier }: CenterPieceProps) {
         {/* Soft ambient halo behind the portal */}
         <Box
           position="absolute"
-          inset="-15%"
+          inset="-10%"
           borderRadius="full"
-          background={`radial-gradient(circle at 50% 50%, ${c}33 0%, transparent 60%)`}
-          filter="blur(28px)"
+          background={`radial-gradient(circle at 50% 50%, ${c}1a 0%, transparent 65%)`}
+          filter="blur(36px)"
         />
 
         {/* Outer hex — static stroke with chamfered corners */}
@@ -54,7 +54,7 @@ export function CenterPiece({ tier }: CenterPieceProps) {
           inset={0}
           className="sys-clip-hex"
           bg={c}
-          style={{ filter: `drop-shadow(0 0 18px ${c}88)` }}
+          style={{ filter: `drop-shadow(0 0 6px ${c}55)` }}
         />
         <Box position="absolute" inset="2px" className="sys-clip-hex" bg="var(--sys-void)" />
 
@@ -63,15 +63,15 @@ export function CenterPiece({ tier }: CenterPieceProps) {
           position="absolute"
           inset="14%"
           className="sys-clip-hex"
-          bg={`${c}22`}
-          style={{ boxShadow: `inset 0 0 36px ${c}55` }}
+          bg={`${c}14`}
+          style={{ boxShadow: `inset 0 0 18px ${c}33` }}
         />
         <Box
           position="absolute"
           inset="calc(14% + 2px)"
           className="sys-clip-hex"
           borderWidth="1px"
-          borderColor={`${c}66`}
+          borderColor={`${c}44`}
         />
 
         {/* Rank glyph */}
@@ -89,11 +89,12 @@ export function CenterPiece({ tier }: CenterPieceProps) {
         >
           <Box
             fontFamily="var(--font-playfair), Georgia, serif"
-            fontSize={{ base: "8rem", md: "11rem" }}
+            fontSize={{ base: "7rem", md: "10rem" }}
             fontWeight="700"
             color={c}
             lineHeight="1"
-            style={{ filter: `drop-shadow(0 0 20px ${c}) drop-shadow(0 0 52px ${c}55)` }}
+            opacity={0.92}
+            style={{ filter: `drop-shadow(0 0 8px ${c}88)` }}
           >
             {RANK_GLYPH[tier.rank] ?? "♛"}
           </Box>
@@ -136,7 +137,7 @@ export function CenterPiece({ tier }: CenterPieceProps) {
           letterSpacing="0.38em"
           textTransform="uppercase"
           color={c}
-          style={{ textShadow: `0 0 6px ${c}99` }}
+          style={{ textShadow: `0 0 3px ${c}55` }}
         >
           {tier.rank}-Rank · {tier.label}
         </Text>

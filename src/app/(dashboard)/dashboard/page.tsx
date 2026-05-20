@@ -94,26 +94,26 @@ export default function DashboardPage() {
         </motion.div>
       </Box>
 
-      {/* Play — primary actions */}
+      {/* Play — primary action gets the hero tile, alternatives are compact rows */}
       <Section title="Play">
         <motion.div variants={staggerContainer} initial="hidden" animate="visible">
-          <SimpleGrid columns={{ base: 1, md: 3 }} gap={5}>
+          <VStack align="stretch" gap={{ base: 3, md: 4 }}>
             <motion.div variants={staggerChild}>
-              <PlayTile href="/games" eyebrow="Matchmaking" title="Find a match" glyph="♚" />
+              <PrimaryPlayTile href="/games" eyebrow="Matchmaking" title="Find a match" glyph="♚" />
             </motion.div>
             <motion.div variants={staggerChild}>
-              <PlayTile href="/games" eyebrow="Private" title="Play a friend" glyph="♛" />
+              <SimpleGrid columns={{ base: 1, sm: 2 }} gap={{ base: 3, md: 4 }}>
+                <CompactPlayTile href="/games" eyebrow="Private" title="Play a friend" glyph="♛" />
+                <CompactPlayTile href="/play/bot" eyebrow="Solo" title="Play the engine" glyph="♞" />
+              </SimpleGrid>
             </motion.div>
-            <motion.div variants={staggerChild}>
-              <PlayTile href="/play/bot" eyebrow="Solo" title="Play the engine" glyph="♞" />
-            </motion.div>
-          </SimpleGrid>
+          </VStack>
         </motion.div>
       </Section>
 
       {/* Offline */}
-      <Section title="Offline" mt={{ base: 7, md: 9 }}>
-        <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
+      <Section title="Offline" mt={{ base: 6, md: 8 }}>
+        <SimpleGrid columns={{ base: 1, sm: 2 }} gap={{ base: 3, md: 4 }}>
           <LocalTile href="/play/local" glyph="♟" title="Two players, one device" />
           <LocalTile href="/play/local" glyph="⏱" title="Chess timer" />
         </SimpleGrid>
@@ -308,9 +308,64 @@ function Section({
   );
 }
 
-/* ─────────── PlayTile (primary action, glyph-first, no description) ─────────── */
+/* ─────────── PrimaryPlayTile (hero matchmaking card) ─────────── */
 
-function PlayTile({
+function PrimaryPlayTile({
+  href,
+  eyebrow,
+  title,
+  glyph,
+}: {
+  href: string;
+  eyebrow: string;
+  title: string;
+  glyph: string;
+}) {
+  return (
+    <GlassCard href={href} goldWash hero>
+      <Box position="relative" px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }} overflow="hidden">
+        {/* Big background glyph — only on the primary tile */}
+        <Box
+          position="absolute"
+          bottom="-30px"
+          right="-10px"
+          fontSize={{ base: "10rem", md: "13rem" }}
+          lineHeight="1"
+          color="rgba(212,175,55,0.10)"
+          pointerEvents="none"
+          fontFamily="serif"
+          style={{ filter: "drop-shadow(0 0 24px rgba(212,175,55,0.12))" }}
+        >
+          {glyph}
+        </Box>
+        <HStack
+          justify="space-between"
+          align="center"
+          gap={4}
+          flexWrap={{ base: "wrap", md: "nowrap" }}
+          position="relative"
+          zIndex={1}
+        >
+          <Box minW={0} flex={1}>
+            <LuxuryEyebrow>{eyebrow}</LuxuryEyebrow>
+            <Box mt={2}>
+              <LuxuryHeading size="md">{title}</LuxuryHeading>
+            </Box>
+          </Box>
+          <Box flexShrink={0}>
+            <LuxuryButton variant="gold" size="md" glyph="▸">
+              Enter
+            </LuxuryButton>
+          </Box>
+        </HStack>
+      </Box>
+    </GlassCard>
+  );
+}
+
+/* ─────────── CompactPlayTile (alternative play modes — quieter row) ─────────── */
+
+function CompactPlayTile({
   href,
   eyebrow,
   title,
@@ -323,43 +378,51 @@ function PlayTile({
 }) {
   return (
     <GlassCard href={href}>
-      <Box position="relative" p={{ base: 5, md: 6 }} h="full" minH={{ md: "172px" }}>
-        {/* Big background glyph */}
+      <HStack px={5} py={4} gap={4} align="center">
         <Box
-          position="absolute"
-          bottom={-2}
-          right={-1}
-          fontSize="9xl"
-          lineHeight="1"
-          color="rgba(212,175,55,0.10)"
-          pointerEvents="none"
+          w="40px"
+          h="40px"
+          borderRadius="6px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          bg="var(--lux-glass-surface-strong)"
+          borderWidth="1px"
+          borderColor="var(--lux-glass-border)"
+          color="var(--lux-gold)"
+          fontSize="xl"
+          flexShrink={0}
           fontFamily="serif"
-          style={{ filter: "drop-shadow(0 0 18px rgba(212,175,55,0.08))" }}
+          lineHeight="1"
         >
           {glyph}
         </Box>
-        <VStack align="flex-start" gap={2} h="full" justifyContent="space-between" position="relative" zIndex={1}>
-          <Box>
-            <LuxuryEyebrow>{eyebrow}</LuxuryEyebrow>
-            <Box mt={2}>
-              <LuxuryHeading size="md">{title}</LuxuryHeading>
-            </Box>
-          </Box>
-          <HStack gap={2} align="center" mt={6}>
-            <Text
-              fontFamily="var(--font-inter), sans-serif"
-              fontSize="2xs"
-              color="var(--lux-gold)"
-              fontWeight="700"
-              letterSpacing="0.22em"
-              textTransform="uppercase"
-            >
-              Enter
-            </Text>
-            <Text color="var(--lux-gold)" fontSize="md" lineHeight="1">→</Text>
-          </HStack>
-        </VStack>
-      </Box>
+        <Box flex={1} minW={0}>
+          <Text
+            fontFamily="var(--font-inter), sans-serif"
+            fontSize="2xs"
+            fontWeight="700"
+            color="var(--lux-gold)"
+            letterSpacing="0.22em"
+            textTransform="uppercase"
+            lineHeight="1"
+          >
+            {eyebrow}
+          </Text>
+          <Text
+            mt={1.5}
+            fontFamily="var(--font-playfair), Georgia, serif"
+            fontSize="md"
+            color="var(--lux-text-primary)"
+            fontWeight="600"
+            letterSpacing="0.02em"
+            lineHeight="1.1"
+          >
+            {title}
+          </Text>
+        </Box>
+        <Text color="var(--lux-gold-muted)" fontSize="lg" flexShrink={0}>→</Text>
+      </HStack>
     </GlassCard>
   );
 }

@@ -190,7 +190,7 @@ export function DChessLanding() {
                   borderRadius="soft"
                   bg="bgCard"
                   borderWidth="1px"
-                  borderColor="whiteAlpha.080"
+                  borderColor="whiteAlpha.200"
                   transition="border-color 0.2s"
                   _hover={{ borderColor: "goldDark" }}
                 >
@@ -207,7 +207,7 @@ export function DChessLanding() {
         </Container>
       </Box>
 
-      <Box as="section" py={{ base: 14, md: 18 }} px={4} bg="bgCard" borderTopWidth="1px" borderColor="whiteAlpha.060">
+      <Box as="section" py={{ base: 14, md: 18 }} px={4} bg="bgCard" borderTopWidth="1px" borderColor="whiteAlpha.100">
         <Container maxW="6xl" textAlign="center">
           <Heading fontFamily="var(--font-playfair), Georgia, serif" size="lg" color="textPrimary" mb={3}>
             Ready to join?
@@ -230,7 +230,7 @@ export function DChessLanding() {
         </Container>
       </Box>
 
-      <Box as="footer" py={10} px={4} borderTopWidth="1px" borderColor="whiteAlpha.080">
+      <Box as="footer" py={10} px={4} borderTopWidth="1px" borderColor="whiteAlpha.200">
         <Container maxW="6xl">
           <Flex direction={{ base: "column", md: "row" }} justify="space-between" align={{ base: "center", md: "flex-start" }} gap={6}>
             <VStack align={{ base: "center", md: "start" }} gap={1}>

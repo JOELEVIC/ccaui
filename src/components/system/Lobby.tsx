@@ -364,7 +364,7 @@ function QuestsView({ tier }: { tier: R2MTier }) {
                 p={3}
                 bg="rgba(10,11,14,0.55)"
                 borderWidth="1px"
-                borderColor={unlocked ? "rgba(0,240,255,0.25)" : "whiteAlpha.080"}
+                borderColor={unlocked ? "rgba(0,240,255,0.25)" : "whiteAlpha.200"}
                 opacity={unlocked ? 1 : 0.45}
                 justify="space-between"
               >

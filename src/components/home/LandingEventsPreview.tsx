@@ -45,7 +45,7 @@ export function LandingEventsPreview() {
   const events = (data?.tournaments ?? []).slice(0, 3);
 
   return (
-    <Box py={{ base: 16, md: 24 }} bg="bgDark">
+    <Box py={{ base: 12, md: 24 }} bg="bgDark">
       <Container maxW="6xl">
         <VStack gap={10} align="stretch">
           <motion.div
@@ -75,7 +75,7 @@ export function LandingEventsPreview() {
                   borderRadius="soft"
                   bg="bgCard"
                   borderWidth="1px"
-                  borderColor="whiteAlpha.06"
+                  borderColor="whiteAlpha.100"
                   textAlign="center"
                 >
                   <Text color="textMuted">No upcoming events. Check back soon!</Text>
@@ -94,7 +94,7 @@ export function LandingEventsPreview() {
                         borderRadius="soft"
                         bg="bgCard"
                         borderWidth="1px"
-                        borderColor="whiteAlpha.06"
+                        borderColor="whiteAlpha.100"
                         _hover={{
                           borderColor: "gold",
                           boxShadow: "var(--shadow-card-soft-hover)",
@@ -133,7 +133,7 @@ export function LandingEventsPreview() {
               borderColor="gold"
               color="gold"
               borderRadius="soft"
-              _hover={{ bg: "whiteAlpha.05" }}
+              _hover={{ bg: "whiteAlpha.100" }}
             >
               View All Events
             </Button>

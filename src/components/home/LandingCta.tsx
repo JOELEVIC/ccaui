@@ -9,7 +9,7 @@ export function LandingCta() {
       py={{ base: 16, md: 20 }}
       bg="bgCard"
       borderTopWidth="1px"
-      borderColor="whiteAlpha.06"
+      borderColor="whiteAlpha.100"
     >
       <Container maxW="4xl">
         <VStack gap={6} textAlign="center">
@@ -21,27 +21,24 @@ export function LandingCta() {
             Ready to make your first move?
           </Heading>
           <Text color="textSecondary" maxW="md" lineHeight="1.7">
-            Countless game nights are waiting. Join us at CCA where play sparks growth and creativity. Our love of games, learning, and people makes each visit a welcoming joy for every valued member.
+            Rated play, daily tactics, and tournaments. Create your account in under a minute and start climbing the Road to Master.
           </Text>
           <Link href="/register">
             <Button
               size="lg"
-              variant="outline"
-              borderWidth="2px"
-              borderColor="gold"
-              bg="bgSurface"
-              color="gold"
-              fontWeight="600"
-              px={8}
+              bg="gold"
+              color="bgDark"
+              fontWeight="700"
+              px={10}
               borderRadius="soft"
-              boxShadow="var(--shadow-card-soft)"
               _hover={{
-                borderColor: "goldLight",
-                boxShadow: "0 0 24px rgba(201, 169, 110, 0.2)",
+                bg: "goldLight",
+                boxShadow: "0 0 28px rgba(230,164,82,0.4)",
+                transform: "translateY(-1px)",
               }}
               transition="all 0.2s"
             >
-              Join the CCA Family
+              ▶ Join the CCA family
             </Button>
           </Link>
         </VStack>

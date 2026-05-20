@@ -32,9 +32,9 @@ export function TierLabel({ rating, size = "md" }: TierLabelProps) {
       px={isSm ? 2 : 2.5}
       py={isSm ? 0.5 : 1}
       borderRadius="soft"
-      bg="whiteAlpha.08"
+      bg="whiteAlpha.200"
       borderWidth="1px"
-      borderColor="whiteAlpha.2"
+      borderColor="whiteAlpha.200"
     >
       <Text
         fontSize={isSm ? "xs" : "sm"}

@@ -118,8 +118,8 @@ export default function PlayersPage() {
                     as="tr"
                     key={row.user.username}
                     borderBottomWidth="1px"
-                    borderColor="whiteAlpha.060"
-                    _hover={{ bg: "whiteAlpha.04" }}
+                    borderColor="whiteAlpha.100"
+                    _hover={{ bg: "whiteAlpha.50" }}
                   >
                     <Text as="td" py={3} color="textMuted">
                       {row.rank}
@@ -172,7 +172,7 @@ export default function PlayersPage() {
           </Text>
           <VStack align="stretch" gap={2}>
             {tournaments.map((t) => (
-              <Box key={t.id} py={2} borderBottomWidth="1px" borderColor="whiteAlpha.060">
+              <Box key={t.id} py={2} borderBottomWidth="1px" borderColor="whiteAlpha.100">
                 <Text fontSize="sm" fontWeight="600">
                   {t.name}
                 </Text>
