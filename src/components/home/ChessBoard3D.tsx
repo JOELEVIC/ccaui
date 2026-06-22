@@ -395,7 +395,7 @@ export function ChessBoard3D() {
         borderRadius="soft"
         bg="blackAlpha.600"
         borderWidth="1px"
-        borderColor="whiteAlpha.100"
+        borderColor="blackAlpha.100"
       >
         <Text color="textMuted" fontSize="sm">
           {feedback || `${turn === "white" ? "White" : "Black"} to play`}

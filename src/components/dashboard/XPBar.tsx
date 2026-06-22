@@ -34,7 +34,7 @@ export function XPBar({
       <Box
         h={isSm ? 1.5 : 2}
         borderRadius="full"
-        bg="whiteAlpha.100"
+        bg="blackAlpha.100"
         overflow="hidden"
       >
         <Box

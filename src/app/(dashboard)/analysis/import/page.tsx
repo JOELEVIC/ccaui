@@ -118,7 +118,7 @@ export default function AnalysisImportPage() {
           }}
           maxW="320px"
           bg="bgCard"
-          borderColor="whiteAlpha.200"
+          borderColor="blackAlpha.200"
           color="textPrimary"
           _placeholder={{ color: "textMuted" }}
         />
@@ -184,7 +184,7 @@ function GamesGrid({
             bg="bgCard"
             borderRadius="soft"
             borderWidth="1px"
-            borderColor="whiteAlpha.200"
+            borderColor="blackAlpha.200"
             cursor="pointer"
             transition="border-color 0.2s"
             _hover={{ borderColor: "gold" }}
@@ -244,7 +244,7 @@ function ReviewPanel({ game, onClose }: { game: ImportedGame; onClose: () => voi
 
   if (!parsed) {
     return (
-      <Box p={6} bg="bgCard" borderRadius="soft" borderWidth="1px" borderColor="whiteAlpha.200">
+      <Box p={6} bg="bgCard" borderRadius="soft" borderWidth="1px" borderColor="blackAlpha.200">
         <Text color="statusWarning">Could not parse this PGN.</Text>
         <Button mt={3} size="sm" variant="ghost" color="gold" onClick={onClose}>
           Back

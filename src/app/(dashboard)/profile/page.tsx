@@ -10,7 +10,8 @@ import {
   LuxuryButton,
   LuxuryHeading,
 } from "@/components/luxury/LuxuryPrimitives";
-import { tierForRating } from "@/lib/r2m";
+
+const RING_GOLD = "var(--lux-gold-soft)";
 
 const VARIANT_LABEL: Record<string, string> = {
   ULTRABULLET: "Ultrabullet",
@@ -71,7 +72,6 @@ export default function ProfilePage() {
   }
 
   const p = me.profile;
-  const tier = tierForRating(me.rating ?? 1200);
   const joined = new Date(me.createdAt).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 
   return (
@@ -81,7 +81,7 @@ export default function ProfilePage() {
       {/* Profile header */}
       <Box mb={{ base: 6, md: 9 }} position="relative" zIndex={1}>
         <HStack gap={{ base: 5, md: 7 }} align="flex-start" flexWrap="wrap">
-          <GoldAvatar size={112} tierColor={tier.color} avatarUrl={p?.avatarUrl} initial={me.username.charAt(0).toUpperCase()} />
+          <GoldAvatar size={112} tierColor={RING_GOLD} avatarUrl={p?.avatarUrl} initial={me.username.charAt(0).toUpperCase()} />
 
           <VStack align="flex-start" gap={2} flex={1} minW={0}>
             <HStack gap={2.5} align="baseline" flexWrap="wrap">
@@ -117,7 +117,7 @@ export default function ProfilePage() {
                 style={{ backdropFilter: "blur(12px)" }}
               >
                 <HStack gap={2}>
-                  <Box w="6px" h="6px" borderRadius="full" bg={tier.color} style={{ boxShadow: `0 0 6px ${tier.color}` }} />
+                  <Box w="6px" h="6px" borderRadius="full" bg={RING_GOLD} />
                   <Text
                     fontFamily="var(--font-inter), sans-serif"
                     fontSize="2xs"
@@ -126,7 +126,7 @@ export default function ProfilePage() {
                     textTransform="uppercase"
                     color="var(--lux-text-primary)"
                   >
-                    {tier.rank}-Rank · {me.rating}
+                    Rating · {me.rating}
                   </Text>
                 </HStack>
               </Box>
@@ -147,8 +147,8 @@ export default function ProfilePage() {
           </VStack>
 
           <Box>
-            <LuxuryButton variant="outline" size="sm" glyph="✦" href="/road-to-master/status">
-              Status
+            <LuxuryButton variant="outline" size="sm" glyph="✦" href="/road-to-master">
+              Training
             </LuxuryButton>
           </Box>
         </HStack>

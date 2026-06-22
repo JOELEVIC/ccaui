@@ -73,7 +73,7 @@ export default function RegisterPage() {
           </Heading>
           <Text color="goldLight">Join DChessAcademy</Text>
           <Box w="full">
-            <Text as="label" display="block" color="whiteAlpha.900" mb={2}>Email</Text>
+            <Text as="label" display="block" color="blackAlpha.900" mb={2}>Email</Text>
             <Input
               type="email"
               value={email}
@@ -81,22 +81,22 @@ export default function RegisterPage() {
               required
               bg="bgCard"
               borderColor="goldDark"
-              color="white"
+              color="textPrimary"
             />
           </Box>
           <Box w="full">
-            <Text as="label" display="block" color="whiteAlpha.900" mb={2}>Username</Text>
+            <Text as="label" display="block" color="blackAlpha.900" mb={2}>Username</Text>
             <Input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
               bg="bgCard"
               borderColor="goldDark"
-              color="white"
+              color="textPrimary"
             />
           </Box>
           <Box w="full">
-            <Text as="label" display="block" color="whiteAlpha.900" mb={2}>Password</Text>
+            <Text as="label" display="block" color="blackAlpha.900" mb={2}>Password</Text>
             <Input
               type="password"
               value={password}
@@ -104,11 +104,11 @@ export default function RegisterPage() {
               required
               bg="bgCard"
               borderColor="goldDark"
-              color="white"
+              color="textPrimary"
             />
           </Box>
           <Box w="full">
-            <Text as="label" display="block" color="whiteAlpha.900" mb={2}>Role</Text>
+            <Text as="label" display="block" color="blackAlpha.900" mb={2}>Role</Text>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as UserRole)}
@@ -129,29 +129,29 @@ export default function RegisterPage() {
             </select>
           </Box>
           <Box w="full">
-            <Text as="label" display="block" color="whiteAlpha.900" mb={2}>First name (optional)</Text>
+            <Text as="label" display="block" color="blackAlpha.900" mb={2}>First name (optional)</Text>
             <Input
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               bg="bgCard"
               borderColor="goldDark"
-              color="white"
+              color="textPrimary"
             />
           </Box>
           <Box w="full">
-            <Text as="label" display="block" color="whiteAlpha.900" mb={2}>Last name (optional)</Text>
+            <Text as="label" display="block" color="blackAlpha.900" mb={2}>Last name (optional)</Text>
             <Input
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               bg="bgCard"
               borderColor="goldDark"
-              color="white"
+              color="textPrimary"
             />
           </Box>
           <Button type="submit" w="full" bg="gold" color="black" loading={loading} _hover={{ bg: "goldLight" }}>
             Register
           </Button>
-          <Text color="whiteAlpha.700">
+          <Text color="blackAlpha.700">
             Already have an account?{" "}
             <Link href="/login" style={{ color: "var(--gold)" }}>
               Sign in

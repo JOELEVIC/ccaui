@@ -3,19 +3,15 @@
 import Link from "next/link";
 import { Box, HStack, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { SystemLabel, type GlowAccent } from "./SystemPrimitives";
+import { type GlowAccent } from "./SystemPrimitives";
 
 /**
- * CourseCard — the System-flavoured row used for course modules, openings,
- * endgames, and tactical puzzles in /learning. Designed for the squint
- * test: the chamfered border, eyebrow tag, and right-side ENTER glyph make
- * the click target obvious without reading any body copy.
- *
- * Variants:
- *   • "module"  — full-width row with a glyph block on the left + title +
- *                  description + ENTER pill on the right
- *   • "tile"    — square-ish tile for grid layouts (Openings / Endgames)
- *   • "feature" — large hero card for "Daily Gate" with strong glow
+ * CourseCard — a clean, standard card used for course modules, openings,
+ * endgames, and tactical puzzles in /learning. Light surface, hairline
+ * border, gold accent. Three variants:
+ *   • "module"  — full-width row (glyph + title + description + Open)
+ *   • "tile"    — grid item
+ *   • "feature" — larger hero card (e.g. "Today's puzzle")
  */
 
 interface CourseCardProps {
@@ -23,39 +19,21 @@ interface CourseCardProps {
   title: string;
   subtitle?: string;
   description?: string;
-  /** Eyebrow tag, e.g. "GATE · TIER E" or "DAILY". */
+  /** Eyebrow tag, e.g. "DAILY" or a category. */
   tag?: string;
-  /** Right-side meta — colour ("White") or rating ("1500") or theme list. */
+  /** Right-side meta — colour ("White"), rating ("1500"), or theme list. */
   meta?: string;
   /** Three-tier difficulty (1=easy, 3=hard). Renders bars. */
   difficulty?: number;
-  /** Visual variant — see file header. */
   variant?: "module" | "tile" | "feature";
-  /** Accent colour for the card. */
+  /** Accepted for API compatibility; styling is uniformly gold/charcoal. */
   accent?: GlowAccent;
   /** Optional left glyph (e.g. "♞", "♚", "✦", or a category letter). */
   glyph?: string;
-  /** Disabled = locked. Renders dimmed + lock icon, not clickable. */
+  /** Disabled = locked. Renders dimmed + lock badge, not clickable. */
   locked?: boolean;
-  /** Reason for being locked, shown when hovered (e.g. "Reach C-Rank"). */
   lockReason?: string;
 }
-
-const ACCENT_VAR: Record<GlowAccent, string> = {
-  cyan: "var(--sys-cyan)",
-  purple: "var(--sys-purple)",
-  epic: "var(--sys-epic)",
-  threat: "var(--sys-threat)",
-  gold: "var(--sys-prestige-gold)",
-};
-
-const ACCENT_RGB: Record<GlowAccent, string> = {
-  cyan: "0, 240, 255",
-  purple: "138, 43, 226",
-  epic: "177, 151, 252",
-  threat: "240, 101, 149",
-  gold: "245, 194, 68",
-};
 
 export function CourseCard({
   href,
@@ -66,78 +44,35 @@ export function CourseCard({
   meta,
   difficulty,
   variant = "module",
-  accent = "cyan",
   glyph,
   locked = false,
   lockReason,
 }: CourseCardProps) {
-  const accentVar = ACCENT_VAR[accent];
-  const rgb = ACCENT_RGB[accent];
-
   const cardInner =
     variant === "feature" ? (
-      <FeatureCard
-        title={title}
-        subtitle={subtitle}
-        description={description}
-        tag={tag}
-        meta={meta}
-        glyph={glyph}
-        accentVar={accentVar}
-        rgb={rgb}
-      />
+      <FeatureCard title={title} subtitle={subtitle} description={description} tag={tag} meta={meta} glyph={glyph} />
     ) : variant === "tile" ? (
-      <TileCard
-        title={title}
-        subtitle={subtitle}
-        description={description}
-        tag={tag}
-        meta={meta}
-        glyph={glyph}
-        accentVar={accentVar}
-        rgb={rgb}
-      />
+      <TileCard title={title} subtitle={subtitle} description={description} tag={tag} meta={meta} glyph={glyph} />
     ) : (
-      <ModuleCard
-        title={title}
-        subtitle={subtitle}
-        description={description}
-        tag={tag}
-        meta={meta}
-        difficulty={difficulty}
-        glyph={glyph}
-        accentVar={accentVar}
-        rgb={rgb}
-      />
+      <ModuleCard title={title} subtitle={subtitle} description={description} tag={tag} meta={meta} difficulty={difficulty} glyph={glyph} />
     );
 
   if (locked) {
     return (
-      <Box
-        position="relative"
-        opacity={0.45}
-        cursor="not-allowed"
-        title={lockReason ?? "Locked"}
-      >
+      <Box position="relative" opacity={0.55} cursor="not-allowed" title={lockReason ?? "Locked"}>
         {cardInner}
         <Box
           position="absolute"
           top={3}
           right={3}
-          px={2}
+          px={2.5}
           py={1}
-          bg="rgba(10,11,14,0.85)"
+          bg="bgWarm"
+          borderRadius="full"
           borderWidth="1px"
-          borderColor="rgba(255,255,255,0.25)"
-          className="sys-clip-panel-sm"
+          borderColor="blackAlpha.200"
         >
-          <Text
-            fontSize="2xs"
-            color="textMuted"
-            letterSpacing="0.18em"
-            textTransform="uppercase"
-            fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-          >
+          <Text fontSize="2xs" color="textMuted" letterSpacing="0.1em" textTransform="uppercase" fontWeight="600">
             🔒 {lockReason ?? "Locked"}
           </Text>
         </Box>
@@ -154,6 +89,19 @@ export function CourseCard({
   );
 }
 
+const CARD_SX = {
+  bg: "bgCard",
+  borderWidth: "1px",
+  borderColor: "blackAlpha.200",
+  borderRadius: "soft",
+  transition: "all 0.18s",
+} as const;
+
+const CARD_HOVER = {
+  borderColor: "goldDark",
+  boxShadow: "0 12px 30px -16px rgba(26,37,48,0.18)",
+} as const;
+
 /* ─────────── Module variant (full-width row) ─────────── */
 
 function ModuleCard(p: {
@@ -164,65 +112,22 @@ function ModuleCard(p: {
   meta?: string;
   difficulty?: number;
   glyph?: string;
-  accentVar: string;
-  rgb: string;
 }) {
   return (
-    <Box
-      position="relative"
-      p={4}
-      bg="rgba(10,11,14,0.72)"
-      borderWidth="1px"
-      borderColor={`rgba(${p.rgb}, 0.32)`}
-      className="sys-clip-panel"
-      transition="all 0.18s"
-      _hover={{
-        borderColor: p.accentVar,
-        bg: "rgba(10,11,14,0.85)",
-        boxShadow: `0 0 28px rgba(${p.rgb}, 0.35)`,
-      }}
-    >
+    <Box {...CARD_SX} p={4} _hover={CARD_HOVER}>
       <HStack gap={4} align="center">
-        {p.glyph && <GlyphBlock glyph={p.glyph} accentVar={p.accentVar} rgb={p.rgb} />}
+        {p.glyph && <GlyphBlock glyph={p.glyph} />}
         <VStack align="stretch" gap={1} flex={1} minW={0}>
           <HStack gap={2} align="center">
-            {p.tag && (
-              <Text
-                fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-                fontSize="2xs"
-                fontWeight="800"
-                color={p.accentVar}
-                letterSpacing="0.22em"
-                textTransform="uppercase"
-                style={{ textShadow: `0 0 4px rgba(${p.rgb}, 0.5)` }}
-              >
-                {p.tag}
-              </Text>
-            )}
-            {p.difficulty && <DifficultyBars difficulty={p.difficulty} accentVar={p.accentVar} />}
-            {p.meta && (
-              <Text
-                fontSize="2xs"
-                color="textMuted"
-                letterSpacing="0.16em"
-                textTransform="uppercase"
-                fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-              >
-                · {p.meta}
-              </Text>
-            )}
+            {p.tag && <TagLabel>{p.tag}</TagLabel>}
+            {p.difficulty && <DifficultyBars difficulty={p.difficulty} />}
+            {p.meta && <MetaText>· {p.meta}</MetaText>}
           </HStack>
-          <Text
-            fontFamily="var(--font-playfair), Georgia, serif"
-            color="textPrimary"
-            fontWeight="700"
-            fontSize="lg"
-            lineHeight="1.15"
-          >
+          <Text fontFamily="var(--font-playfair), Georgia, serif" color="textPrimary" fontWeight="700" fontSize="lg" lineHeight="1.15">
             {p.title}
           </Text>
           {p.subtitle && (
-            <Text fontSize="sm" color={p.accentVar} fontWeight="600" lineHeight="1.3">
+            <Text fontSize="sm" color="textSecondary" fontWeight="600" lineHeight="1.3">
               {p.subtitle}
             </Text>
           )}
@@ -232,7 +137,7 @@ function ModuleCard(p: {
             </Text>
           )}
         </VStack>
-        <EnterPill accentVar={p.accentVar} rgb={p.rgb} />
+        <OpenLink />
       </HStack>
     </Box>
   );
@@ -247,65 +152,21 @@ function TileCard(p: {
   tag?: string;
   meta?: string;
   glyph?: string;
-  accentVar: string;
-  rgb: string;
 }) {
   return (
-    <Box
-      position="relative"
-      p={4}
-      bg="rgba(10,11,14,0.72)"
-      borderWidth="1px"
-      borderColor={`rgba(${p.rgb}, 0.32)`}
-      className="sys-clip-panel"
-      h="full"
-      transition="all 0.18s"
-      _hover={{
-        borderColor: p.accentVar,
-        bg: "rgba(10,11,14,0.88)",
-        boxShadow: `0 0 26px rgba(${p.rgb}, 0.32)`,
-      }}
-    >
+    <Box {...CARD_SX} p={4} h="full" _hover={CARD_HOVER}>
       <HStack justify="space-between" mb={2}>
-        {p.tag && (
-          <Text
-            fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-            fontSize="2xs"
-            fontWeight="800"
-            color={p.accentVar}
-            letterSpacing="0.22em"
-            textTransform="uppercase"
-            style={{ textShadow: `0 0 4px rgba(${p.rgb}, 0.5)` }}
-          >
-            {p.tag}
-          </Text>
-        )}
-        {p.meta && (
-          <Text
-            fontSize="2xs"
-            color="textMuted"
-            letterSpacing="0.16em"
-            textTransform="uppercase"
-            fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-          >
-            {p.meta}
-          </Text>
-        )}
+        {p.tag && <TagLabel>{p.tag}</TagLabel>}
+        {p.meta && <MetaText>{p.meta}</MetaText>}
       </HStack>
       <HStack gap={3} align="flex-start">
-        {p.glyph && <GlyphBlock glyph={p.glyph} accentVar={p.accentVar} rgb={p.rgb} compact />}
+        {p.glyph && <GlyphBlock glyph={p.glyph} compact />}
         <Box flex={1}>
-          <Text
-            fontFamily="var(--font-playfair), Georgia, serif"
-            color="textPrimary"
-            fontWeight="700"
-            fontSize="lg"
-            lineHeight="1.15"
-          >
+          <Text fontFamily="var(--font-playfair), Georgia, serif" color="textPrimary" fontWeight="700" fontSize="lg" lineHeight="1.15">
             {p.title}
           </Text>
           {p.subtitle && (
-            <Text fontSize="xs" color={p.accentVar} fontWeight="700" mt={0.5} letterSpacing="0.04em">
+            <Text fontSize="xs" color="textSecondary" fontWeight="600" mt={0.5}>
               {p.subtitle}
             </Text>
           )}
@@ -317,7 +178,7 @@ function TileCard(p: {
         </Text>
       )}
       <HStack mt={3} justify="flex-end">
-        <EnterPill accentVar={p.accentVar} rgb={p.rgb} compact />
+        <OpenLink />
       </HStack>
     </Box>
   );
@@ -332,56 +193,18 @@ function FeatureCard(p: {
   tag?: string;
   meta?: string;
   glyph?: string;
-  accentVar: string;
-  rgb: string;
 }) {
   return (
-    <Box
-      position="relative"
-      p={{ base: 5, md: 6 }}
-      bg="rgba(10,11,14,0.78)"
-      borderWidth="1px"
-      borderColor={p.accentVar}
-      className="sys-clip-panel"
-      backdropFilter="blur(8px)"
-      transition="all 0.18s"
-      style={{
-        boxShadow: `0 0 32px rgba(${p.rgb}, 0.32), inset 0 0 24px rgba(${p.rgb}, 0.06)`,
-      }}
-      _hover={{
-        bg: "rgba(10,11,14,0.9)",
-      }}
-    >
-      <Box
-        position="absolute"
-        inset={0}
-        opacity={0.06}
-        backgroundImage={`linear-gradient(${p.accentVar} 1px, transparent 1px), linear-gradient(90deg, ${p.accentVar} 1px, transparent 1px)`}
-        backgroundSize="48px 48px"
-        pointerEvents="none"
-        className="sys-clip-panel"
-      />
-      <HStack
-        gap={{ base: 3, md: 5 }}
-        align="center"
-        flexWrap={{ base: "wrap", md: "nowrap" }}
-        position="relative"
-        zIndex={1}
-      >
-        {p.glyph && <GlyphBlock glyph={p.glyph} accentVar={p.accentVar} rgb={p.rgb} large />}
+    <Box {...CARD_SX} p={{ base: 5, md: 6 }} _hover={CARD_HOVER}>
+      <HStack gap={{ base: 3, md: 5 }} align="center" flexWrap={{ base: "wrap", md: "nowrap" }}>
+        {p.glyph && <GlyphBlock glyph={p.glyph} large />}
         <VStack align="stretch" gap={1.5} flex={1} minW={0}>
-          {p.tag && <SystemLabel accent={glowAccentForVar(p.accentVar)}>{p.tag}</SystemLabel>}
-          <Text
-            fontFamily="var(--font-playfair), Georgia, serif"
-            color="textPrimary"
-            fontWeight="700"
-            fontSize={{ base: "2xl", md: "3xl" }}
-            lineHeight="1.05"
-          >
+          {p.tag && <TagLabel>{p.tag}</TagLabel>}
+          <Text fontFamily="var(--font-playfair), Georgia, serif" color="textPrimary" fontWeight="700" fontSize={{ base: "2xl", md: "3xl" }} lineHeight="1.05">
             {p.title}
           </Text>
           {p.subtitle && (
-            <Text fontSize="md" color={p.accentVar} fontWeight="700">
+            <Text fontSize="md" color="textSecondary" fontWeight="600">
               {p.subtitle}
             </Text>
           )}
@@ -392,7 +215,7 @@ function FeatureCard(p: {
           )}
         </VStack>
         <Box flexShrink={0} display={{ base: "none", md: "block" }}>
-          <EnterPill accentVar={p.accentVar} rgb={p.rgb} />
+          <OpenLink />
         </Box>
       </HStack>
     </Box>
@@ -401,116 +224,60 @@ function FeatureCard(p: {
 
 /* ─────────── Building blocks ─────────── */
 
-function GlyphBlock({
-  glyph,
-  accentVar,
-  rgb,
-  compact = false,
-  large = false,
-}: {
-  glyph: string;
-  accentVar: string;
-  rgb: string;
-  compact?: boolean;
-  large?: boolean;
-}) {
-  const size = large ? "72px" : compact ? "44px" : "56px";
-  const fontSize = large ? "4xl" : compact ? "xl" : "2xl";
+function GlyphBlock({ glyph, compact = false, large = false }: { glyph: string; compact?: boolean; large?: boolean }) {
+  const size = large ? "64px" : compact ? "44px" : "52px";
+  const fontSize = large ? "3xl" : compact ? "xl" : "2xl";
   return (
     <Box
-      position="relative"
       w={size}
       h={size}
       flexShrink={0}
       display="flex"
       alignItems="center"
       justifyContent="center"
+      borderRadius="md"
+      bg="bgWarm"
+      color="gold"
+      fontFamily="serif"
     >
-      <Box
-        position="absolute"
-        inset={0}
-        className="sys-clip-hex"
-        bg={accentVar}
-        style={{ filter: `drop-shadow(0 0 10px rgba(${rgb}, 0.7))` }}
-      />
-      <Box position="absolute" inset="2px" className="sys-clip-hex" bg="var(--sys-void)" />
-      <Text
-        position="relative"
-        zIndex={1}
-        fontSize={fontSize}
-        color={accentVar}
-        fontWeight="700"
-        lineHeight="1"
-        style={{ textShadow: `0 0 10px ${accentVar}` }}
-      >
+      <Text fontSize={fontSize} lineHeight="1">
         {glyph}
       </Text>
     </Box>
   );
 }
 
-function DifficultyBars({ difficulty, accentVar }: { difficulty: number; accentVar: string }) {
+function TagLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <Text fontSize="2xs" fontWeight="700" color="gold" letterSpacing="0.18em" textTransform="uppercase">
+      {children}
+    </Text>
+  );
+}
+
+function MetaText({ children }: { children: React.ReactNode }) {
+  return (
+    <Text fontSize="2xs" color="textMuted" letterSpacing="0.12em" textTransform="uppercase">
+      {children}
+    </Text>
+  );
+}
+
+function DifficultyBars({ difficulty }: { difficulty: number }) {
   const lvl = Math.min(3, Math.max(1, difficulty));
   return (
     <HStack gap="3px">
       {[1, 2, 3].map((i) => (
-        <Box
-          key={i}
-          w="4px"
-          h={i === 1 ? "6px" : i === 2 ? "9px" : "12px"}
-          bg={i <= lvl ? accentVar : "rgba(255,255,255,0.15)"}
-          style={{ boxShadow: i <= lvl ? `0 0 6px ${accentVar}` : undefined }}
-        />
+        <Box key={i} w="4px" h={i === 1 ? "6px" : i === 2 ? "9px" : "12px"} borderRadius="1px" bg={i <= lvl ? "gold" : "blackAlpha.200"} />
       ))}
     </HStack>
   );
 }
 
-function EnterPill({
-  accentVar,
-  rgb,
-  compact = false,
-}: {
-  accentVar: string;
-  rgb: string;
-  compact?: boolean;
-}) {
+function OpenLink() {
   return (
-    <Box
-      flexShrink={0}
-      px={compact ? 3 : 4}
-      py={compact ? 1.5 : 2}
-      bg={`rgba(${rgb}, 0.12)`}
-      borderWidth="1px"
-      borderColor={accentVar}
-      className="sys-clip-panel-sm"
-      transition="all 0.15s"
-      style={{ boxShadow: `0 0 10px rgba(${rgb}, 0.3)` }}
-    >
-      <HStack gap={1.5}>
-        <Text
-          fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-          fontSize={compact ? "2xs" : "xs"}
-          fontWeight="800"
-          color={accentVar}
-          letterSpacing="0.2em"
-          textTransform="uppercase"
-        >
-          Enter
-        </Text>
-        <Text fontSize={compact ? "sm" : "md"} color={accentVar} lineHeight="1">
-          ▶
-        </Text>
-      </HStack>
-    </Box>
+    <Text flexShrink={0} fontSize="sm" fontWeight="600" color="gold">
+      Open →
+    </Text>
   );
-}
-
-
-function glowAccentForVar(v: string): GlowAccent {
-  if (v.includes("cyan")) return "cyan";
-  if (v.includes("purple")) return "purple";
-  if (v.includes("epic")) return "epic";
-  if (v.includes("threat")) return "threat";
-  return "gold";
 }

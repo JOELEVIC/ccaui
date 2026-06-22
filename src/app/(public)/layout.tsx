@@ -10,7 +10,7 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Box minH="100vh" bg="bgDark" color="white" display="flex" flexDir="column">
+    <Box minH="100vh" bg="bgDark" color="textPrimary" display="flex" flexDir="column">
       <LandingNav />
       <Box flex={1} py={{ base: 8, md: 12 }}>
         <Container maxW="6xl" px={{ base: 4, md: 6 }}>

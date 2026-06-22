@@ -146,8 +146,8 @@ export default function DashboardRankingsPage() {
                 key={user.id}
                 borderBottomWidth={i < users.length - 1 ? "1px" : 0}
                 borderColor="goldDark"
-                bg={i < 3 ? "whiteAlpha.50" : "transparent"}
-                _hover={{ bg: "whiteAlpha.100" }}
+                bg={i < 3 ? "blackAlpha.50" : "transparent"}
+                _hover={{ bg: "blackAlpha.100" }}
               >
                 <Box as="td" py={3} px={4} color="textMuted" fontWeight="bold">
                   <HStack gap={2} display="inline-flex">

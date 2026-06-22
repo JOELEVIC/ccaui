@@ -18,7 +18,6 @@ import {
   LuxuryHeading,
   LuxuryStat,
 } from "@/components/luxury/LuxuryPrimitives";
-import { tierForRating } from "@/lib/r2m";
 
 /**
  * Dashboard — Play-first, near-zero prose.
@@ -57,7 +56,6 @@ export default function DashboardPage() {
   const playersTotal = metricsData?.platformMetrics.playersTotal ?? 0;
   const playingNow = metricsData?.platformMetrics.playingNow ?? 0;
   const liveGames = gamesData?.liveGames ?? [];
-  const tier = tierForRating(user?.rating ?? 1200);
   const greeting = greetByHour();
   const displayName = user?.username ?? "Member";
 
@@ -87,7 +85,7 @@ export default function DashboardPage() {
             </Box>
 
             <HStack gap={3} align="center">
-              <TierPill rank={tier.rank} rating={user?.rating ?? null} color={tier.color} />
+              <RatingPill rating={user?.rating ?? null} />
               <ProToggle on={proOn} onToggle={(on) => { setProOn(on); if (on) setPremiumOpen(true); }} />
             </HStack>
           </HStack>
@@ -155,26 +153,7 @@ export default function DashboardPage() {
       {/* Road to Master — bold portal card */}
       <Section title="Road to Master" mt={{ base: 7, md: 9 }}>
         <GlassCard href="/road-to-master" goldWash hero>
-          <Box position="relative" px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }} overflow="hidden">
-            {/* Background HUD grid */}
-            <Box
-              position="absolute"
-              inset={0}
-              opacity={0.05}
-              backgroundImage="linear-gradient(rgba(0,240,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,0.6) 1px, transparent 1px)"
-              backgroundSize="48px 48px"
-              pointerEvents="none"
-            />
-            {/* Diagonal cyan→purple sheen — hints at the System palette inside */}
-            <Box
-              position="absolute"
-              inset={0}
-              pointerEvents="none"
-              style={{
-                background:
-                  "radial-gradient(ellipse at 90% 20%, rgba(0,240,255,0.12) 0%, transparent 55%), radial-gradient(ellipse at 20% 90%, rgba(138,43,226,0.15) 0%, transparent 55%)",
-              }}
-            />
+          <Box position="relative" px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }}>
             <HStack
               justify="space-between"
               align="center"
@@ -184,38 +163,27 @@ export default function DashboardPage() {
               zIndex={1}
             >
               <HStack gap={{ base: 4, md: 5 }} align="center" flex={1} minW={0}>
-                {/* Hexagonal R2M sigil */}
                 <Box
-                  position="relative"
-                  w={{ base: "56px", md: "68px" }}
-                  h={{ base: "56px", md: "68px" }}
+                  w={{ base: "56px", md: "64px" }}
+                  h={{ base: "56px", md: "64px" }}
                   flexShrink={0}
+                  borderRadius="14px"
+                  bg="var(--lux-glass-surface-strong)"
+                  borderWidth="1px"
+                  borderColor="var(--lux-glass-border)"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
                 >
-                  <Box
-                    position="absolute"
-                    inset={0}
-                    className="sys-clip-hex"
-                    bg="var(--lux-gold)"
-                    style={{ filter: "drop-shadow(0 0 12px rgba(212,175,55,0.55))" }}
-                  />
-                  <Box position="absolute" inset="2px" className="sys-clip-hex" bg="var(--lux-obsidian)" />
-                  <Box
-                    position="absolute"
-                    inset={0}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
+                  <Text
+                    fontFamily="var(--font-playfair), Georgia, serif"
+                    fontSize={{ base: "2xl", md: "3xl" }}
+                    color="var(--lux-gold)"
+                    fontWeight="700"
+                    lineHeight="1"
                   >
-                    <Text
-                      fontFamily="var(--font-playfair), Georgia, serif"
-                      fontSize={{ base: "2xl", md: "3xl" }}
-                      color="var(--lux-gold)"
-                      fontWeight="700"
-                      style={{ textShadow: "0 0 12px var(--lux-gold)" }}
-                    >
-                      ◆
-                    </Text>
-                  </Box>
+                    ♚
+                  </Text>
                 </Box>
 
                 <Box minW={0}>
@@ -226,9 +194,8 @@ export default function DashboardPage() {
                     color="var(--lux-gold)"
                     letterSpacing="0.28em"
                     textTransform="uppercase"
-                    style={{ textShadow: "0 0 4px rgba(212,175,55,0.5)" }}
                   >
-                    The Path
+                    Training
                   </Text>
                   <Text
                     fontFamily="var(--font-playfair), Georgia, serif"
@@ -242,9 +209,9 @@ export default function DashboardPage() {
                     Road to <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>Master</Text>
                   </Text>
                   <HStack mt={2} gap={2} flexWrap="wrap">
-                    <BadgePill>Status</BadgePill>
-                    <BadgePill>Quests</BadgePill>
-                    <BadgePill>Dungeon</BadgePill>
+                    <BadgePill>Profile</BadgePill>
+                    <BadgePill>Lessons</BadgePill>
+                    <BadgePill>Tasks</BadgePill>
                   </HStack>
                 </Box>
               </HStack>
@@ -467,7 +434,7 @@ function LocalTile({ href, title, glyph }: { href: string; title: string; glyph:
 
 /* ─────────── TierPill ─────────── */
 
-function TierPill({ rank, rating, color }: { rank: string; rating: number | null; color: string }) {
+function RatingPill({ rating }: { rating: number | null }) {
   return (
     <Box
       px={3}
@@ -479,7 +446,7 @@ function TierPill({ rank, rating, color }: { rank: string; rating: number | null
       style={{ backdropFilter: "blur(12px)" }}
     >
       <HStack gap={2}>
-        <Box w="6px" h="6px" borderRadius="full" bg={color} style={{ boxShadow: `0 0 6px ${color}` }} />
+        <Box w="6px" h="6px" borderRadius="full" bg="var(--lux-gold)" />
         <Text
           fontFamily="var(--font-inter), sans-serif"
           fontSize="2xs"
@@ -488,7 +455,7 @@ function TierPill({ rank, rating, color }: { rank: string; rating: number | null
           color="var(--lux-text-primary)"
           fontWeight="700"
         >
-          {rank}-Rank · {rating ?? "—"}
+          Rating · {rating ?? "—"}
         </Text>
       </HStack>
     </Box>

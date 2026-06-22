@@ -40,7 +40,7 @@ export default function LoginEmailPage() {
             </Text>
           </Box>
 
-          <Box bg="whiteAlpha.400" backdropFilter="blur(8px)" borderRadius="soft" p={{ base: 6, md: 8 }} borderWidth="1px" borderColor="blackAlpha.100">
+          <Box bg="blackAlpha.400" backdropFilter="blur(8px)" borderRadius="soft" p={{ base: 6, md: 8 }} borderWidth="1px" borderColor="blackAlpha.100">
             <LoginForm chessPro />
           </Box>
 
@@ -49,7 +49,7 @@ export default function LoginEmailPage() {
             px={4}
             py={2}
             borderRadius="soft"
-            bg="whiteAlpha.300"
+            bg="blackAlpha.300"
             borderWidth="1px"
             borderColor="blackAlpha.100"
             textAlign="center"

@@ -61,7 +61,7 @@ export default function SchoolDetailPage() {
       <Heading size="xl" color="gold" fontFamily="serif">
         {school.name}
       </Heading>
-      <Text color="whiteAlpha.800">{school.region}</Text>
+      <Text color="blackAlpha.800">{school.region}</Text>
       {stats && (
         <Box display="flex" gap={6} flexWrap="wrap">
           <Text color="gold">Students: {stats.totalStudents}</Text>
@@ -75,7 +75,7 @@ export default function SchoolDetailPage() {
           Leaderboard
         </Heading>
         {leaderboard.length === 0 ? (
-          <Text color="whiteAlpha.700">No players yet.</Text>
+          <Text color="blackAlpha.700">No players yet.</Text>
         ) : (
           <VStack align="stretch" gap={2}>
             {leaderboard.map((entry, i) => (
@@ -89,7 +89,7 @@ export default function SchoolDetailPage() {
                 display="flex"
                 justifyContent="space-between"
               >
-                <Text color="white">
+                <Text color="textPrimary">
                   #{i + 1} {entry.user.username}
                 </Text>
                 <Text color="gold">

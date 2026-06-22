@@ -54,7 +54,7 @@ export default function AnalysisHubPage() {
               borderRadius="soft"
               bg="bgCard"
               borderWidth="1px"
-              borderColor="whiteAlpha.100"
+              borderColor="blackAlpha.100"
               _hover={{ borderColor: "gold" }}
             >
               <Text fontWeight="600" color="gold">

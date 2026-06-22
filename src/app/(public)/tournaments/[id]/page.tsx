@@ -183,7 +183,7 @@ export default function PublicTournamentDetailPage() {
               justifyContent="space-between"
               alignItems="center"
             >
-              <Text color="white">
+              <Text color="textPrimary">
                 #{i + 1} {p.user.username} ({p.user.rating})
               </Text>
               <Text color="gold">{p.score} pts</Text>
@@ -191,7 +191,7 @@ export default function PublicTournamentDetailPage() {
           ))}
         </VStack>
       </Box>
-      <Text color="whiteAlpha.600" fontSize="sm">
+      <Text color="blackAlpha.600" fontSize="sm">
         {t.games?.length ?? 0} games
       </Text>
     </VStack>

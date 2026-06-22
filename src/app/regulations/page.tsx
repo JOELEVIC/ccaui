@@ -61,7 +61,7 @@ const CODE_OF_CONDUCT = [
 
 export default function RegulationsPage() {
   return (
-    <Box minH="100vh" bg="bgDark" color="white" display="flex" flexDir="column">
+    <Box minH="100vh" bg="bgDark" color="textPrimary" display="flex" flexDir="column">
       <LandingNav />
       <Box flex={1} py={{ base: 8, md: 14 }}>
         <Container maxW="4xl" px={{ base: 4, md: 6 }}>
@@ -151,7 +151,7 @@ export default function RegulationsPage() {
             </Text>
           </Section>
 
-          <Box mt={10} pt={6} borderTopWidth="1px" borderColor="whiteAlpha.200">
+          <Box mt={10} pt={6} borderTopWidth="1px" borderColor="blackAlpha.200">
             <Text color="textMuted" fontSize="xs">
               These regulations are reviewed annually by the academy committee. Effective from January 2026. Last
               updated: 2026.

@@ -73,7 +73,7 @@ export function MoreDrawer({ isOpen, onClose }: MoreDrawerProps) {
               position: "fixed",
               inset: 0,
               zIndex: 40,
-              background: "rgba(5,7,10,0.7)",
+              background: "rgba(255,255,255,0.7)",
               backdropFilter: "blur(8px)",
               WebkitBackdropFilter: "blur(8px)",
             }}
@@ -91,7 +91,7 @@ export function MoreDrawer({ isOpen, onClose }: MoreDrawerProps) {
               bottom: 0,
               width: "min(360px, 92vw)",
               zIndex: 41,
-              background: "rgba(10, 13, 18, 0.92)",
+              background: "rgba(255,255,255, 0.92)",
               borderLeft: "1px solid var(--lux-glass-border-strong)",
               boxShadow: "-30px 0 80px rgba(0,0,0,0.5)",
               backdropFilter: "blur(22px) saturate(130%)",

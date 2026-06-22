@@ -89,7 +89,7 @@ export function LandingRankingsPreview() {
               borderRadius="soft"
               bg="bgCard"
               borderWidth="1px"
-              borderColor="whiteAlpha.100"
+              borderColor="blackAlpha.100"
               textAlign="center"
             >
               <Text color="textSecondary" fontSize="sm" mb={4}>
@@ -102,7 +102,7 @@ export function LandingRankingsPreview() {
                   borderColor="gold"
                   color="gold"
                   borderRadius="soft"
-                  _hover={{ bg: "whiteAlpha.100" }}
+                  _hover={{ bg: "blackAlpha.100" }}
                 >
                   Browse rankings
                 </Button>
@@ -118,7 +118,7 @@ export function LandingRankingsPreview() {
                       borderRadius="soft"
                       bg="bgSurface"
                       borderWidth="1px"
-                      borderColor="whiteAlpha.100"
+                      borderColor="blackAlpha.100"
                       boxShadow="var(--shadow-card-soft)"
                       _hover={{
                         borderColor: "gold",
@@ -175,7 +175,7 @@ export function LandingRankingsPreview() {
                     borderColor="gold"
                     color="gold"
                     borderRadius="soft"
-                    _hover={{ bg: "whiteAlpha.100" }}
+                    _hover={{ bg: "blackAlpha.100" }}
                   >
                     View Full Rankings
                   </Button>

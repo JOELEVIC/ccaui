@@ -63,7 +63,7 @@ export function LandingCameroonChess() {
                   borderColor="gold"
                   color="gold"
                   borderRadius="soft"
-                  _hover={{ bg: "whiteAlpha.100" }}
+                  _hover={{ bg: "blackAlpha.100" }}
                 >
                   Become a member of the CCA family today!
                 </Button>
@@ -84,7 +84,7 @@ export function LandingCameroonChess() {
               overflow="hidden"
               bg="bgSurface"
               borderWidth="1px"
-              borderColor="whiteAlpha.100"
+              borderColor="blackAlpha.100"
               boxShadow="var(--shadow-card-soft)"
             >
               {!imageError ? (

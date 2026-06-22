@@ -535,7 +535,7 @@ function GamePageInner() {
                     onCheckedChange={(e) => setPremoveEnabled(!!e.checked)}
                   >
                     <Switch.HiddenInput />
-                    <Switch.Control bg={premoveEnabled ? "gold" : "bgSurface"} borderWidth="1px" borderColor="whiteAlpha.200">
+                    <Switch.Control bg={premoveEnabled ? "gold" : "bgSurface"} borderWidth="1px" borderColor="blackAlpha.200">
                       <Switch.Thumb />
                     </Switch.Control>
                   </Switch.Root>
@@ -550,7 +550,7 @@ function GamePageInner() {
                   onCheckedChange={(e) => setSoundsEnabled(!!e.checked)}
                 >
                   <Switch.HiddenInput />
-                  <Switch.Control bg={soundsEnabled ? "gold" : "bgSurface"} borderWidth="1px" borderColor="whiteAlpha.200">
+                  <Switch.Control bg={soundsEnabled ? "gold" : "bgSurface"} borderWidth="1px" borderColor="blackAlpha.200">
                     <Switch.Thumb />
                   </Switch.Control>
                 </Switch.Root>
@@ -812,7 +812,7 @@ function GamePageInner() {
           {analysis && (
             <>
               <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
-                <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="whiteAlpha.100">
+                <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="blackAlpha.100">
                   <Text color="gold" fontWeight="700" mb={2}>
                     {game.white.username}
                   </Text>
@@ -821,7 +821,7 @@ function GamePageInner() {
                   <StatRow label="Blunders" value={analysis.white.blunders} />
                   <StatRow label="Avg centipawn loss" value={analysis.white.acpl} />
                 </Box>
-                <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="whiteAlpha.100">
+                <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="blackAlpha.100">
                   <Text color="gold" fontWeight="700" mb={2}>
                     {game.black.username}
                   </Text>
@@ -831,7 +831,7 @@ function GamePageInner() {
                   <StatRow label="Avg centipawn loss" value={analysis.black.acpl} />
                 </Box>
               </SimpleGrid>
-              <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="whiteAlpha.100" h="220px">
+              <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="blackAlpha.100" h="220px">
                 <Text fontSize="xs" color="textMuted" mb={2}>
                   Evaluation (opening · middlegame · endgame)
                 </Text>

@@ -60,7 +60,7 @@ export function LandingCoursesPreview() {
                     borderRadius="soft"
                     bg="bgSurface"
                     borderWidth="1px"
-                    borderColor="whiteAlpha.100"
+                    borderColor="blackAlpha.100"
                     h="full"
                     display="flex"
                     flexDir="column"
@@ -86,7 +86,7 @@ export function LandingCoursesPreview() {
                         borderColor="gold"
                         color="gold"
                         borderRadius="soft"
-                        _hover={{ bg: "whiteAlpha.100" }}
+                        _hover={{ bg: "blackAlpha.100" }}
                       >
                         Start learning →
                       </Button>
@@ -103,7 +103,7 @@ export function LandingCoursesPreview() {
               borderColor="gold"
               color="gold"
               borderRadius="soft"
-              _hover={{ bg: "whiteAlpha.100" }}
+              _hover={{ bg: "blackAlpha.100" }}
             >
               View All Courses
             </Button>

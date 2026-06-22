@@ -87,7 +87,7 @@ export default function PuzzlesDashboardPage() {
       )}
 
       {dash && (
-        <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="whiteAlpha.100" h="380px">
+        <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="blackAlpha.100" h="380px">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={chartData}>
               <PolarGrid stroke="#ffffff22" />
@@ -135,7 +135,7 @@ function StatCard({
       borderRadius="soft"
       bg="bgCard"
       borderWidth="1px"
-      borderColor="whiteAlpha.100"
+      borderColor="blackAlpha.100"
     >
       <Text fontSize="xs" color="textMuted" textTransform="uppercase" letterSpacing="wider">
         {label}
@@ -144,7 +144,7 @@ function StatCard({
         {value}
       </Text>
       {bar != null && (
-        <Box mt={3} h="8px" bg="whiteAlpha.100" borderRadius="full" overflow="hidden">
+        <Box mt={3} h="8px" bg="blackAlpha.100" borderRadius="full" overflow="hidden">
           <Box h="full" w={`${Math.min(100, bar * 100)}%`} bg="accentGreen" borderRadius="full" transition="width 0.3s" />
         </Box>
       )}

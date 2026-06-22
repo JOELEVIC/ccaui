@@ -47,7 +47,7 @@ export function HomeOverview() {
   }
 
   return (
-    <Box minH="100vh" bg="bgDark" color="white">
+    <Box minH="100vh" bg="bgDark" color="textPrimary">
       <LandingNav />
       <LandingHeroMinimal />
       <LandingIconFeatures />

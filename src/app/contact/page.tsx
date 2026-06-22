@@ -58,7 +58,7 @@ export default function ContactPage() {
   };
 
   return (
-    <Box minH="100vh" bg="bgDark" color="white" display="flex" flexDir="column">
+    <Box minH="100vh" bg="bgDark" color="textPrimary" display="flex" flexDir="column">
       <LandingNav />
       <Box flex={1} py={{ base: 8, md: 14 }}>
         <Container maxW="5xl" px={{ base: 4, md: 6 }}>
@@ -83,7 +83,7 @@ export default function ContactPage() {
                     bg="bgCard"
                     borderRadius="soft"
                     borderWidth="1px"
-                    borderColor="whiteAlpha.200"
+                    borderColor="blackAlpha.200"
                     _hover={{ borderColor: "goldDark" }}
                     transition="border-color 0.2s"
                   >
@@ -161,7 +161,7 @@ export default function ContactPage() {
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Full name"
                       bg="bgDark"
-                      borderColor="whiteAlpha.200"
+                      borderColor="blackAlpha.200"
                       color="textPrimary"
                       _placeholder={{ color: "textMuted" }}
                     />
@@ -176,7 +176,7 @@ export default function ContactPage() {
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
                       bg="bgDark"
-                      borderColor="whiteAlpha.200"
+                      borderColor="blackAlpha.200"
                       color="textPrimary"
                       _placeholder={{ color: "textMuted" }}
                       required
@@ -214,7 +214,7 @@ export default function ContactPage() {
                       placeholder="Tell us how we can help."
                       rows={6}
                       bg="bgDark"
-                      borderColor="whiteAlpha.200"
+                      borderColor="blackAlpha.200"
                       color="textPrimary"
                       _placeholder={{ color: "textMuted" }}
                       required

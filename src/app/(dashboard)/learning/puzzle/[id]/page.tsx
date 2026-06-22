@@ -148,8 +148,8 @@ export default function PuzzlePage() {
             const xp = result.xpAwarded ?? 0;
             const streak = result.streakAfter ?? 0;
             setReward({ xp, streak });
-            const msg = xp > 0 || streak > 0
-              ? `Correct! +${xp} XP${streak > 0 ? ` · Streak: ${streak}` : ""}`
+            const msg = streak > 0
+              ? `Correct! · Streak: ${streak}`
               : "Correct! Puzzle solved.";
             toaster.create({ title: msg, type: "success" });
           }
@@ -475,28 +475,16 @@ function SolvedOverlay({
               </Text>
             </VStack>
 
-            {reward && (reward.xp > 0 || reward.streak > 0) && (
+            {reward && reward.streak > 0 && (
               <HStack gap={3} justify="center" mt={2}>
-                {reward.xp > 0 && (
-                  <Box px={4} py={2} borderWidth="1px" borderColor="rgba(0,240,255,0.5)" bg="rgba(0,240,255,0.08)" className="sys-clip-panel-sm">
-                    <Text fontSize="2xs" color="textMuted" letterSpacing="0.22em" textTransform="uppercase" fontFamily="var(--font-oswald), var(--font-inter), sans-serif">
-                      Reward
-                    </Text>
-                    <Text fontFamily="var(--font-oswald), var(--font-inter), sans-serif" fontSize="xl" fontWeight="800" color="sys.cyan" style={{ textShadow: "0 0 8px var(--sys-cyan)" }}>
-                      +{reward.xp} XP
-                    </Text>
-                  </Box>
-                )}
-                {reward.streak > 0 && (
-                  <Box px={4} py={2} borderWidth="1px" borderColor="rgba(177,151,252,0.5)" bg="rgba(177,151,252,0.08)" className="sys-clip-panel-sm">
-                    <Text fontSize="2xs" color="textMuted" letterSpacing="0.22em" textTransform="uppercase" fontFamily="var(--font-oswald), var(--font-inter), sans-serif">
-                      Streak
-                    </Text>
-                    <Text fontFamily="var(--font-oswald), var(--font-inter), sans-serif" fontSize="xl" fontWeight="800" color="sys.epic" style={{ textShadow: "0 0 8px var(--sys-epic)" }}>
-                      {reward.streak} ✦
-                    </Text>
-                  </Box>
-                )}
+                <Box px={4} py={2} borderWidth="1px" borderColor="rgba(26,37,48,0.15)" bg="rgba(26,37,48,0.04)" className="sys-clip-panel-sm">
+                  <Text fontSize="2xs" color="textMuted" letterSpacing="0.22em" textTransform="uppercase" fontFamily="var(--font-oswald), var(--font-inter), sans-serif">
+                    Streak
+                  </Text>
+                  <Text fontFamily="var(--font-oswald), var(--font-inter), sans-serif" fontSize="xl" fontWeight="800" color="textPrimary">
+                    {reward.streak} ✦
+                  </Text>
+                </Box>
               </HStack>
             )}
 

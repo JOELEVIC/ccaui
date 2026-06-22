@@ -69,7 +69,7 @@ export function LoginForm({ onSuccess, compact = false, chessPro = false }: Logi
         </Text>
       )}
       <Box w="full">
-        <Text as="label" display="block" color={chessPro ? "bgDark" : "whiteAlpha.900"} mb={1} fontSize="sm" fontWeight="500">
+        <Text as="label" display="block" color={chessPro ? "bgDark" : "blackAlpha.900"} mb={1} fontSize="sm" fontWeight="500">
           {chessPro ? "Email" : "Email"}
         </Text>
         <Input
@@ -77,15 +77,15 @@ export function LoginForm({ onSuccess, compact = false, chessPro = false }: Logi
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          bg={chessPro ? "whiteAlpha.800" : "bgCard"}
-          borderColor={chessPro ? "blackAlpha.100" : "whiteAlpha.300"}
+          bg={chessPro ? "blackAlpha.800" : "bgCard"}
+          borderColor={chessPro ? "blackAlpha.100" : "blackAlpha.300"}
           color={chessPro ? "bgDark" : "white"}
           size={compact ? "sm" : "md"}
-          _placeholder={{ color: chessPro ? "blackAlpha.400" : "whiteAlpha.500" }}
+          _placeholder={{ color: chessPro ? "blackAlpha.400" : "blackAlpha.500" }}
         />
       </Box>
       <Box w="full">
-        <Text as="label" display="block" color={chessPro ? "bgDark" : "whiteAlpha.900"} mb={1} fontSize="sm" fontWeight="500">
+        <Text as="label" display="block" color={chessPro ? "bgDark" : "blackAlpha.900"} mb={1} fontSize="sm" fontWeight="500">
           Password
         </Text>
         <Input
@@ -93,11 +93,11 @@ export function LoginForm({ onSuccess, compact = false, chessPro = false }: Logi
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          bg={chessPro ? "whiteAlpha.800" : "bgCard"}
-          borderColor={chessPro ? "blackAlpha.100" : "whiteAlpha.300"}
+          bg={chessPro ? "blackAlpha.800" : "bgCard"}
+          borderColor={chessPro ? "blackAlpha.100" : "blackAlpha.300"}
           color={chessPro ? "bgDark" : "white"}
           size={compact ? "sm" : "md"}
-          _placeholder={{ color: chessPro ? "blackAlpha.400" : "whiteAlpha.500" }}
+          _placeholder={{ color: chessPro ? "blackAlpha.400" : "blackAlpha.500" }}
         />
       </Box>
       {errorMessage && (
@@ -113,13 +113,13 @@ export function LoginForm({ onSuccess, compact = false, chessPro = false }: Logi
         color={chessPro ? "gold" : "black"}
         size={compact ? "sm" : "md"}
         loading={loading}
-        _hover={{ bg: chessPro ? "#1a2238" : undefined }}
+        _hover={{ bg: chessPro ? "#FFFFFF" : undefined }}
         borderRadius="soft"
       >
         Sign in
       </Button>
       {!chessPro && (
-        <Text color="whiteAlpha.700" fontSize="sm">
+        <Text color="blackAlpha.700" fontSize="sm">
           Don&apos;t have an account?{" "}
           <Link href="/register" style={{ color: "var(--chakra-colors-gold)" }}>
             Register

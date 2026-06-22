@@ -30,7 +30,7 @@ export default function AdminPage() {
         <Heading size="xl" color="gold">
           Admin
         </Heading>
-        <Text color="whiteAlpha.700" mt={4}>
+        <Text color="blackAlpha.700" mt={4}>
           You do not have permission to view this page.
         </Text>
       </Box>
@@ -49,7 +49,7 @@ export default function AdminPage() {
           Users
         </Heading>
         {users.length === 0 ? (
-          <Text color="whiteAlpha.700">No users.</Text>
+          <Text color="blackAlpha.700">No users.</Text>
         ) : (
           <VStack align="stretch" gap={2}>
             {users.slice(0, 50).map((u: { id: string; username: string; email: string; role: string; rating: number; school?: { name: string } }) => (
@@ -60,7 +60,7 @@ export default function AdminPage() {
                 bg="bgCard"
                 borderWidth="1px"
                 borderColor="goldDark"
-                color="whiteAlpha.900"
+                color="blackAlpha.900"
               >
                 {u.username} — {u.email} · {u.role} · {u.rating} ELO
                 {u.school && ` · ${u.school.name}`}

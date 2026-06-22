@@ -40,7 +40,7 @@ export function DChessLanding() {
 
   return (
     <Box minH="100vh" bg="bgDark" color="textPrimary">
-      <Box as="header" borderBottomWidth="1px" borderColor="whiteAlpha.100" bg="rgba(10, 14, 26, 0.92)" backdropFilter="blur(8px)" position="sticky" top={0} zIndex={10}>
+      <Box as="header" borderBottomWidth="1px" borderColor="blackAlpha.100" bg="rgba(255,255,255, 0.92)" backdropFilter="blur(8px)" position="sticky" top={0} zIndex={10}>
         <Container maxW="6xl" py={4}>
           <Flex align="center" justify="space-between" gap={4} flexWrap="wrap">
             <Link href="/">
@@ -84,7 +84,7 @@ export function DChessLanding() {
         pt={{ base: 14, md: 20 }}
         pb={{ base: 16, md: 24 }}
         px={4}
-        bg="linear-gradient(165deg, #0a0e1a 0%, #141b2e 45%, #0a0e1a 100%)"
+        bg="linear-gradient(165deg, #FDFBF7 0%, #FFFFFF 45%, #FDFBF7 100%)"
       >
         <Container maxW="6xl">
           <SimpleGrid columns={{ base: 1, lg: 2 }} gap={{ base: 12, lg: 16 }} alignItems="center">
@@ -113,7 +113,7 @@ export function DChessLanding() {
                   </Button>
                 </Link>
                 <Link href="/tournaments">
-                  <Button size="lg" variant="outline" borderColor="whiteAlpha.300" color="textPrimary" borderRadius="soft" _hover={{ borderColor: "gold", color: "gold" }}>
+                  <Button size="lg" variant="outline" borderColor="blackAlpha.300" color="textPrimary" borderRadius="soft" _hover={{ borderColor: "gold", color: "gold" }}>
                     Browse tournaments
                   </Button>
                 </Link>
@@ -144,7 +144,7 @@ export function DChessLanding() {
               borderRadius="soft"
               bg="bgCard"
               borderWidth="1px"
-              borderColor="whiteAlpha.100"
+              borderColor="blackAlpha.100"
               p={{ base: 8, md: 10 }}
               boxShadow="0 24px 80px rgba(0,0,0,0.35)"
             >
@@ -190,7 +190,7 @@ export function DChessLanding() {
                   borderRadius="soft"
                   bg="bgCard"
                   borderWidth="1px"
-                  borderColor="whiteAlpha.200"
+                  borderColor="blackAlpha.200"
                   transition="border-color 0.2s"
                   _hover={{ borderColor: "goldDark" }}
                 >
@@ -207,7 +207,7 @@ export function DChessLanding() {
         </Container>
       </Box>
 
-      <Box as="section" py={{ base: 14, md: 18 }} px={4} bg="bgCard" borderTopWidth="1px" borderColor="whiteAlpha.100">
+      <Box as="section" py={{ base: 14, md: 18 }} px={4} bg="bgCard" borderTopWidth="1px" borderColor="blackAlpha.100">
         <Container maxW="6xl" textAlign="center">
           <Heading fontFamily="var(--font-playfair), Georgia, serif" size="lg" color="textPrimary" mb={3}>
             Ready to join?
@@ -230,7 +230,7 @@ export function DChessLanding() {
         </Container>
       </Box>
 
-      <Box as="footer" py={10} px={4} borderTopWidth="1px" borderColor="whiteAlpha.200">
+      <Box as="footer" py={10} px={4} borderTopWidth="1px" borderColor="blackAlpha.200">
         <Container maxW="6xl">
           <Flex direction={{ base: "column", md: "row" }} justify="space-between" align={{ base: "center", md: "flex-start" }} gap={6}>
             <VStack align={{ base: "center", md: "start" }} gap={1}>

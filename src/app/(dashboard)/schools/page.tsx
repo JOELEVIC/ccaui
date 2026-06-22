@@ -90,12 +90,12 @@ export default function SchoolsPage() {
               </Heading>
               <VStack align="stretch" gap={3}>
                 <Box>
-                  <Text color="whiteAlpha.900" mb={1} fontSize="sm">Name</Text>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="School name" bg="bgDark" borderColor="goldDark" color="white" />
+                  <Text color="blackAlpha.900" mb={1} fontSize="sm">Name</Text>
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="School name" bg="bgDark" borderColor="goldDark" color="textPrimary" />
                 </Box>
                 <Box>
-                  <Text color="whiteAlpha.900" mb={1} fontSize="sm">Region</Text>
-                  <Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Region" bg="bgDark" borderColor="goldDark" color="white" />
+                  <Text color="blackAlpha.900" mb={1} fontSize="sm">Region</Text>
+                  <Input value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Region" bg="bgDark" borderColor="goldDark" color="textPrimary" />
                 </Box>
                 <Box display="flex" gap={2}>
                   <Button type="submit" size="sm" bg="gold" color="black" loading={creating} _hover={{ bg: "goldLight" }}>
@@ -112,7 +112,7 @@ export default function SchoolsPage() {
       )}
 
       {schools.length === 0 ? (
-        <Text color="whiteAlpha.700">No schools registered.</Text>
+        <Text color="blackAlpha.700">No schools registered.</Text>
       ) : (
         <VStack align="stretch" gap={3}>
           {schools.map((s: { id: string; name: string; region: string; students: unknown[]; tournaments: unknown[] }) => (
@@ -128,7 +128,7 @@ export default function SchoolsPage() {
                 <Text color="gold" fontWeight="bold">
                   {s.name}
                 </Text>
-                <Text color="whiteAlpha.700">
+                <Text color="blackAlpha.700">
                   {s.region} · {s.students.length} students · {s.tournaments.length} tournaments
                 </Text>
               </Box>

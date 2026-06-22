@@ -100,7 +100,7 @@ export function TournamentSchedule({ day, tournaments, currentUserId }: Tourname
           </Box>
         ))}
       </VStack>
-      <Box flex={1} position="relative" borderLeftWidth="1px" borderColor="whiteAlpha.100" minW={0}>
+      <Box flex={1} position="relative" borderLeftWidth="1px" borderColor="blackAlpha.100" minW={0}>
         {slots.slice(0, -1).map((s) => (
           <Box
             key={s.label}
@@ -110,7 +110,7 @@ export function TournamentSchedule({ day, tournaments, currentUserId }: Tourname
             top={`${((s.min - DAY_START_MIN) / SLOT_MIN) * PX_PER_SLOT + 24}px`}
             h={`${PX_PER_SLOT}px`}
             borderTopWidth="1px"
-            borderColor="whiteAlpha.100"
+            borderColor="blackAlpha.100"
             pointerEvents="none"
           />
         ))}
@@ -140,7 +140,7 @@ export function TournamentSchedule({ day, tournaments, currentUserId }: Tourname
               px={2}
               py={1}
               bg={colorForCard(t.cardColor)}
-              color="#0a0e1a"
+              color="#FDFBF7"
               overflow="hidden"
               zIndex={1}
               boxShadow="md"
@@ -190,7 +190,7 @@ export function TournamentListMobile({
             borderRadius="soft"
             bg="bgCard"
             borderWidth="1px"
-            borderColor="whiteAlpha.100"
+            borderColor="blackAlpha.100"
           >
             <Text fontWeight="700" color="gold">
               {t.name}

@@ -1,75 +1,66 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Box, VStack } from "@chakra-ui/react";
-import {
-  ShadowCollection,
-  ShadowExtraction,
-  useShadowInventory,
-  type ShadowCandidate,
-} from "@/components/system/ShadowExtraction";
+import Link from "next/link";
+import { Card, Eyebrow, GoldButton } from "@/components/redesign/Primitives";
 
-/**
- * Demo Shadow Extraction page.
- *
- * A real implementation would pull candidates from the user's reviewed games
- * (every position where they were >0.5 from the engine's top line and that
- * top line resulted in mate / a +3 evaluation jump). For the scaffolding,
- * we ship three canonical brilliant-move positions so the flow is testable.
- */
-
-const DEMO_CANDIDATES: ShadowCandidate[] = [
+const CHALLENGES = [
   {
-    id: "fischer-byrne-1956",
     label: "The Game of the Century — Byrne vs Fischer",
-    // Position after 17. Kf1, Black to move. Fischer played 17...Be6!! —
-    // offering his queen for a long combination that ends in mate.
-    fen: "r3r1k1/pp3pbp/1qp3p1/2B5/2BP2b1/Q1n2N2/P4PPP/3R1K1R b - - 0 17",
-    expectedSan: "Be6",
-    flavour: "Fischer, age 13. Offers the queen for an immortal combination.",
-    sourceUrl: "https://www.chessgames.com/perl/chessgame?gid=1008361",
+    note: "Fischer, age 13, offered his queen for an immortal combination. Find the move.",
   },
   {
-    id: "philidors-legacy",
     label: "Philidor's Legacy — Smothered Mate",
-    // Knight on h6, black king already cornered on h8 with rook on g8 +
-    // pawns on g7 and h7 blocking every flight. Nf7 delivers the textbook
-    // smothered mate.
-    fen: "6rk/6pp/7N/8/8/8/8/7K w - - 0 1",
-    expectedSan: "Nf7#",
-    flavour: "Knight on h6, king in the corner. End the night with elegance.",
+    note: "Knight on h6, king in the corner. End it in one.",
   },
   {
-    id: "greek-gift-template",
     label: "Greek Gift — Classical Sacrifice",
-    // Black has just castled. Bd3 hits h7 with the king now on g8 —
-    // classical Greek gift sacrifice opens the attack.
-    fen: "r1bq1rk1/ppp2ppp/2nb1n2/3pp3/3P4/2NBPN2/PPP2PPP/R1BQK2R w KQ - 0 6",
-    expectedSan: "Bxh7+",
-    flavour: "Once the king sits on g8, the diagonal b1–h7 becomes a runway.",
+    note: "The king has just castled. Open the attack on h7.",
   },
 ];
 
-export default function ShadowPage() {
-  const inventory = useShadowInventory();
-  const [idx, setIdx] = useState(0);
-  const current = useMemo(() => DEMO_CANDIDATES[idx % DEMO_CANDIDATES.length], [idx]);
-
-  if (!current) return null;
-
+export default function GameReviewPage() {
   return (
-    <Box bg="sys.void" minH="100vh" py={{ base: 4, md: 8 }} px={{ base: 3, md: 6 }}>
-      <VStack maxW="1080px" mx="auto" gap={6} align="stretch">
-        <ShadowExtraction
-          candidate={current}
-          onExtract={(s) => {
-            inventory.add(s);
-            setTimeout(() => setIdx((i) => i + 1), 1600);
-          }}
-          onSkip={() => setIdx((i) => i + 1)}
-        />
-        <ShadowCollection shadows={inventory.shadows} />
-      </VStack>
-    </Box>
+    <main className="min-h-screen bg-canvas font-sans text-ink">
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-12">
+        <div className="flex items-center justify-between gap-4">
+          <Eyebrow>Game review</Eyebrow>
+          <Link href="/road-to-master" className="text-sm text-ink-60 hover:text-ink">
+            ← Back to training
+          </Link>
+        </div>
+        <h1 className="font-display text-3xl text-ink sm:text-4xl">Find the best move</h1>
+        <p className="mt-2 max-w-lg text-ink-60">
+          Step into famous positions from master games and your own, and try to find the strongest
+          move before you see the answer.
+        </p>
+
+        <div className="mt-8 space-y-3">
+          {CHALLENGES.map((c) => (
+            <Card key={c.label} className="flex items-center gap-4 p-5 transition hover:shadow-gold">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-ink">{c.label}</p>
+                <p className="mt-0.5 text-sm text-ink-60">{c.note}</p>
+              </div>
+              <Link href="/learning">
+                <GoldButton className="text-sm">Start</GoldButton>
+              </Link>
+            </Card>
+          ))}
+        </div>
+
+        <Card className="mt-6 p-5 sm:p-6">
+          <Eyebrow>Review your own games</Eyebrow>
+          <p className="text-sm text-ink-60">
+            Import your recent games to find the moments where a stronger move was available.
+          </p>
+          <Link
+            href="/analysis/import"
+            className="mt-3 inline-block text-sm font-medium text-gold underline-offset-4 hover:underline"
+          >
+            Import games →
+          </Link>
+        </Card>
+      </div>
+    </main>
   );
 }

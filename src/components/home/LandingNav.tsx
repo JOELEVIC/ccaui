@@ -24,8 +24,8 @@ export function LandingNav() {
       top={0}
       zIndex={10}
       borderBottomWidth="1px"
-      borderColor="whiteAlpha.100"
-      bg="rgba(10, 14, 26, 0.92)"
+      borderColor="blackAlpha.100"
+      bg="rgba(255,255,255, 0.92)"
       backdropFilter="blur(8px)"
     >
       <Container maxW="6xl" py={{ base: 3, md: 4 }} px={{ base: 3, md: 6 }}>
@@ -87,8 +87,8 @@ export function LandingNav() {
           py={4}
           px={4}
           borderTopWidth="1px"
-          borderColor="whiteAlpha.100"
-          bg="rgba(10, 14, 26, 0.98)"
+          borderColor="blackAlpha.100"
+          bg="rgba(255,255,255, 0.98)"
         >
           <VStack align="stretch" gap={1}>
             {NAV_LINKS.map(({ label, href }) => (

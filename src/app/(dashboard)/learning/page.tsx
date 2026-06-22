@@ -5,8 +5,6 @@ import { Box, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
-import { useAuth } from "@/lib/auth";
-import { StreakCounter } from "@/components/dashboard";
 import { staggerContainer, staggerChild } from "@/lib/animations";
 import { CourseCard } from "@/components/system/CourseCard";
 import {
@@ -50,13 +48,11 @@ const PUZZLES = gql`
 `;
 
 export default function LearningPage() {
-  const { user } = useAuth();
   const { data: dailyData } = useQuery<{ dailyPuzzle: { id: string; difficulty: number; theme: string[] } | null }>(DAILY_PUZZLE);
   const { data: puzzlesData } = useQuery<{ puzzles: Array<{ id: string; difficulty: number; theme: string[] }> }>(PUZZLES);
 
   const dailyPuzzle = dailyData?.dailyPuzzle;
   const puzzles = puzzlesData?.puzzles ?? [];
-  const streak = user?.profile?.puzzleStreakCount ?? 0;
 
   return (
     <Box position="relative" minH="100vh" bg="sys.void" mx={{ base: -3, md: -6 }} px={{ base: 3, md: 6 }} pt={{ base: 2, md: 4 }} pb={10}>
@@ -78,7 +74,6 @@ export default function LearningPage() {
               Learn
             </Text>
           </Box>
-          <StreakCounter count={streak} size="md" />
         </HStack>
 
         {/* Daily puzzle */}
@@ -99,13 +94,7 @@ export default function LearningPage() {
         {/* Puzzles — fixed-height scroll, fade top/bottom, ~3 visible */}
         <Section title="Puzzles" accent="cyan">
           {puzzles.length === 0 ? (
-            <Box
-              p={5}
-              bg="rgba(10,11,14,0.55)"
-              borderWidth="1px"
-              borderColor="rgba(255,255,255,0.1)"
-              className="sys-clip-panel"
-            >
+            <Box p={5} bg="bgCard" borderWidth="1px" borderColor="blackAlpha.200" borderRadius="soft">
               <Text color="textMuted">No puzzles available right now.</Text>
             </Box>
           ) : (
@@ -144,7 +133,7 @@ export default function LearningPage() {
                     href={e.href}
                     variant="tile"
                     accent="gold"
-                    tag={`Endgame · ${e.tier}-Rank`}
+                    tag="Endgame"
                     title={e.title}
                     description={e.summary}
                     glyph={e.glyph}
@@ -163,11 +152,10 @@ export default function LearningPage() {
 
 function Section({
   title,
-  accent,
   children,
 }: {
   title: string;
-  accent: GlowAccent;
+  accent?: GlowAccent;
   children: React.ReactNode;
 }) {
   return (
@@ -188,13 +176,7 @@ function Section({
           minW="80px"
           style={{
             background:
-              accent === "cyan"
-                ? "linear-gradient(90deg, transparent 0%, rgba(0,240,255,0.4) 50%, transparent 100%)"
-                : accent === "purple"
-                  ? "linear-gradient(90deg, transparent 0%, rgba(138,43,226,0.4) 50%, transparent 100%)"
-                  : accent === "gold"
-                    ? "linear-gradient(90deg, transparent 0%, rgba(245,194,68,0.4) 50%, transparent 100%)"
-                    : "linear-gradient(90deg, transparent 0%, rgba(240,101,149,0.4) 50%, transparent 100%)",
+              "linear-gradient(90deg, transparent 0%, rgba(197,160,89,0.35) 50%, transparent 100%)",
           }}
         />
       </HStack>
@@ -205,22 +187,12 @@ function Section({
 
 function Backdrop() {
   return (
-    <>
-      <Box
-        position="absolute"
-        inset={0}
-        background="radial-gradient(ellipse at 50% 0%, rgba(0,240,255,0.07) 0%, transparent 55%), radial-gradient(ellipse at 50% 100%, rgba(138,43,226,0.10) 0%, transparent 50%)"
-        pointerEvents="none"
-      />
-      <Box
-        position="absolute"
-        inset={0}
-        opacity={0.04}
-        backgroundImage="linear-gradient(rgba(0,240,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,0.6) 1px, transparent 1px)"
-        backgroundSize="64px 64px"
-        pointerEvents="none"
-      />
-    </>
+    <Box
+      position="absolute"
+      inset={0}
+      background="radial-gradient(ellipse at 50% 0%, rgba(197,160,89,0.06) 0%, transparent 55%)"
+      pointerEvents="none"
+    />
   );
 }
 

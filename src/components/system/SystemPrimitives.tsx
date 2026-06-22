@@ -199,7 +199,7 @@ export function SystemButton({
     >
       <Box
         style={{ clipPath: BTN_CLIP_INNER }}
-        bg={emphasis === "ghost" ? "rgba(10,11,14,0.55)" : "sysVoid"}
+        bg={emphasis === "ghost" ? "rgba(255,255,255,0.55)" : "sysVoid"}
         borderWidth={emphasis === "ghost" ? "1px" : undefined}
         borderColor={emphasis === "ghost" ? ring : undefined}
         px={padX}

@@ -159,7 +159,7 @@ export function LandingPlayCompete() {
                   <Button
                     size="lg"
                     variant="outline"
-                    borderColor="whiteAlpha.300"
+                    borderColor="blackAlpha.300"
                     color="textPrimary"
                     borderRadius="soft"
                     _hover={{ borderColor: "gold", color: "gold" }}

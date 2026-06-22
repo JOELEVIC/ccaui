@@ -25,7 +25,7 @@ const organizationJsonLd = {
 
 export default function AboutPage() {
   return (
-    <Box minH="100vh" bg="bgDark" color="white">
+    <Box minH="100vh" bg="bgDark" color="textPrimary">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

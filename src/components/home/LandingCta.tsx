@@ -9,7 +9,7 @@ export function LandingCta() {
       py={{ base: 16, md: 20 }}
       bg="bgCard"
       borderTopWidth="1px"
-      borderColor="whiteAlpha.100"
+      borderColor="blackAlpha.100"
     >
       <Container maxW="4xl">
         <VStack gap={6} textAlign="center">

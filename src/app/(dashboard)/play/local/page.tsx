@@ -102,7 +102,7 @@ export default function PlayLocalPage() {
                 w="8px"
                 h="8px"
                 borderRadius="full"
-                bg={turnIsWhite ? "#f5efe3" : "#0a0d12"}
+                bg={turnIsWhite ? "#f5efe3" : "#FFFFFF"}
                 borderWidth="1px"
                 borderColor={turnIsWhite ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.45)"}
               />

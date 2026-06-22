@@ -139,7 +139,7 @@ export default function DashboardTournamentDetailPage() {
       <Heading size="xl" color="gold" fontFamily="serif">
         {t.name}
       </Heading>
-      <Text color="whiteAlpha.800">
+      <Text color="blackAlpha.800">
         {t.school.name} · {t.school.region}
       </Text>
       <Text color="gold">
@@ -182,7 +182,7 @@ export default function DashboardTournamentDetailPage() {
               justifyContent="space-between"
               alignItems="center"
             >
-              <Text color="white">
+              <Text color="textPrimary">
                 #{i + 1} {p.user.username} ({p.user.rating})
               </Text>
               <Text color="gold">{p.score} pts</Text>
@@ -190,7 +190,7 @@ export default function DashboardTournamentDetailPage() {
           ))}
         </VStack>
       </Box>
-      <Text color="whiteAlpha.600" fontSize="sm">
+      <Text color="blackAlpha.600" fontSize="sm">
         {t.games?.length ?? 0} games
       </Text>
     </VStack>

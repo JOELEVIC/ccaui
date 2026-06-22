@@ -94,7 +94,7 @@ export default function PlayersPage() {
         <Box overflowX="auto">
           <Box as="table" w="full" fontSize="sm" minW="600px">
             <Box as="thead">
-              <Box as="tr" borderBottomWidth="1px" borderColor="whiteAlpha.100">
+              <Box as="tr" borderBottomWidth="1px" borderColor="blackAlpha.100">
                 <Text as="th" textAlign="left" py={3} color="textMuted" fontWeight="600">
                   #
                 </Text>
@@ -118,8 +118,8 @@ export default function PlayersPage() {
                     as="tr"
                     key={row.user.username}
                     borderBottomWidth="1px"
-                    borderColor="whiteAlpha.100"
-                    _hover={{ bg: "whiteAlpha.50" }}
+                    borderColor="blackAlpha.100"
+                    _hover={{ bg: "blackAlpha.50" }}
                   >
                     <Text as="td" py={3} color="textMuted">
                       {row.rank}
@@ -151,7 +151,7 @@ export default function PlayersPage() {
       </Box>
 
       <VStack align="stretch" gap={6} w={{ base: "full", xl: "340px" }} flexShrink={0}>
-        <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="whiteAlpha.100">
+        <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="blackAlpha.100">
           <Text fontWeight="700" color="gold" mb={3}>
             Rating distribution
           </Text>
@@ -166,13 +166,13 @@ export default function PlayersPage() {
           </Box>
         </Box>
 
-        <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="whiteAlpha.100">
+        <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="blackAlpha.100">
           <Text fontWeight="700" color="gold" mb={3}>
             Soonest tournaments
           </Text>
           <VStack align="stretch" gap={2}>
             {tournaments.map((t) => (
-              <Box key={t.id} py={2} borderBottomWidth="1px" borderColor="whiteAlpha.100">
+              <Box key={t.id} py={2} borderBottomWidth="1px" borderColor="blackAlpha.100">
                 <Text fontSize="sm" fontWeight="600">
                   {t.name}
                 </Text>
@@ -184,7 +184,7 @@ export default function PlayersPage() {
           </VStack>
         </Box>
 
-        <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="whiteAlpha.100">
+        <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="blackAlpha.100">
           <Text fontWeight="700" color="gold" mb={3}>
             Live games
           </Text>
@@ -203,7 +203,7 @@ export default function PlayersPage() {
           )}
         </Box>
 
-        <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="whiteAlpha.100">
+        <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="blackAlpha.100">
           <Text fontWeight="700" color="gold" mb={3}>
             Top 10
           </Text>

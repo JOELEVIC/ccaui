@@ -40,7 +40,7 @@ export default function LoginGatewayPage() {
             bg="bgCard"
             borderRadius="soft"
             borderWidth="1px"
-            borderColor="whiteAlpha.100"
+            borderColor="blackAlpha.100"
             p={{ base: 6, md: 8 }}
           >
             <Text fontWeight="600" color="gold" mb={4} fontSize="sm" textTransform="uppercase" letterSpacing="wider">

@@ -114,8 +114,8 @@ export function LandingHeroMinimal() {
                 <motion.div variants={staggerChild}>
                   <Text color="textSecondary" fontSize={{ base: "md", md: "lg" }} lineHeight="1.65" maxW="xl">
                     A complete chess platform for Cameroon — live games, arena tournaments, daily puzzles,
-                    and an in-browser engine that reviews every move. Climb from <strong style={{ color: "var(--chakra-colors-gold)" }}>E-Rank to SS</strong> on the
-                    Road to Master.
+                    and an in-browser engine that reviews every move. Follow a <strong style={{ color: "var(--chakra-colors-gold)" }}>step-by-step training path</strong> from
+                    beginner to advanced.
                   </Text>
                 </motion.div>
 
@@ -138,7 +138,7 @@ export function LandingHeroMinimal() {
                       <Button
                         size="lg"
                         variant="outline"
-                        borderColor="whiteAlpha.300"
+                        borderColor="blackAlpha.300"
                         color="textPrimary"
                         borderRadius="soft"
                         _hover={{ borderColor: "gold", color: "gold" }}

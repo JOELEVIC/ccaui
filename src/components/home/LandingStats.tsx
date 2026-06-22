@@ -46,7 +46,7 @@ export function LandingStats() {
                   borderRadius="soft"
                   bg="bgSurface"
                   borderWidth="1px"
-                  borderColor="whiteAlpha.100"
+                  borderColor="blackAlpha.100"
                   align="center"
                   gap={2}
                   _hover={{

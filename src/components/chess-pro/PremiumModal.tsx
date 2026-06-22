@@ -37,7 +37,7 @@ export function PremiumModal({ open, onClose }: PremiumModalProps) {
             color="gold"
             borderRadius="soft"
             size="lg"
-            _hover={{ bg: "#1a2238" }}
+            _hover={{ bg: "#FFFFFF" }}
             onClick={onClose}
           >
             Subscribe

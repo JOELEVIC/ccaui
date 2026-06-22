@@ -105,7 +105,7 @@ export default function TournamentsPage() {
         <Heading fontFamily="var(--font-playfair), Georgia, serif" size="xl" color="textPrimary">
           Tournaments
         </Heading>
-        <Button bg="bgSurface" color="textPrimary" borderWidth="1px" borderColor="whiteAlpha.200" borderRadius="soft" size="sm">
+        <Button bg="bgSurface" color="textPrimary" borderWidth="1px" borderColor="blackAlpha.200" borderRadius="soft" size="sm">
           + Create tournament
         </Button>
       </Flex>
@@ -116,7 +116,7 @@ export default function TournamentsPage() {
             key={v}
             size="sm"
             variant={view === v ? "solid" : "ghost"}
-            bg={view === v ? "whiteAlpha.10" : "transparent"}
+            bg={view === v ? "blackAlpha.10" : "transparent"}
             borderWidth="1px"
             borderColor={view === v ? "gold" : "transparent"}
             color={view === v ? "gold" : "textSecondary"}
@@ -148,7 +148,7 @@ export default function TournamentsPage() {
           onChange={(e) => setSearch(e.target.value)}
           maxW="240px"
           bg="bgCard"
-          borderColor="whiteAlpha.100"
+          borderColor="blackAlpha.100"
           borderRadius="soft"
           size="sm"
         />
@@ -158,7 +158,7 @@ export default function TournamentsPage() {
           onChange={(e) => setVariant(e.target.value)}
           maxW="160px"
           bg="bgCard"
-          borderColor="whiteAlpha.100"
+          borderColor="blackAlpha.100"
           borderRadius="soft"
           size="sm"
         />
@@ -206,7 +206,7 @@ export default function TournamentsPage() {
                   borderRadius="soft"
                   bg="bgCard"
                   borderWidth="1px"
-                  borderColor="whiteAlpha.100"
+                  borderColor="blackAlpha.100"
                 >
                   <HStack gap={3}>
                     <Text color="textMuted" w="24px">

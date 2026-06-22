@@ -105,7 +105,7 @@ export function LandingHero() {
                   mt={6}
                   p={4}
                   borderRadius="soft"
-                  bg="whiteAlpha.100"
+                  bg="blackAlpha.100"
                   borderWidth="1px"
                   borderColor="goldDark"
                   display="inline-flex"

@@ -2,15 +2,13 @@
 
 import Link from "next/link";
 import { Box, HStack, Image, Text, VStack } from "@chakra-ui/react";
-import { tierForRating } from "@/lib/r2m";
+
+const RING_GOLD = "var(--lux-gold-bright)";
 
 /**
- * MemberBadge — premium "Member Badge" pill for the top-right of the
- * AppHeader. Renders a gold-ringed avatar, the user's display name, and a
- * tier line ("C-Rank · 1480") under it. The whole capsule is a single
- * clickable link to /profile.
- *
- * Used in the AppHeader in place of the simple avatar + username pill.
+ * MemberBadge — member pill for the top-right of the AppHeader. Renders a
+ * gold-ringed avatar, the user's display name, and their rating under it.
+ * The whole capsule is a single clickable link to /profile.
  */
 
 interface MemberBadgeProps {
@@ -22,7 +20,6 @@ interface MemberBadgeProps {
 }
 
 export function MemberBadge({ username, rating, avatarUrl, compact = false }: MemberBadgeProps) {
-  const tier = tierForRating(rating ?? 1200);
   const initial = (username?.charAt(0) ?? "?").toUpperCase();
   const showTierLine = !compact && username;
 
@@ -47,7 +44,7 @@ export function MemberBadge({ username, rating, avatarUrl, compact = false }: Me
           WebkitBackdropFilter: "blur(12px) saturate(120%)",
         }}
       >
-        <AvatarRing tierColor={tier.color}>
+        <AvatarRing tierColor={RING_GOLD}>
           {avatarUrl ? (
             <Image
               src={avatarUrl}
@@ -93,8 +90,7 @@ export function MemberBadge({ username, rating, avatarUrl, compact = false }: Me
                 w="6px"
                 h="6px"
                 borderRadius="full"
-                bg={tier.color}
-                style={{ boxShadow: `0 0 6px ${tier.color}` }}
+                bg={RING_GOLD}
               />
               <Text
                 fontSize="2xs"
@@ -103,7 +99,7 @@ export function MemberBadge({ username, rating, avatarUrl, compact = false }: Me
                 textTransform="uppercase"
                 fontFamily="var(--font-inter), sans-serif"
               >
-                {tier.rank}-Rank · {rating ?? "—"}
+                {rating ?? "—"} rating
               </Text>
             </HStack>
           </VStack>

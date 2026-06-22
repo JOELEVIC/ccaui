@@ -1,40 +1,43 @@
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --background: #0a0e1a;
-  --background-gradient-start: #12182a;
-  --background-surface: #1a2238;
-  --foreground: #f0f2f8;
-  --foreground-secondary: #a8b0c4;
-  --foreground-muted: #6b728e;
-  --gold: #e6a452;
-  --gold-highlight: #f0b870;
-  --gold-muted: #b87a2a;
-  --accent-green: #4caf50;
+  --background: #FDFBF7;
+  --background-gradient-start: #FFFFFF;
+  --background-surface: #FFFFFF;
+  --foreground: #1A2530;
+  --foreground-secondary: #5B6770;
+  --foreground-muted: #6E7680;
+  --gold: #C5A059;
+  --gold-highlight: #D4AF37;
+  --gold-muted: #9C7D36;
+  --accent-green: #2E7D5B;
   --cameroon-green: #007a3d;
   --cameroon-red: #ce1126;
   --cameroon-yellow: #fcd116;
-  --status-success: #1f3b2d;
-  --status-warning: #5a1f1f;
+  --status-success: #2E7D5B;
+  --status-warning: #C0492F;
   --radius-cca: 6px;
   --radius-soft: 10px;
 
   /* ── R2M "System" palette (Solo-Leveling HUD) ───────────────────── */
-  --sys-cyan: #00f0ff;
-  --sys-cyan-dim: #0fa8b5;
-  --sys-purple: #8a2be2;
-  --sys-purple-dim: #5c1aa8;
-  --sys-epic: #b197fc;
-  --sys-threat: #f06595;
-  --sys-void: #050505;
-  --sys-glass: rgba(10, 11, 14, 0.7);
-  --sys-prestige-gold: #f5c244;
-  --sys-prestige-onyx: #0b0b0f;
-  --sys-glow-cyan: 0 0 8px rgba(0, 240, 255, 0.6), 0 0 24px rgba(0, 240, 255, 0.35);
-  --sys-glow-purple: 0 0 8px rgba(138, 43, 226, 0.6), 0 0 24px rgba(138, 43, 226, 0.35);
-  --sys-glow-threat: 0 0 8px rgba(240, 101, 149, 0.6), 0 0 24px rgba(240, 101, 149, 0.35);
-  --sys-glow-epic: 0 0 8px rgba(177, 151, 252, 0.6), 0 0 24px rgba(177, 151, 252, 0.35);
-  --sys-glow-prestige: 0 0 8px rgba(245, 194, 68, 0.6), 0 0 26px rgba(245, 194, 68, 0.4);
-  --shadow-card-soft: 0 4px 24px rgba(0, 0, 0, 0.2);
-  --shadow-card-soft-hover: 0 8px 32px rgba(0, 0, 0, 0.25);
+  --sys-cyan: #0F8A99;
+  --sys-cyan-dim: #0B6571;
+  --sys-purple: #6A3FB5;
+  --sys-purple-dim: #4A2A86;
+  --sys-epic: #7A5CD0;
+  --sys-threat: #C0492F;
+  --sys-void: #FDFBF7;
+  --sys-glass: rgba(255, 255, 255, 0.72);
+  --sys-prestige-gold: #C5A059;
+  --sys-prestige-onyx: #FFFFFF;
+  --sys-glow-cyan: 0 8px 24px -12px rgba(15, 138, 153, 0.35);
+  --sys-glow-purple: 0 8px 24px -12px rgba(106, 63, 181, 0.35);
+  --sys-glow-threat: 0 8px 24px -12px rgba(192, 73, 47, 0.35);
+  --sys-glow-epic: 0 8px 24px -12px rgba(122, 92, 208, 0.35);
+  --sys-glow-prestige: 0 8px 26px -12px rgba(197, 160, 89, 0.4);
+  --shadow-card-soft: 0 1px 2px rgba(26,37,48,.04), 0 8px 24px -12px rgba(26,37,48,.10);
+  --shadow-card-soft-hover: 0 12px 30px -14px rgba(26,37,48,.16);
   --transition-page: 200ms ease;
   /* Animation tokens */
   --animation-duration-fast: 0.2s;
@@ -44,28 +47,28 @@
   --animation-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
   /* ── Luxury Academic palette (dashboard / play) ─────────────────── */
-  --lux-obsidian: #05070a;
-  --lux-obsidian-soft: #0a0d12;
-  --lux-obsidian-elev: #10141a;
-  --lux-gold: #d4af37;
-  --lux-gold-soft: #b88f2a;
-  --lux-gold-bright: #efcf6b;
-  --lux-gold-muted: rgba(212, 175, 55, 0.6);
-  --lux-glass-surface: rgba(255, 255, 255, 0.05);
-  --lux-glass-surface-strong: rgba(255, 255, 255, 0.08);
-  --lux-glass-border: rgba(255, 255, 255, 0.1);
-  --lux-glass-border-strong: rgba(255, 255, 255, 0.18);
-  --lux-text-primary: #f5efe3;
-  --lux-text-secondary: rgba(245, 239, 227, 0.66);
-  --lux-text-muted: rgba(245, 239, 227, 0.38);
-  --lux-shadow-card: 0 18px 48px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
-  --lux-shadow-card-hover: 0 24px 60px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(212, 175, 55, 0.18) inset;
-  --lux-shadow-button: 0 4px 14px rgba(212, 175, 55, 0.32), 0 1px 0 rgba(255, 255, 255, 0.18) inset;
-  --lux-shadow-button-hover: 0 6px 22px rgba(212, 175, 55, 0.45), 0 1px 0 rgba(255, 255, 255, 0.22) inset;
-  --lux-gradient-gold: linear-gradient(180deg, #efcf6b 0%, #d4af37 52%, #a37e1f 100%);
-  --lux-gradient-ghost: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.03) 100%);
-  --lux-gradient-hero: linear-gradient(135deg, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.02) 38%, transparent 80%);
-  --lux-ring-gold: 0 0 0 1px rgba(212, 175, 55, 0.55), 0 0 22px rgba(212, 175, 55, 0.18);
+  --lux-obsidian: #FDFBF7;
+  --lux-obsidian-soft: #FFFFFF;
+  --lux-obsidian-elev: #FFFFFF;
+  --lux-gold: #C5A059;
+  --lux-gold-soft: #9C7D36;
+  --lux-gold-bright: #D4AF37;
+  --lux-gold-muted: rgba(197, 160, 89, 0.5);
+  --lux-glass-surface: rgba(255, 255, 255, 0.72);
+  --lux-glass-surface-strong: rgba(255, 255, 255, 0.92);
+  --lux-glass-border: rgba(26, 37, 48, 0.10);
+  --lux-glass-border-strong: rgba(26, 37, 48, 0.18);
+  --lux-text-primary: #1A2530;
+  --lux-text-secondary: rgba(26, 37, 48, 0.66);
+  --lux-text-muted: rgba(26, 37, 48, 0.45);
+  --lux-shadow-card: 0 1px 2px rgba(26,37,48,.04), 0 12px 32px -16px rgba(26,37,48,.18);
+  --lux-shadow-card-hover: 0 18px 44px -18px rgba(26,37,48,.22);
+  --lux-shadow-button: 0 8px 20px -8px rgba(197,160,89,.45);
+  --lux-shadow-button-hover: 0 10px 26px -8px rgba(197,160,89,.55);
+  --lux-gradient-gold: linear-gradient(180deg, #D4AF37 0%, #C5A059 52%, #9C7D36 100%);
+  --lux-gradient-ghost: linear-gradient(180deg, rgba(26, 37, 48, 0.04) 0%, rgba(26, 37, 48, 0.02) 100%);
+  --lux-gradient-hero: linear-gradient(135deg, rgba(197, 160, 89, 0.16) 0%, rgba(197, 160, 89, 0.03) 38%, transparent 80%);
+  --lux-ring-gold: 0 0 0 1px rgba(197, 160, 89, 0.5), 0 0 18px rgba(197, 160, 89, 0.16);
 }
 
 body {
@@ -120,11 +123,11 @@ body {
 .sys-glow-epic    { box-shadow: var(--sys-glow-epic); }
 .sys-glow-prestige{ box-shadow: var(--sys-glow-prestige); }
 
-.sys-text-cyan    { color: var(--sys-cyan);    text-shadow: 0 0 6px rgba(0,240,255,0.55); }
-.sys-text-purple  { color: var(--sys-purple);  text-shadow: 0 0 6px rgba(138,43,226,0.55); }
-.sys-text-threat  { color: var(--sys-threat);  text-shadow: 0 0 6px rgba(240,101,149,0.55); }
-.sys-text-epic    { color: var(--sys-epic);    text-shadow: 0 0 6px rgba(177,151,252,0.55); }
-.sys-text-prestige{ color: var(--sys-prestige-gold); text-shadow: 0 0 6px rgba(245,194,68,0.6); }
+.sys-text-cyan    { color: var(--sys-cyan); }
+.sys-text-purple  { color: var(--sys-purple); }
+.sys-text-threat  { color: var(--sys-threat); }
+.sys-text-epic    { color: var(--sys-epic); }
+.sys-text-prestige{ color: var(--sys-prestige-gold); }
 
 /* Chamfered ("clip-path") panel shapes for the System UI */
 .sys-clip-panel {

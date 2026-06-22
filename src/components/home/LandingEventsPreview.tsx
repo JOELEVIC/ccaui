@@ -75,7 +75,7 @@ export function LandingEventsPreview() {
                   borderRadius="soft"
                   bg="bgCard"
                   borderWidth="1px"
-                  borderColor="whiteAlpha.100"
+                  borderColor="blackAlpha.100"
                   textAlign="center"
                 >
                   <Text color="textMuted">No upcoming events. Check back soon!</Text>
@@ -94,7 +94,7 @@ export function LandingEventsPreview() {
                         borderRadius="soft"
                         bg="bgCard"
                         borderWidth="1px"
-                        borderColor="whiteAlpha.100"
+                        borderColor="blackAlpha.100"
                         _hover={{
                           borderColor: "gold",
                           boxShadow: "var(--shadow-card-soft-hover)",
@@ -133,7 +133,7 @@ export function LandingEventsPreview() {
               borderColor="gold"
               color="gold"
               borderRadius="soft"
-              _hover={{ bg: "whiteAlpha.100" }}
+              _hover={{ bg: "blackAlpha.100" }}
             >
               View All Events
             </Button>

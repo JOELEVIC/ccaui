@@ -49,7 +49,7 @@ export function SystemBoardFrame({
           position="relative"
           px={3}
           py={2}
-          bg="rgba(10,11,14,0.65)"
+          bg="rgba(255,255,255,0.65)"
           borderWidth="1px"
           borderColor={accentVar}
           className="sys-clip-panel-sm"
@@ -78,7 +78,7 @@ export function SystemBoardFrame({
         <Box
           position="relative"
           p={{ base: 2, md: 3 }}
-          bg="rgba(10,11,14,0.55)"
+          bg="rgba(255,255,255,0.55)"
           backdropFilter="blur(10px)"
           borderWidth="1px"
           borderColor={`rgba(${accentRgb}, 0.45)`}

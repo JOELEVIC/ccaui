@@ -36,7 +36,7 @@ export default function LearnPage() {
             Structured lessons to sharpen calculation and pattern recognition.
           </Text>
         </Box>
-        <Box bg="bgCard" borderRadius="soft" p={6} borderWidth="1px" borderColor="whiteAlpha.100">
+        <Box bg="bgCard" borderRadius="soft" p={6} borderWidth="1px" borderColor="blackAlpha.100">
           <Text color="textSecondary" fontSize="sm">
             Progress syncs with your account. Bookmark courses to revisit them anytime.
           </Text>
@@ -60,7 +60,7 @@ export default function LearnPage() {
                 borderRadius="soft"
                 bg="bgCard"
                 borderWidth="1px"
-                borderColor="whiteAlpha.200"
+                borderColor="blackAlpha.200"
               >
                 <HStack gap={3}>
                   <Text color={c.completed ? "accentGreen" : "textMuted"}>{c.completed ? "✓" : "○"}</Text>

@@ -105,7 +105,7 @@ export function EvaluationBar({
         left={0}
         right={0}
         h={`${fillPct * 100}%`}
-        bg={whiteAdvantage ? "whiteAlpha.400" : "statusWarning"}
+        bg={whiteAdvantage ? "blackAlpha.400" : "statusWarning"}
         opacity={whiteAdvantage ? 1 : 0.6}
         transition="height 0.2s"
       />
