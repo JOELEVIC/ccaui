@@ -184,13 +184,12 @@ class EngineDriver {
 
   private ensureWorker(): Worker {
     if (this.worker) return this.worker;
-    // Construct the worker URL with a hash override so the loader resolves
-    // the WASM path explicitly. The loader script reads
-    // `self.location.hash.substr(1).split(",")` and uses index 0 as the
-    // WASM URL; index 1 must equal "worker" so it identifies itself.
-    const url = `${ENGINE_URL}#${encodeURIComponent(
-      "/stockfish/stockfish-18-lite-single.wasm"
-    )},worker`;
+    // Tell the loader where the .wasm is via the URL hash. nmrugg/stockfish.js
+    // reads `decodeURIComponent(self.location.hash.substr(1).split(",")[0])` as
+    // the wasm path. Do NOT append ",worker" — that flag makes it behave as a
+    // pthread sub-worker and silently ignore UCI commands (the cause of the
+    // "engine timeout" fallback). Plain `#<wasm-path>` is the correct usage.
+    const url = `${ENGINE_URL}#${WASM_URL}`;
     let w: Worker;
     try {
       w = new Worker(url);

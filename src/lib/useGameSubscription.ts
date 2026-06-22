@@ -38,10 +38,21 @@ export function useGameSubscription(
     const client = createClient({
       url: wsUrl,
       connectionParams: { token },
+      // The live service (cca on Render) can cold-start; keep retrying so the
+      // subscription connects once it wakes instead of failing permanently.
+      lazy: true,
+      keepAlive: 10_000,
+      retryAttempts: 20,
+      shouldRetry: () => true,
       on: {
-        connected: () => setConnected(true),
+        connected: () => {
+          setConnected(true);
+          setError(null);
+        },
         closed: () => setConnected(false),
-        error: (e) => setError(e instanceof Error ? e.message : "Connection error"),
+        // Don't surface transient connection errors while we're still retrying;
+        // graphql-ws will keep attempting until the service is reachable.
+        error: () => setConnected(false),
       },
     });
 

@@ -6,6 +6,7 @@ import { Box, Flex, HStack, Input, SimpleGrid, Text, VStack } from "@chakra-ui/r
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { toaster } from "@/lib/toaster";
+import { useAuth } from "@/lib/auth";
 import { CREATE_GAME } from "@/graphql/mutations/games";
 import {
   ChessWatermark,
@@ -54,10 +55,11 @@ type PlayMode = "human" | "self" | "bot";
 
 export default function GamesPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [playMode, setPlayMode] = useState<PlayMode>("human");
   const [selectedBotElo, setSelectedBotElo] = useState(1600);
-  const [whiteId, setWhiteId] = useState("");
-  const [blackId, setBlackId] = useState("");
+  const [opponentId, setOpponentId] = useState("");
+  const [colorChoice, setColorChoice] = useState<"white" | "black" | "random">("white");
   const [timeControl, setTimeControl] = useState("10+0");
 
   const { data: liveData } = useQuery<{
@@ -75,14 +77,18 @@ export default function GamesPage() {
 
   async function handleCreateGame(e: React.FormEvent) {
     e.preventDefault();
-    if (!whiteId || !blackId || !timeControl) {
-      toaster.create({ title: "Select both players and time control", type: "error" });
+    const meId = user?.id;
+    if (!meId) {
+      toaster.create({ title: "Sign in to start a match", type: "error" });
       return;
     }
-    if (whiteId === blackId) {
-      toaster.create({ title: "White and Black must be different players", type: "error" });
+    if (!opponentId || !timeControl) {
+      toaster.create({ title: "Pick an opponent and time control", type: "error" });
       return;
     }
+    const myColor = colorChoice === "random" ? (Math.random() < 0.5 ? "white" : "black") : colorChoice;
+    const whiteId = myColor === "white" ? meId : opponentId;
+    const blackId = myColor === "white" ? opponentId : meId;
     try {
       const { data, error } = await createGame({
         variables: { input: { whiteId, blackId, timeControl } },
@@ -201,20 +207,51 @@ export default function GamesPage() {
             <Box as="form" onSubmit={handleCreateGame} px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }}>
               <LuxuryHeading size="md">New match</LuxuryHeading>
 
-              <SimpleGrid mt={5} columns={{ base: 1, md: 2 }} gap={4}>
+              <Box mt={5}>
                 <PlayerField
-                  label="White"
-                  value={whiteId}
-                  onChange={setWhiteId}
-                  users={users}
+                  label="Opponent"
+                  value={opponentId}
+                  onChange={setOpponentId}
+                  users={users.filter((u) => u.id !== user?.id)}
                 />
-                <PlayerField
-                  label="Black"
-                  value={blackId}
-                  onChange={setBlackId}
-                  users={users}
-                />
-              </SimpleGrid>
+              </Box>
+
+              <Box mt={5}>
+                <LuxuryEyebrow>Your Color</LuxuryEyebrow>
+                <Flex mt={2} gap={2} flexWrap="wrap">
+                  {(
+                    [
+                      { id: "white", label: "White" },
+                      { id: "black", label: "Black" },
+                      { id: "random", label: "Random" },
+                    ] as { id: "white" | "black" | "random"; label: string }[]
+                  ).map((c) => {
+                    const active = colorChoice === c.id;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setColorChoice(c.id)}
+                        style={{
+                          padding: "8px 18px",
+                          borderRadius: "999px",
+                          background: active ? "rgba(212,175,55,0.18)" : "var(--lux-glass-surface)",
+                          border: `1px solid ${active ? "var(--lux-gold)" : "var(--lux-glass-border)"}`,
+                          transition: "all 0.18s",
+                          cursor: "pointer",
+                          fontFamily: "var(--font-inter), sans-serif",
+                          fontSize: 12,
+                          fontWeight: 700,
+                          letterSpacing: "0.12em",
+                          color: active ? "var(--lux-gold-bright)" : "var(--lux-text-secondary)",
+                        }}
+                      >
+                        {c.label}
+                      </button>
+                    );
+                  })}
+                </Flex>
+              </Box>
 
               <Box mt={5}>
                 <LuxuryEyebrow>Time Control</LuxuryEyebrow>
