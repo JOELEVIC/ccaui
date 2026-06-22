@@ -500,7 +500,10 @@ export function useStockfish(elo: number) {
         // eslint-disable-next-line no-console
         console.info(`[engine] move via local JS: ${localMove}`);
         setLastSource("local");
-        if (!error) setError("Running on local engine");
+        // Functional update so this callback doesn't depend on `error`;
+        // depending on it churned getBestMove's identity every call and made
+        // the bot-trigger effect re-fire (double engine requests per move).
+        setError((prev) => prev ?? "Running on local engine");
         return localMove;
       }
       // eslint-disable-next-line no-console
@@ -508,7 +511,7 @@ export function useStockfish(elo: number) {
       setError("Engine unavailable");
       return null;
     },
-    [wasmDead, elo, error],
+    [wasmDead, elo],
   );
 
   const getEvaluation = useCallback(

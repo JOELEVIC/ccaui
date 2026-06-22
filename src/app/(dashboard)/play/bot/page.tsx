@@ -123,6 +123,10 @@ export default function PlayBotPage() {
   const [premoveEnabled, setPremoveEnabled] = useState(() => readStoredBool(LS_PREMOVE, false));
   const [pendingPremove, setPendingPremove] = useState<PendingPremove | null>(null);
   const evalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guards against the bot-trigger effect firing runBot more than once per
+  // turn (it re-runs whenever runBot's identity churns mid-search), which
+  // otherwise sends two engine requests and double-logs the move.
+  const botRunningRef = useRef(false);
 
   const {
     getBestMove,
@@ -176,33 +180,41 @@ export default function PlayBotPage() {
   }, [showAnalysis, displayFen, getEvaluation]);
 
   const runBot = useCallback(async () => {
-    const nextFen = fen;
-    // Always ask the engine first — getBestMove internally falls through
-    // WASM → backend → null. Only as an absolute last resort do we play
-    // a random legal move (so the game never deadlocks even if both
-    // engines are unreachable).
-    let moveStr: string | null = await getBestMove(nextFen);
-    if (!moveStr) {
-      moveStr = getRandomMove(nextFen);
-    }
-
-    if (!moveStr) {
-      setBotThinking(false);
-      return;
-    }
-
-    const newFen = applyMove(nextFen, moveStr);
-    if (newFen) {
-      const c = new Chess(newFen);
-      setFen(newFen);
-      setMoveHistory((prev) => [...prev, moveStr!]);
-      setViewingIndex((i) => i + 1);
-      if (c.isGameOver()) {
-        setGameResult(c.isCheckmate() ? "0-1" : "1/2-1/2");
-        setGameOverReason(c.isCheckmate() ? "Checkmate" : "Draw");
+    // The trigger effect below can re-fire mid-search; only let one engine
+    // request run per turn.
+    if (botRunningRef.current) return;
+    botRunningRef.current = true;
+    try {
+      const nextFen = fen;
+      // Always ask the engine first — getBestMove internally falls through
+      // WASM → backend → null. Only as an absolute last resort do we play
+      // a random legal move (so the game never deadlocks even if both
+      // engines are unreachable).
+      let moveStr: string | null = await getBestMove(nextFen);
+      if (!moveStr) {
+        moveStr = getRandomMove(nextFen);
       }
+
+      if (!moveStr) {
+        setBotThinking(false);
+        return;
+      }
+
+      const newFen = applyMove(nextFen, moveStr);
+      if (newFen) {
+        const c = new Chess(newFen);
+        setFen(newFen);
+        setMoveHistory((prev) => [...prev, moveStr!]);
+        setViewingIndex((i) => i + 1);
+        if (c.isGameOver()) {
+          setGameResult(c.isCheckmate() ? "0-1" : "1/2-1/2");
+          setGameOverReason(c.isCheckmate() ? "Checkmate" : "Draw");
+        }
+      }
+      setBotThinking(false);
+    } finally {
+      botRunningRef.current = false;
     }
-    setBotThinking(false);
   }, [fen, getBestMove]);
 
   useEffect(() => {
@@ -537,7 +549,7 @@ export default function PlayBotPage() {
       </Flex>
 
       <Dialog.Root open={!!gameResult} onOpenChange={() => {}}>
-        <Dialog.Backdrop style={{ background: "rgba(5,7,10,0.86)", backdropFilter: "blur(8px)" }} />
+        <Dialog.Backdrop style={{ background: "rgba(255,255,255,0.86)", backdropFilter: "blur(8px)" }} />
         <Dialog.Positioner>
           <Dialog.Content
             bg="transparent"
@@ -594,7 +606,7 @@ function PlayerNameplate({
           w="14px"
           h="14px"
           borderRadius="full"
-          bg={colour === "white" ? "#f5efe3" : "#0a0d12"}
+          bg={colour === "white" ? "#f5efe3" : "#FFFFFF"}
           borderWidth="1px"
           borderColor={colour === "white" ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.4)"}
           style={{

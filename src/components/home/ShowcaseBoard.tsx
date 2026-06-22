@@ -52,7 +52,22 @@ export function ShowcaseBoard({
 }: ShowcaseBoardProps) {
   const [demoIndex, setDemoIndex] = useState(0);
   const [moveIndex, setMoveIndex] = useState(0);
+  // Only render the board once its container has a real measured width;
+  // react-chessboard throws "Square width not found" if it mounts at 0 width.
+  const boardWrapRef = useRef<HTMLDivElement>(null);
+  const [boardWidth, setBoardWidth] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const el = boardWrapRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width ?? 0;
+      if (w > 0) setBoardWidth(w);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const demo = demos[demoIndex];
 
@@ -111,15 +126,17 @@ export function ShowcaseBoard({
         opacity={0.9}
       />
       <Box
+        ref={boardWrapRef}
         position="relative"
         w="full"
         h="full"
         borderRadius="14px"
-        boxShadow="0 24px 80px rgba(0,0,0,0.55)"
+        boxShadow="0 18px 48px -20px rgba(26,37,48,0.30)"
         overflow="hidden"
         borderWidth="1px"
-        borderColor="whiteAlpha.200"
+        borderColor="blackAlpha.100"
       >
+        {boardWidth > 0 && (
         <Chessboard
           options={{
             position: fen,
@@ -132,6 +149,7 @@ export function ShowcaseBoard({
             animationDurationInMs: 380,
           }}
         />
+        )}
       </Box>
     </Box>
   );
