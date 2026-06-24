@@ -23,9 +23,9 @@ export function LandingMemory() {
               Train the skill grandmasters rely on
             </Heading>
             <Text color="textSecondary" fontSize={{ base: "sm", md: "md" }} maxW="lg" lineHeight="1.65">
-              <strong style={{ color: "var(--gold)" }}>Board Memory</strong> flashes a position for a
-              few seconds, then asks you to rebuild it. It&apos;s the visualisation muscle behind
-              every calculation — and it&apos;s oddly addictive. No sign-up to try.
+              <strong style={{ color: "var(--gold)" }}>Board Memory</strong> shows a position for a
+              few seconds, then asks you to rebuild it from memory — the visualisation muscle
+              behind every calculation a strong player makes.
             </Text>
             <Link href="/train">
               <Button bg="gold" color="white" size="lg" px={8} borderRadius="soft" fontWeight="600" _hover={{ bg: "goldLight", boxShadow: "0 0 28px rgba(197,160,89,0.4)" }} _active={{ transform: "scale(0.97)" }} transition="all 0.15s">

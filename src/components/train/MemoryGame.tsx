@@ -194,7 +194,7 @@ export function MemoryGame() {
       <Box textAlign="center" minH="28px">
         {phase === "idle" && (
           <Text color="textSecondary" fontSize="sm">
-            Memorise the pieces, then tap every square that held one.
+            Memorise the pieces, then mark every square that held one.
           </Text>
         )}
         {phase === "study" && (
@@ -217,7 +217,7 @@ export function MemoryGame() {
         )}
         {phase === "recall" && (
           <Text color="textPrimary" fontWeight="600" fontSize="sm">
-            Tap the {targetSquares.length} squares · {guesses.size}/{targetSquares.length}
+            Mark the {targetSquares.length} squares · {guesses.size}/{targetSquares.length}
           </Text>
         )}
         {phase === "result" && (

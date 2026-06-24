@@ -158,9 +158,6 @@ export function LandingHeroMinimal() {
                         </Button>
                       </Link>
                     </HStack>
-                    <Text fontSize="xs" color="textMuted" letterSpacing="0.02em">
-                      Free to play — no sign-up needed.
-                    </Text>
                   </VStack>
                 </motion.div>
 

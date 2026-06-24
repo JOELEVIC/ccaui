@@ -127,6 +127,9 @@ export default function PublicPlayPage() {
   const botRunningRef = useRef(false);
   const seedRef = useRef(0);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  // Bumped whenever the game is reset/changed, so a bot move computed during
+  // its think-delay is dropped instead of landing on a fresh board.
+  const epochRef = useRef(0);
 
   const orientation = "white" as const;
   const turn = fen.split(" ")[1];
@@ -155,6 +158,7 @@ export default function PublicPlayPage() {
       setReason(null);
       setThinking(false);
       botRunningRef.current = false;
+      epochRef.current++;
       const p = nextPersonaId ? getPersona(nextPersonaId) : persona;
       seedRef.current = 0;
       setChat([{ id: -1, text: pickLine(p, "greeting", 0) }]);
@@ -171,11 +175,28 @@ export default function PublicPlayPage() {
   const runBot = useCallback(async () => {
     if (botRunningRef.current) return;
     botRunningRef.current = true;
+    const epoch = epochRef.current;
     try {
       const current = fen;
-      let uci = await getBestMove(current);
-      if (!uci) uci = randomMove(current);
+      const startedAt = Date.now();
+      // Weaker personas play a random move some of the time so the levels
+      // genuinely differ (Stockfish itself can't play below ~1320 Elo).
+      let uci: string | null;
+      if (Math.random() < persona.mistakeChance) {
+        uci = randomMove(current) ?? (await getBestMove(current));
+      } else {
+        uci = (await getBestMove(current)) ?? randomMove(current);
+      }
       if (!uci) {
+        setThinking(false);
+        return;
+      }
+      // A natural, slightly-random pause so the bot doesn't snap back instantly.
+      const elapsed = Date.now() - startedAt;
+      const target = 550 + Math.random() * 850;
+      if (elapsed < target) await new Promise((r) => setTimeout(r, target - elapsed));
+      // Game was reset/changed mid-think — discard this move.
+      if (epoch !== epochRef.current) {
         setThinking(false);
         return;
       }
@@ -198,7 +219,7 @@ export default function PublicPlayPage() {
     } finally {
       botRunningRef.current = false;
     }
-  }, [fen, getBestMove, say]);
+  }, [fen, getBestMove, say, persona]);
 
   useEffect(() => {
     if (thinking) runBot();
@@ -238,6 +259,7 @@ export default function PublicPlayPage() {
 
   const resign = useCallback(() => {
     if (result) return;
+    epochRef.current++;
     setResult("0-1");
     setReason("You resigned");
     setThinking(false);
@@ -251,22 +273,15 @@ export default function PublicPlayPage() {
     <VStack align="stretch" gap={{ base: 6, md: 8 }} maxW="5xl" mx="auto">
       {/* Heading */}
       <VStack align={{ base: "center", md: "flex-start" }} gap={2} textAlign={{ base: "center", md: "left" }}>
-        <HStack px={3} py={1.5} borderRadius="full" bg="bgWarm" borderWidth="1px" borderColor="goldDark" gap={2}>
-          <Box w="6px" h="6px" borderRadius="full" bg="accentGreen" />
-          <Text fontSize="xs" color="gold" fontWeight="600" letterSpacing="0.08em" textTransform="uppercase">
-            Free play · no sign-up
-          </Text>
-        </HStack>
         <Text as="h1" fontFamily="var(--font-playfair), Georgia, serif" fontSize={{ base: "3xl", md: "4xl" }} color="textPrimary" fontWeight="600" lineHeight="1.1">
           Choose your opponent
         </Text>
         <Text color="textSecondary" fontSize={{ base: "sm", md: "md" }} maxW="lg">
-          Each bot has its own style — and a few things to say. Want to save games
-          and earn a rating?{" "}
+          Each opponent plays in its own style.{" "}
           <Link href="/register" style={{ color: "var(--gold)", fontWeight: 600 }}>
             Create a free account
-          </Link>
-          .
+          </Link>{" "}
+          to save your games and earn a rating.
         </Text>
       </VStack>
 

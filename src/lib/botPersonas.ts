@@ -25,6 +25,13 @@ export interface BotPersona {
   level: string;
   elo: number;
   tagline: string;
+  /**
+   * Probability (0–1) that the bot plays a random legal move instead of the
+   * engine's choice. Stockfish can't actually play below ~1320 Elo (its
+   * UCI_Elo floor), so without this every "weaker" persona feels identical;
+   * this is what makes Gentle genuinely beatable and Sharp genuinely tough.
+   */
+  mistakeChance: number;
   lines: Record<ChatEvent, string[]>;
 }
 
@@ -36,6 +43,7 @@ export const BOT_PERSONAS: BotPersona[] = [
     level: "Gentle",
     elo: 600,
     tagline: "Patient and encouraging — perfect for learning.",
+    mistakeChance: 0.34,
     lines: {
       greeting: [
         "Hi, I'm Kofi! Let's enjoy a friendly game. 😊",
@@ -67,6 +75,7 @@ export const BOT_PERSONAS: BotPersona[] = [
     level: "Club",
     elo: 1200,
     tagline: "Quick, witty, and loves a good tactic.",
+    mistakeChance: 0.13,
     lines: {
       greeting: ["Amina here. Let's make this sharp. 😏", "I like tactics — hope you do too.", "Board's set. Try to keep up."],
       banter: ["Bold.", "Predictable… or is it?", "Let's complicate things."],
@@ -86,6 +95,7 @@ export const BOT_PERSONAS: BotPersona[] = [
     level: "Sharp",
     elo: 1800,
     tagline: "Calm, precise, and quietly intimidating.",
+    mistakeChance: 0.04,
     lines: {
       greeting: ["I am the Professor. Let us begin. 🎩", "Precision wins games. Shall we?", "Concentrate. Then play."],
       banter: ["Reasonable.", "There were better squares.", "Hmm. Continue."],

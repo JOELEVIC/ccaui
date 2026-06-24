@@ -21,7 +21,7 @@ import { TierLabel } from "@/components/dashboard/TierLabel";
 import { useStockfish } from "@/lib/useStockfish";
 import type { Evaluation } from "@/lib/useStockfish";
 import { toaster } from "@/lib/toaster";
-import { personaForElo, pickLine, type ChatEvent } from "@/lib/botPersonas";
+import { BOT_PERSONAS, personaForElo, pickLine, type ChatEvent } from "@/lib/botPersonas";
 import {
   ChessWatermark,
   GlassCard,
@@ -113,10 +113,11 @@ export default function PlayBotPage() {
   const eloParam = searchParams.get("elo");
   const fenParam = searchParams.get("fen");
   const orientationParam = searchParams.get("orientation");
-  const elo = useMemo(() => {
+  // Seeded from the URL once, then switchable in-UI via the level picker.
+  const [elo, setElo] = useState(() => {
     const n = eloParam ? parseInt(eloParam, 10) : 1600;
     return BOT_ELO_PRESETS.includes(n) ? n : 1600;
-  }, [eloParam]);
+  });
   const startFen = useMemo(() => {
     if (!fenParam) return START_FEN;
     try {
@@ -144,6 +145,9 @@ export default function PlayBotPage() {
   // turn (it re-runs whenever runBot's identity churns mid-search), which
   // otherwise sends two engine requests and double-logs the move.
   const botRunningRef = useRef(false);
+  // Bumped on reset/level-change/resign so a move computed during the bot's
+  // think-delay is dropped instead of landing on a fresh game.
+  const epochRef = useRef(0);
 
   const {
     getBestMove,
@@ -221,18 +225,33 @@ export default function PlayBotPage() {
     // request run per turn.
     if (botRunningRef.current) return;
     botRunningRef.current = true;
+    const epoch = epochRef.current;
     try {
       const nextFen = fen;
-      // Always ask the engine first — getBestMove internally falls through
-      // WASM → backend → null. Only as an absolute last resort do we play
-      // a random legal move (so the game never deadlocks even if both
-      // engines are unreachable).
-      let moveStr: string | null = await getBestMove(nextFen);
-      if (!moveStr) {
-        moveStr = getRandomMove(nextFen);
+      const startedAt = Date.now();
+      // Weaker personas mix in a random move so the levels genuinely differ
+      // (Stockfish itself can't play below ~1320 Elo). getBestMove internally
+      // falls through WASM → backend → JS, and getRandomMove is the absolute
+      // last resort so the game never deadlocks.
+      let moveStr: string | null;
+      if (Math.random() < persona.mistakeChance) {
+        moveStr = getRandomMove(nextFen) ?? (await getBestMove(nextFen));
+      } else {
+        moveStr = (await getBestMove(nextFen)) ?? getRandomMove(nextFen);
       }
 
       if (!moveStr) {
+        setBotThinking(false);
+        return;
+      }
+
+      // Natural, slightly-random pause so the bot doesn't move instantly.
+      const elapsed = Date.now() - startedAt;
+      const target = 550 + Math.random() * 850;
+      if (elapsed < target) await new Promise((r) => setTimeout(r, target - elapsed));
+
+      // Game was reset / level switched mid-think — discard this move.
+      if (epoch !== epochRef.current) {
         setBotThinking(false);
         return;
       }
@@ -258,7 +277,7 @@ export default function PlayBotPage() {
     } finally {
       botRunningRef.current = false;
     }
-  }, [fen, getBestMove, say]);
+  }, [fen, getBestMove, say, persona]);
 
   useEffect(() => {
     if (!botThinking) return;
@@ -339,6 +358,7 @@ export default function PlayBotPage() {
 
   const handleResign = useCallback(() => {
     if (gameResult) return;
+    epochRef.current++;
     setGameResult(orientation === "white" ? "0-1" : "1-0");
     setGameOverReason("Resignation");
     setBotThinking(false);
@@ -357,6 +377,7 @@ export default function PlayBotPage() {
   }, [fen, gameResult]);
 
   const handleRematch = useCallback(() => {
+    epochRef.current++;
     setFen(startFen);
     setMoveHistory([]);
     setViewingIndex(0);
@@ -374,6 +395,28 @@ export default function PlayBotPage() {
   const handlePlayNewGame = useCallback(() => {
     router.push("/games");
   }, [router]);
+
+  // Switch engine strength in-place and start a fresh game at that level.
+  const changeLevel = useCallback(
+    (newElo: number) => {
+      if (newElo === elo) return;
+      epochRef.current++;
+      setElo(newElo);
+      setFen(startFen);
+      setMoveHistory([]);
+      setViewingIndex(0);
+      setGameResult(null);
+      setGameOverReason(null);
+      setBotThinking(false);
+      botRunningRef.current = false;
+      seedRef.current = 0;
+      setChat([{ id: -1, text: pickLine(personaForElo(newElo), "greeting", 0) }]);
+      const startTurnIsWhite = startFen.split(" ")[1] === "w";
+      const startIsBotTurn = orientation === "white" ? !startTurnIsWhite : startTurnIsWhite;
+      if (startIsBotTurn) setBotThinking(true);
+    },
+    [elo, startFen, orientation]
+  );
 
   const canGoBack = viewingIndex > 0;
   const canGoForward = viewingIndex < moveHistory.length;
@@ -452,6 +495,44 @@ export default function PlayBotPage() {
             ◇ Warming up — the first move may take a moment
           </Text>
         )}
+
+        {/* Level picker — switch engine strength and start fresh */}
+        <HStack mt={4} gap={2} flexWrap="wrap">
+          {BOT_PERSONAS.map((p) => {
+            const active = p.elo === elo;
+            return (
+              <Box
+                as="button"
+                key={p.id}
+                onClick={() => changeLevel(p.elo)}
+                px={3.5}
+                py={2}
+                borderRadius="999px"
+                bg="var(--lux-glass-surface)"
+                borderWidth="1px"
+                borderColor={active ? "rgba(212,175,55,0.55)" : "var(--lux-glass-border)"}
+                transition="all 0.18s"
+                _hover={{ borderColor: "rgba(212,175,55,0.55)" }}
+                style={{ backdropFilter: "blur(10px)" }}
+              >
+                <HStack gap={2}>
+                  <Box fontSize="sm" lineHeight="1">
+                    {p.avatar}
+                  </Box>
+                  <Text
+                    fontFamily="var(--font-inter), sans-serif"
+                    fontSize="xs"
+                    fontWeight="600"
+                    letterSpacing="0.04em"
+                    color={active ? "var(--lux-gold)" : "var(--lux-text-secondary)"}
+                  >
+                    {p.level} · {p.elo}
+                  </Text>
+                </HStack>
+              </Box>
+            );
+          })}
+        </HStack>
       </Box>
 
       {/* Board + side rail */}

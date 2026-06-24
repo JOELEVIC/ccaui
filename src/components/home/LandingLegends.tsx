@@ -69,8 +69,8 @@ export function LandingLegends() {
           </Heading>
           <Box h="1px" w="64px" bg="gold" opacity={0.8} />
           <Text color="textSecondary" fontSize={{ base: "sm", md: "md" }} maxW="lg" lineHeight="1.6">
-            From Morphy to Carlsen — and Africa&apos;s own trailblazers. Tap a face to
-            discover who they were and why they matter.
+            From Morphy to Carlsen — and Africa&apos;s own trailblazers — the players
+            who shaped how the game is played.
           </Text>
         </VStack>
 
