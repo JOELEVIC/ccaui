@@ -21,6 +21,7 @@ import { TierLabel } from "@/components/dashboard/TierLabel";
 import { useStockfish } from "@/lib/useStockfish";
 import type { Evaluation } from "@/lib/useStockfish";
 import { toaster } from "@/lib/toaster";
+import { personaForElo, pickLine, type ChatEvent } from "@/lib/botPersonas";
 import {
   ChessWatermark,
   GlassCard,
@@ -75,6 +76,22 @@ function applyMove(fen: string, moveStr: string): string | null {
     return move ? c.fen() : null;
   } catch {
     return null;
+  }
+}
+
+/** Was the move a capture, and does it give check? (drives bot chat) */
+function moveMeta(fenBefore: string, uci: string): { captured: boolean; check: boolean } {
+  const c = safeChess(fenBefore);
+  if (!c) return { captured: false, check: false };
+  try {
+    const mv = c.move({
+      from: uci.slice(0, 2),
+      to: uci.slice(2, 4),
+      promotion: (uci[4] as "q" | "r" | "b" | "n") || "q",
+    });
+    return { captured: !!mv?.captured, check: c.inCheck() };
+  } catch {
+    return { captured: false, check: false };
   }
 }
 
@@ -133,8 +150,28 @@ export default function PlayBotPage() {
     getEvaluation,
     wasmDead,
     warming: engineWarming,
-    lastSource,
   } = useStockfish(elo);
+
+  // Bot personality + zero-cost in-game chat (persona chosen from the Elo).
+  const persona = useMemo(() => personaForElo(elo), [elo]);
+  const [chat, setChat] = useState<{ id: number; text: string }[]>([]);
+  const seedRef = useRef(0);
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const say = useCallback(
+    (event: ChatEvent) => {
+      const seed = seedRef.current++;
+      const text = pickLine(persona, event, seed);
+      if (text) setChat((prev) => [...prev.slice(-25), { id: seed, text }]);
+    },
+    [persona]
+  );
+  useEffect(() => {
+    setChat([{ id: -1, text: pickLine(persona, "greeting", 0) }]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ block: "nearest" });
+  }, [chat]);
 
   const displayFen = useMemo(
     () => buildFenAtMove(startFen, moveHistory, viewingIndex),
@@ -203,19 +240,25 @@ export default function PlayBotPage() {
       const newFen = applyMove(nextFen, moveStr);
       if (newFen) {
         const c = new Chess(newFen);
+        const meta = moveMeta(nextFen, moveStr);
         setFen(newFen);
         setMoveHistory((prev) => [...prev, moveStr!]);
         setViewingIndex((i) => i + 1);
         if (c.isGameOver()) {
           setGameResult(c.isCheckmate() ? "0-1" : "1/2-1/2");
           setGameOverReason(c.isCheckmate() ? "Checkmate" : "Draw");
+          say(c.isCheckmate() ? "win" : "draw");
+        } else if (meta.check) {
+          say("botCheck");
+        } else if (meta.captured) {
+          say("botCapture");
         }
       }
       setBotThinking(false);
     } finally {
       botRunningRef.current = false;
     }
-  }, [fen, getBestMove]);
+  }, [fen, getBestMove, say]);
 
   useEffect(() => {
     if (!botThinking) return;
@@ -269,13 +312,18 @@ export default function PlayBotPage() {
           setGameResult("1/2-1/2");
         }
         setGameOverReason(c.isCheckmate() ? "Checkmate" : "Draw");
+        say(c.isCheckmate() ? "lose" : "draw");
       } else {
+        const meta = moveMeta(fen, moveStr);
+        if (meta.check) say("userCheck");
+        else if (meta.captured) say("userCapture");
+        else if (seedRef.current % 3 === 0) say("banter");
         const newTurnIsWhite = newFen.split(" ")[1] === "w";
         const isBotTurn = orientation === "white" ? !newTurnIsWhite : newTurnIsWhite;
         if (isBotTurn) setBotThinking(true);
       }
     },
-    [fen, atHead, gameResult, orientation]
+    [fen, atHead, gameResult, orientation, say]
   );
 
   useEffect(() => {
@@ -294,7 +342,8 @@ export default function PlayBotPage() {
     setGameResult(orientation === "white" ? "0-1" : "1-0");
     setGameOverReason("Resignation");
     setBotThinking(false);
-  }, [gameResult, orientation]);
+    say("win");
+  }, [gameResult, orientation, say]);
 
   const handleOfferDraw = useCallback(() => {
     if (gameResult) return;
@@ -314,11 +363,13 @@ export default function PlayBotPage() {
     setGameResult(null);
     setGameOverReason(null);
     setBotThinking(false);
+    seedRef.current = 0;
+    setChat([{ id: -1, text: pickLine(persona, "greeting", 0) }]);
     // If the position to defend / drill starts on the bot's turn, fire it.
     const startTurnIsWhite = startFen.split(" ")[1] === "w";
     const startIsBotTurn = orientation === "white" ? !startTurnIsWhite : startTurnIsWhite;
     if (startIsBotTurn) setBotThinking(true);
-  }, [startFen, orientation]);
+  }, [startFen, orientation, persona]);
 
   const handlePlayNewGame = useCallback(() => {
     router.push("/games");
@@ -336,7 +387,9 @@ export default function PlayBotPage() {
         <HStack justify="space-between" align="center" flexWrap="wrap" gap={4}>
           <HStack gap={3} align="center" flexWrap="wrap">
             <LuxuryHeading size="lg">
-              <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>Engine</Text>
+              <Text as="span" color="var(--lux-gold)" style={{ fontStyle: "italic" }}>
+                {persona.avatar} {persona.name}
+              </Text>
             </LuxuryHeading>
             <Box
               px={3}
@@ -378,12 +431,12 @@ export default function PlayBotPage() {
 
           <HStack gap={2} flexWrap="wrap" align="center">
             <ToggleChip
-              label="Premove"
+              label="Auto-move"
               on={premoveEnabled}
               onToggle={() => setPremoveEnabled((v) => !v)}
             />
             <ToggleChip
-              label="Eval"
+              label="Analysis"
               on={showAnalysis}
               onToggle={() => setShowAnalysis((s) => !s)}
               disabled={!!gameResult}
@@ -395,32 +448,8 @@ export default function PlayBotPage() {
         </HStack>
 
         {engineWarming && !wasmDead && (
-          <Text mt={3} fontSize="xs" color="rgba(0,240,255,0.85)" letterSpacing="0.16em" textTransform="uppercase">
-            ◇ Engine warming up — first move may take a moment
-          </Text>
-        )}
-        {lastSource && (
-          <Text
-            mt={3}
-            fontSize="xs"
-            color={
-              lastSource === "wasm"
-                ? "rgba(212,175,55,0.95)"
-                : lastSource === "backend"
-                  ? "rgba(0,240,255,0.9)"
-                  : "rgba(255,200,120,0.9)"
-            }
-            letterSpacing="0.18em"
-            textTransform="uppercase"
-            fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-            fontWeight="700"
-          >
-            ◇ Engine ·{" "}
-            {lastSource === "wasm"
-              ? "Stockfish (browser)"
-              : lastSource === "backend"
-                ? "Server engine"
-                : "Local fallback"}
+          <Text mt={3} fontSize="xs" color="var(--lux-text-muted)" letterSpacing="0.16em" textTransform="uppercase">
+            ◇ Warming up — the first move may take a moment
           </Text>
         )}
       </Box>
@@ -454,7 +483,7 @@ export default function PlayBotPage() {
             />
           </HStack>
           <PlayerNameplate
-            label={`Engine · ${elo} Elo`}
+            label={`${persona.avatar} ${persona.name} · ${elo}`}
             colour={orientation === "white" ? "black" : "white"}
             highlight={botThinking}
             tierBadge={<TierLabel rating={elo} size="sm" />}
@@ -463,6 +492,43 @@ export default function PlayBotPage() {
 
         <VStack align="stretch" gap={4} flex="1 1 280px" minW="260px" maxW={{ lg: "360px" }}>
           <MaterialDisplay fen={displayFen} />
+
+          {/* Bot chat — in-character reactions, zero server cost */}
+          <GlassCard>
+            <Box px={5} py={4}>
+              <HStack gap={2} mb={3} align="center">
+                <Box fontSize="lg">{persona.avatar}</Box>
+                <LuxuryEyebrow>{persona.name}</LuxuryEyebrow>
+              </HStack>
+              <VStack align="stretch" gap={2} maxH="170px" overflowY="auto" pr={1}>
+                {chat.map((m) => (
+                  <HStack key={m.id} align="flex-start" gap={2}>
+                    <Box fontSize="sm" flexShrink={0} lineHeight="1.4">
+                      {persona.avatar}
+                    </Box>
+                    <Box
+                      bg="var(--lux-glass-surface)"
+                      borderRadius="10px"
+                      px={3}
+                      py={1.5}
+                      borderWidth="1px"
+                      borderColor="var(--lux-glass-border)"
+                    >
+                      <Text
+                        fontFamily="var(--font-inter), sans-serif"
+                        fontSize="sm"
+                        color="var(--lux-text-primary)"
+                        lineHeight="1.4"
+                      >
+                        {m.text}
+                      </Text>
+                    </Box>
+                  </HStack>
+                ))}
+                <div ref={chatEndRef} />
+              </VStack>
+            </Box>
+          </GlassCard>
 
           <GlassCard>
             <Box px={5} py={4}>

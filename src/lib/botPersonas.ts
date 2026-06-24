@@ -104,6 +104,14 @@ export function getPersona(id: string): BotPersona {
   return BOT_PERSONAS.find((p) => p.id === id) ?? BOT_PERSONAS[1];
 }
 
+/** Pick the persona whose voice best fits an arbitrary engine Elo — lets the
+ *  Elo-preset bot screen borrow a personality without changing its rating model. */
+export function personaForElo(elo: number): BotPersona {
+  if (elo <= 900) return BOT_PERSONAS[0]; // Kofi
+  if (elo <= 1700) return BOT_PERSONAS[1]; // Amina
+  return BOT_PERSONAS[2]; // The Professor
+}
+
 /** Pick a random in-character line for an event (varies by call index so the
  *  same event doesn't always repeat the same words). */
 export function pickLine(persona: BotPersona, event: ChatEvent, seed: number): string {
