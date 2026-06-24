@@ -13,12 +13,8 @@ import { APP_NAME } from "@/lib/appName";
  *   • Legends    → the world-greats showcase on the landing
  * About / Contact / Rankings / Schools / Learning moved to the footer or
  * gated flows so the header stays a clean set of working doors.
+ * (Play, Tournaments and Legends are rendered explicitly below.)
  */
-const NAV_LINKS = [
-  { label: "Play", href: "/play" },
-  { label: "Legends", href: "/#legends" },
-];
-
 export function LandingNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
