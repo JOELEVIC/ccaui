@@ -1,0 +1,447 @@
+[
+  {
+    "slug": "magnus-carlsen",
+    "name": "Magnus Carlsen",
+    "country": "Norway",
+    "flag": "🇳🇴",
+    "era": "2001–present",
+    "crown": "World Champion 2013–2023",
+    "peak": "2882 — highest rating ever",
+    "achievements": [
+      "Undisputed World Champion 2013–2023",
+      "Highest rating in history: 2882",
+      "World Rapid & Blitz Champion many times over",
+      "World No. 1 for over a decade straight"
+    ],
+    "why": "The most dominant player of the modern era — a universal style and superhuman endgames.",
+    "blurb": "Sven Magnus Øen Carlsen (born 30 November 1990) is a Norwegian chess grandmaster. Carlsen is a five-time World Chess Champion, reigning six-time World Rapid Chess Champion, reigning nine-time World Blitz Chess Champion and the reigning FIDE Freestyle Chess World Champion.",
+    "image": "/legends/magnus-carlsen.jpg",
+    "width": 720,
+    "height": 881,
+    "credit": {
+      "artist": "Miroslav.vajdic",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Magnus_Carlsen_in_2025.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Magnus%20Carlsen"
+  },
+  {
+    "slug": "garry-kasparov",
+    "name": "Garry Kasparov",
+    "country": "Russia",
+    "flag": "🇷🇺",
+    "era": "1980–2005",
+    "crown": "World Champion 1985–2000",
+    "peak": "2851",
+    "achievements": [
+      "Youngest undisputed World Champion at 22 (1985)",
+      "Ranked World No. 1 for 255 months",
+      "Famous 1997 match vs IBM's Deep Blue",
+      "Held the 2851 rating record for 13 years"
+    ],
+    "why": "Ferocious aggression and bottomless preparation that defined an entire era.",
+    "blurb": "Garry Kimovich Kasparov (born Garik Kimovich Weinstein on 13 April 1963) is a Russian chess grandmaster, political activist and writer, who was the World Chess Champion from 1985 to 2000. His peak FIDE chess rating of 2851, achieved in 1999, was the highest recorded until being surpassed by Magnus Carlsen in 2013.",
+    "image": "/legends/garry-kasparov.jpg",
+    "width": 720,
+    "height": 974,
+    "credit": {
+      "artist": "Fryta 73 from Strzegom",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Garri_Kasparow_(18776605665)_(cropped)_2.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Garry%20Kasparov"
+  },
+  {
+    "slug": "bobby-fischer",
+    "name": "Bobby Fischer",
+    "country": "United States",
+    "flag": "🇺🇸",
+    "era": "1958–1972",
+    "crown": "World Champion 1972–1975",
+    "peak": "2785",
+    "achievements": [
+      "Won the 1972 'Match of the Century' vs Spassky",
+      "Perfect 11/11 at the 1963/64 US Championship",
+      "20-game winning streak against the world elite",
+      "Invented Chess960 and the clock increment"
+    ],
+    "why": "A lone American genius who broke Soviet dominance at the height of the Cold War.",
+    "blurb": "Robert James Fischer (March 9, 1943 – January 17, 2008) was an American chess grandmaster and the eleventh World Chess Champion. A chess prodigy, he won his first of a record eight US Championships at the age of 14.",
+    "image": "/legends/bobby-fischer.jpg",
+    "width": 720,
+    "height": 981,
+    "credit": {
+      "artist": "Bert Verhoeff for Anefo",
+      "license": "CC0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File:Bobby_Fischer_1972.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Bobby%20Fischer"
+  },
+  {
+    "slug": "jose-raul-capablanca",
+    "name": "José Raúl Capablanca",
+    "country": "Cuba",
+    "flag": "🇨🇺",
+    "era": "1909–1939",
+    "crown": "World Champion 1921–1927",
+    "peak": null,
+    "achievements": [
+      "Nearly unbeaten for a decade (1916–1924)",
+      "Lost only a handful of games in his whole career",
+      "Renowned for flawless, intuitive endgames"
+    ],
+    "why": "The 'Chess Machine' — an effortless clarity that still teaches players a century later.",
+    "blurb": "José Raúl Capablanca y Graupera (19 November 1888 – 8 March 1942) was a Cuban chess player who was the third world chess champion from 1921 to 1927. A chess prodigy, he was widely renowned for his exceptional endgame skill and speed of play.",
+    "image": "/legends/jose-raul-capablanca.jpg",
+    "width": 494,
+    "height": 658,
+    "credit": {
+      "artist": "AnonymousUnknown author (Keystone-France)",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "source": "https://commons.wikimedia.org/wiki/File:Jos%C3%A9_Ra%C3%BAl_Capablanca_1931.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Jos%C3%A9%20Ra%C3%BAl%20Capablanca"
+  },
+  {
+    "slug": "mikhail-tal",
+    "name": "Mikhail Tal",
+    "country": "Latvia / USSR",
+    "flag": "🇱🇻",
+    "era": "1957–1992",
+    "crown": "World Champion 1960–1961",
+    "peak": null,
+    "achievements": [
+      "Youngest World Champion of his time, at 23",
+      "Legendary sacrificial 'Magician from Riga'",
+      "Record unbeaten streaks of 95 and 86 games"
+    ],
+    "why": "Romantic, fearless sacrifices that made chess feel like magic.",
+    "blurb": "Mikhail Tal (9 November 1936 – 28 June 1992) was a Soviet Latvian chess grandmaster and the eighth World Chess Champion. He is considered a creative genius and is widely regarded as one of the most influential players in chess history.",
+    "image": "/legends/mikhail-tal.jpg",
+    "width": 720,
+    "height": 923,
+    "credit": {
+      "artist": "Harry Pot for Anefo ]]",
+      "license": "CC BY-SA 3.0 nl",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/nl/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File:Mikhail_Tal_1962.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Mikhail%20Tal"
+  },
+  {
+    "slug": "anatoly-karpov",
+    "name": "Anatoly Karpov",
+    "country": "Russia",
+    "flag": "🇷🇺",
+    "era": "1970–2000s",
+    "crown": "World Champion 1975–1985",
+    "peak": null,
+    "achievements": [
+      "Dominated the 1970s–80s with positional mastery",
+      "Over 160 tournament victories",
+      "Epic five-match rivalry with Kasparov"
+    ],
+    "why": "The boa constrictor — squeezing wins from the quietest positions.",
+    "blurb": "Anatoly Yevgenyevich Karpov (Russian: Анатолий Евгеньевич Карпов, IPA: [ɐnɐˈtolʲɪj jɪvˈɡʲenʲjɪvʲɪtɕ ˈkarpəf]; born May 23, 1951) is a Russian and former Soviet chess grandmaster, former World Chess Champion, ⁣and politician. He was the 12th World Chess Champion from 1975 to 1985, a three-time FIDE World Champion (1993, 1996, 1998), twice World Chess champion as a member of the USSR team (1985, 1989), a six-time winner of Chess Olympiads as a member of the USSR team (1972, 1974, 1980, 1982, 1986, 1988), and the 1st World Rapid Chess Champion (1988).",
+    "image": "/legends/anatoly-karpov.jpg",
+    "width": 720,
+    "height": 1085,
+    "credit": {
+      "artist": "Veni Markovski | Вени Марковски",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Anatoly_Karpov_2017_april.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Anatoly%20Karpov"
+  },
+  {
+    "slug": "viswanathan-anand",
+    "name": "Viswanathan Anand",
+    "country": "India",
+    "flag": "🇮🇳",
+    "era": "1988–present",
+    "crown": "World Champion 2007–2013",
+    "peak": "2817",
+    "achievements": [
+      "Undisputed World Champion 2007–2013",
+      "India's first-ever grandmaster",
+      "World Champion in classical, rapid and knockout formats"
+    ],
+    "why": "The 'Lightning Kid' who sparked India's chess revolution.",
+    "blurb": "Viswanathan \"Vishy\" Anand (born 11 December 1969) is an Indian chess grandmaster. Anand is a five-time World Chess Champion, a two-time World Rapid Chess Champion, and a World Blitz Chess Cup Champion.",
+    "image": "/legends/viswanathan-anand.jpg",
+    "width": 720,
+    "height": 778,
+    "credit": {
+      "artist": "Wolfgang Jekel",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Viswanathan_Anand_(2016)_(cropped).jpeg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Viswanathan%20Anand"
+  },
+  {
+    "slug": "judit-polgar",
+    "name": "Judit Polgár",
+    "country": "Hungary",
+    "flag": "🇭🇺",
+    "era": "1988–2014",
+    "crown": "Strongest female player in history",
+    "peak": "2735",
+    "achievements": [
+      "Grandmaster at 15 — younger than Fischer was",
+      "Only woman ever to reach the world top 10 (No. 8)",
+      "Defeated eleven current or former world champions"
+    ],
+    "why": "Shattered the idea that chess had a gender ceiling.",
+    "blurb": "Judit Polgár (born 23 July 1976) is a Hungarian chess grandmaster, widely regarded as the strongest female chess player of all time. She is the only woman to be ranked in the world top 10, the only woman to achieve a rating over 2700, reaching a peak rating of 2735, and the only woman to compete in the final stage of a World Chess Championship.",
+    "image": "/legends/judit-polgar.jpg",
+    "width": 720,
+    "height": 960,
+    "credit": {
+      "artist": "This photo was taken by Przemysław JahrAutorem zdjęcia jest Przemysław JahrWykorzystując zdjęcie proszę podać jako autora:Przemysław Jahr / Wikimedia Commons",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "source": "https://commons.wikimedia.org/wiki/File:Judit_Polg%C3%A1r_2013.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Judit%20Polg%C3%A1r"
+  },
+  {
+    "slug": "emanuel-lasker",
+    "name": "Emanuel Lasker",
+    "country": "Germany",
+    "flag": "🇩🇪",
+    "era": "1894–1921",
+    "crown": "World Champion 1894–1921",
+    "peak": null,
+    "achievements": [
+      "Longest reign in history: 27 years",
+      "Also a mathematician and philosopher",
+      "Pioneered psychological, fighting chess"
+    ],
+    "why": "Held the crown longer than anyone — chess as a battle of wills.",
+    "blurb": "Emanuel Lasker (German pronunciation: [eˈmaːnuɛl ˈlaskɐ] ; December 24, 1868 – January 11, 1941) was a German chess player, mathematician, and philosopher. He was the second World Chess Champion, holding the title for 27 years, from 1894 to 1921, the longest reign of any officially recognised World Chess Champion, winning 6 World Chess Championships.",
+    "image": "/legends/emanuel-lasker.jpg",
+    "width": 546,
+    "height": 800,
+    "credit": {
+      "artist": "Unknown authorUnknown author",
+      "license": "CC BY-SA 3.0 de",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+      "source": "https://commons.wikimedia.org/wiki/File:Bundesarchiv_Bild_102-00457,_Emanuel_Lasker.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Emanuel%20Lasker"
+  },
+  {
+    "slug": "alexander-alekhine",
+    "name": "Alexander Alekhine",
+    "country": "Russia / France",
+    "flag": "🇫🇷",
+    "era": "1914–1946",
+    "crown": "World Champion 1927–1935, 1937–1946",
+    "peak": null,
+    "achievements": [
+      "The only champion to die holding the title",
+      "Dazzling, deeply calculated attacking play",
+      "Crushing tournament results in the early 1930s"
+    ],
+    "why": "Attacking chess of breathtaking imagination and depth.",
+    "blurb": "Alexander Aleksandrovich Alekhine (October 31 [O.S. October 19] 1892 – March 24, 1946) was a Russian and French chess player and the fourth World Chess Champion, a title he held for two reigns.",
+    "image": "/legends/alexander-alekhine.jpg",
+    "width": 720,
+    "height": 1014,
+    "credit": {
+      "artist": "George Grantham Bain Collection (Library of Congress)",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "source": "https://commons.wikimedia.org/wiki/File:Alexandre_Alekhine_01.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Alexander%20Alekhine"
+  },
+  {
+    "slug": "paul-morphy",
+    "name": "Paul Morphy",
+    "country": "United States",
+    "flag": "🇺🇸",
+    "era": "1857–1859",
+    "crown": "Unofficial World Champion",
+    "peak": null,
+    "achievements": [
+      "Crushed Europe's best players in 1858",
+      "Created the immortal 'Opera Game'",
+      "Father of modern open-game principles"
+    ],
+    "why": "A meteoric genius who played a century ahead of his time.",
+    "blurb": "Paul Charles Morphy (June 22, 1837 – July 10, 1884) was an American chess player. During his brief career in the late 1850s, Morphy was acknowledged as the world's greatest chess master.",
+    "image": "/legends/paul-morphy.jpg",
+    "width": 603,
+    "height": 680,
+    "credit": {
+      "artist": "Unknown authorUnknown author",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "source": "https://commons.wikimedia.org/wiki/File:PaulCharlesMorphy.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Paul%20Morphy"
+  },
+  {
+    "slug": "vladimir-kramnik",
+    "name": "Vladimir Kramnik",
+    "country": "Russia",
+    "flag": "🇷🇺",
+    "era": "1992–2019",
+    "crown": "World Champion 2000–2007",
+    "peak": "2817",
+    "achievements": [
+      "Dethroned Kasparov in 2000 without losing a game",
+      "Unified the world title in 2006",
+      "Architect of the Berlin Defence revival"
+    ],
+    "why": "Granite-solid strategy that toppled the greatest attacker alive.",
+    "blurb": "Vladimir Borisovich Kramnik (Russian: Влади́мир Бори́сович Кра́мник; born 25 June 1975) is a Russian chess grandmaster. He was the Classical World Chess Champion from 2000 to 2006, and the 14th undisputed World Chess Champion from 2006 to 2007.",
+    "image": "/legends/vladimir-kramnik.jpg",
+    "width": 302,
+    "height": 380,
+    "credit": {
+      "artist": "Vladimir Barskij",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Vladimir_Kramnik_2,_Candidates_Tournament_2018.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Vladimir%20Kramnik"
+  },
+  {
+    "slug": "hikaru-nakamura",
+    "name": "Hikaru Nakamura",
+    "country": "United States",
+    "flag": "🇺🇸",
+    "era": "2003–present",
+    "crown": "Five-time US Champion",
+    "peak": null,
+    "achievements": [
+      "Climbed to World No. 2 in classical chess",
+      "Multiple-time world blitz medallist",
+      "Brought chess to millions as a streamer"
+    ],
+    "why": "Speed-chess wizard and a face of the online chess boom.",
+    "blurb": "Christopher Hikaru Nakamura (Japanese: 中村光; born December 9, 1987) is an American chess grandmaster, internet personality, five-time U.S. Chess Champion, and the 2022 World Fischer Random Chess Champion.",
+    "image": "/legends/hikaru-nakamura.jpg",
+    "width": 720,
+    "height": 992,
+    "credit": {
+      "artist": "Andreas Kontokanis from Piraeus, Greece",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Nakamura_Hikaru_(29290269410)_(cropped)_(cropped).jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Hikaru%20Nakamura"
+  },
+  {
+    "slug": "ding-liren",
+    "name": "Ding Liren",
+    "country": "China",
+    "flag": "🇨🇳",
+    "era": "2009–present",
+    "crown": "World Champion 2023–2024",
+    "peak": "2816",
+    "achievements": [
+      "China's first male World Champion (2023)",
+      "Once unbeaten across 100 classical games",
+      "Peak rating of 2816"
+    ],
+    "why": "Calm, creative brilliance that won China its first crown.",
+    "blurb": "Ding Liren (born 24 October 1992) is a Chinese chess grandmaster who was the 17th World Chess Champion from 2023–24. He is a three-time Chinese Chess Champion and was part of the Chinese teams that won the Chess Olympiads in 2014 and 2018.",
+    "image": "/legends/ding-liren.jpg",
+    "width": 720,
+    "height": 822,
+    "credit": {
+      "artist": "Stefan64",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:DingLiren24a.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Ding%20Liren"
+  },
+  {
+    "slug": "hou-yifan",
+    "name": "Hou Yifan",
+    "country": "China",
+    "flag": "🇨🇳",
+    "era": "2007–present",
+    "crown": "Four-time Women's World Champion",
+    "peak": "2686",
+    "achievements": [
+      "Youngest Women's World Champion ever, at 16",
+      "Highest-rated active woman for years",
+      "Earned the grandmaster title at 14"
+    ],
+    "why": "The strongest woman of her generation, by a clear distance.",
+    "blurb": "Hou Yifan (Chinese: 侯逸凡; pinyin: Hóu Yìfán ; born 27 February 1994) is a Chinese chess grandmaster, four-time Women's World Chess Champion and professor at Peking University. She is the second-highest-rated female player of all time.",
+    "image": "/legends/hou-yifan.jpg",
+    "width": 720,
+    "height": 644,
+    "credit": {
+      "artist": "Andreas Kontokanis from Piraeus, Greece",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Hou_Yifan_(29762728494)_(cropped).jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Hou%20Yifan"
+  },
+  {
+    "slug": "wilhelm-steinitz",
+    "name": "Wilhelm Steinitz",
+    "country": "Austria / United States",
+    "flag": "🇦🇹",
+    "era": "1866–1894",
+    "crown": "First official World Champion 1886–1894",
+    "peak": null,
+    "achievements": [
+      "First official World Champion (1886)",
+      "Founder of positional, scientific chess",
+      "32-game winning streak against the elite"
+    ],
+    "why": "The father of modern strategy — he taught chess how to think.",
+    "blurb": "William Steinitz (born Wilhelm Steinitz; May 14, 1836 – August 12, 1900) was a Bohemian-Austrian, and later American, chess player. From 1886 to 1894, he was the first World Chess Champion.",
+    "image": "/legends/wilhelm-steinitz.jpg",
+    "width": 720,
+    "height": 867,
+    "credit": {
+      "artist": "Schumann, Fritz",
+      "license": "Public domain",
+      "licenseUrl": null,
+      "source": "https://commons.wikimedia.org/wiki/File:Steinitz,_William-4_-_DPLA_-_9eeab9ac335135c24b69ab7e36fc5354_(cropped).jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Wilhelm%20Steinitz"
+  },
+  {
+    "slug": "bassem-amin",
+    "name": "Bassem Amin",
+    "country": "Egypt",
+    "flag": "🇪🇬",
+    "era": "2000s–present",
+    "crown": "Africa's strongest player",
+    "peak": "2707",
+    "achievements": [
+      "First African player to cross 2700",
+      "Five-time African Champion",
+      "A practising medical doctor and grandmaster"
+    ],
+    "why": "Africa's trailblazer — proof the continent belongs among the very best.",
+    "blurb": "Bassem Amin (Arabic: باسم أمين; born 9 September 1988) is an Egyptian chess grandmaster and medical doctor. He was awarded the Grandmaster title by FIDE in 2006.",
+    "image": "/legends/bassem-amin.jpg",
+    "width": 720,
+    "height": 782,
+    "credit": {
+      "artist": "Stefan64",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:BassemAmin23.jpg"
+    },
+    "wikipedia": "https://en.wikipedia.org/wiki/Bassem%20Amin"
+  }
+]

@@ -5,13 +5,18 @@ import { Box, Container, Flex, Heading, HStack, Text, Button, VStack } from "@ch
 import Link from "next/link";
 import { APP_NAME } from "@/lib/appName";
 
+/**
+ * Public header — deliberately lean. Only links a logged-out visitor can
+ * actually use without hitting a login wall live here:
+ *   • Play       → instant, no-login game vs the engine
+ *   • Tournaments → public schedule (the emphasised, "alive" link)
+ *   • Legends    → the world-greats showcase on the landing
+ * About / Contact / Rankings / Schools / Learning moved to the footer or
+ * gated flows so the header stays a clean set of working doors.
+ */
 const NAV_LINKS = [
-  { label: "About", href: "/about" },
-  { label: "Rankings", href: "/rankings" },
-  { label: "Tournaments", href: "/tournaments" },
-  { label: "Learning", href: "/learning" },
-  { label: "Schools", href: "/schools" },
-  { label: "Contact", href: "/contact" },
+  { label: "Play", href: "/play" },
+  { label: "Legends", href: "/#legends" },
 ];
 
 export function LandingNav() {
@@ -41,28 +46,64 @@ export function LandingNav() {
               {APP_NAME}
             </Heading>
           </Link>
-          <HStack gap={{ base: 1, md: 6 }} flexWrap="nowrap" justify="flex-end">
-            {NAV_LINKS.map(({ label, href }) => (
-              <Link key={href} href={href}>
-                <Text
-                  fontSize="sm"
-                  color="textSecondary"
-                  _hover={{ color: "gold" }}
-                  display={{ base: "none", md: "block" }}
-                  cursor="pointer"
-                >
-                  {label}
+          <HStack gap={{ base: 1, md: 5 }} flexWrap="nowrap" justify="flex-end">
+            {/* Play */}
+            <Link href="/play">
+              <Text
+                fontSize="sm"
+                color="textSecondary"
+                _hover={{ color: "gold" }}
+                display={{ base: "none", md: "block" }}
+                cursor="pointer"
+              >
+                Play
+              </Text>
+            </Link>
+
+            {/* Tournaments — the emphasised, gently-alive link */}
+            <Link href="/tournaments">
+              <HStack
+                className="cca-tournament-pill"
+                display={{ base: "none", md: "flex" }}
+                gap={2}
+                px={3.5}
+                py={1.5}
+                borderRadius="full"
+                bg="rgba(197,160,89,0.10)"
+                borderWidth="1px"
+                borderColor="gold"
+                cursor="pointer"
+                transition="background 0.2s"
+                _hover={{ bg: "rgba(197,160,89,0.18)" }}
+              >
+                <Box className="cca-live-dot" w="6px" h="6px" borderRadius="full" bg="accentGreen" />
+                <Text fontSize="sm" color="gold" fontWeight="700" letterSpacing="0.02em">
+                  Tournaments
                 </Text>
-              </Link>
-            ))}
+              </HStack>
+            </Link>
+
+            {/* Legends */}
+            <Link href="/#legends">
+              <Text
+                fontSize="sm"
+                color="textSecondary"
+                _hover={{ color: "gold" }}
+                display={{ base: "none", md: "block" }}
+                cursor="pointer"
+              >
+                Legends
+              </Text>
+            </Link>
+
             <Link href="/login">
               <Button variant="ghost" size="sm" color="gold" display={{ base: "none", md: "inline-flex" }}>
                 Sign in
               </Button>
             </Link>
             <Link href="/register">
-              <Button size="sm" bg="gold" color="bgDark" borderRadius="soft" _hover={{ bg: "goldLight" }}>
-                Register
+              <Button size="sm" bg="gold" color="white" borderRadius="soft" _hover={{ bg: "goldLight" }}>
+                Join free
               </Button>
             </Link>
             <Button
@@ -91,13 +132,24 @@ export function LandingNav() {
           bg="rgba(255,255,255, 0.98)"
         >
           <VStack align="stretch" gap={1}>
-            {NAV_LINKS.map(({ label, href }) => (
-              <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}>
-                <Text w="full" py={2} fontSize="sm" color="textSecondary" _hover={{ color: "gold" }} cursor="pointer">
-                  {label}
+            <Link href="/play" onClick={() => setMobileMenuOpen(false)}>
+              <Text w="full" py={2} fontSize="sm" color="textSecondary" _hover={{ color: "gold" }} cursor="pointer">
+                Play
+              </Text>
+            </Link>
+            <Link href="/tournaments" onClick={() => setMobileMenuOpen(false)}>
+              <HStack w="full" py={2} gap={2}>
+                <Box w="6px" h="6px" borderRadius="full" bg="accentGreen" />
+                <Text fontSize="sm" color="gold" fontWeight="700" cursor="pointer">
+                  Tournaments
                 </Text>
-              </Link>
-            ))}
+              </HStack>
+            </Link>
+            <Link href="/#legends" onClick={() => setMobileMenuOpen(false)}>
+              <Text w="full" py={2} fontSize="sm" color="textSecondary" _hover={{ color: "gold" }} cursor="pointer">
+                Legends
+              </Text>
+            </Link>
             <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
               <Text w="full" py={2} fontSize="sm" color="gold" cursor="pointer">
                 Sign in

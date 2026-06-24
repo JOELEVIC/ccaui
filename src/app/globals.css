@@ -216,6 +216,44 @@ body {
   animation: sys-mana-flow 1.6s linear infinite;
 }
 
+/* ── Header "Tournaments" link — low-key, ambient pulse so it reads as the
+      one alive, can't-miss door without shouting. ─────────────────────── */
+@keyframes cca-ring-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(197, 160, 89, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.12);
+  }
+}
+.cca-tournament-pill {
+  animation: cca-ring-pulse 2.8s ease-in-out infinite;
+}
+@keyframes cca-live-dot {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(46, 125, 91, 0.45);
+  }
+  50% {
+    opacity: 0.65;
+    box-shadow: 0 0 0 3px rgba(46, 125, 91, 0);
+  }
+}
+.cca-live-dot {
+  animation: cca-live-dot 1.8s ease-in-out infinite;
+}
+
+/* ── Legends gallery — low-key Ken-Burns zoom on hover/focus ─────────── */
+.legend-card img {
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.legend-card:hover img,
+.legend-card:focus-visible img {
+  transform: scale(1.06);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -20,6 +20,9 @@ import { LandingAcademy } from "./LandingAcademy";
 import { LandingCta } from "./LandingCta";
 import { LandingFooter } from "./LandingFooter";
 import { LandingRoadToMaster } from "./LandingRoadToMaster";
+import { LandingLegends } from "./LandingLegends";
+import { LandingChessToday } from "./LandingChessToday";
+import { LandingMemory } from "./LandingMemory";
 import { ChessLoader } from "@/components/common/ChessLoader";
 
 /**
@@ -52,7 +55,10 @@ export function HomeOverview() {
       <LandingHeroMinimal />
       <LandingIconFeatures />
       <LandingPlayCompete />
+      <LandingMemory />
       <LandingRoadToMaster />
+      <LandingLegends />
+      <LandingChessToday />
       <LandingRankingsPreview />
       <LandingCameroonChess />
       <LandingStats />

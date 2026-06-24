@@ -1,0 +1,269 @@
+[
+  {
+    "slug": "magnus-carlsen",
+    "name": "Magnus Carlsen",
+    "wikiTitle": "Magnus Carlsen",
+    "country": "Norway",
+    "flag": "🇳🇴",
+    "era": "2001–present",
+    "crown": "World Champion 2013–2023",
+    "peak": "2882 — highest rating ever",
+    "achievements": [
+      "Undisputed World Champion 2013–2023",
+      "Highest rating in history: 2882",
+      "World Rapid & Blitz Champion many times over",
+      "World No. 1 for over a decade straight"
+    ],
+    "why": "The most dominant player of the modern era — a universal style and superhuman endgames."
+  },
+  {
+    "slug": "garry-kasparov",
+    "name": "Garry Kasparov",
+    "wikiTitle": "Garry Kasparov",
+    "country": "Russia",
+    "flag": "🇷🇺",
+    "era": "1980–2005",
+    "crown": "World Champion 1985–2000",
+    "peak": "2851",
+    "achievements": [
+      "Youngest undisputed World Champion at 22 (1985)",
+      "Ranked World No. 1 for 255 months",
+      "Famous 1997 match vs IBM's Deep Blue",
+      "Held the 2851 rating record for 13 years"
+    ],
+    "why": "Ferocious aggression and bottomless preparation that defined an entire era."
+  },
+  {
+    "slug": "bobby-fischer",
+    "name": "Bobby Fischer",
+    "wikiTitle": "Bobby Fischer",
+    "country": "United States",
+    "flag": "🇺🇸",
+    "era": "1958–1972",
+    "crown": "World Champion 1972–1975",
+    "peak": "2785",
+    "achievements": [
+      "Won the 1972 'Match of the Century' vs Spassky",
+      "Perfect 11/11 at the 1963/64 US Championship",
+      "20-game winning streak against the world elite",
+      "Invented Chess960 and the clock increment"
+    ],
+    "why": "A lone American genius who broke Soviet dominance at the height of the Cold War."
+  },
+  {
+    "slug": "jose-raul-capablanca",
+    "name": "José Raúl Capablanca",
+    "wikiTitle": "José Raúl Capablanca",
+    "country": "Cuba",
+    "flag": "🇨🇺",
+    "era": "1909–1939",
+    "crown": "World Champion 1921–1927",
+    "achievements": [
+      "Nearly unbeaten for a decade (1916–1924)",
+      "Lost only a handful of games in his whole career",
+      "Renowned for flawless, intuitive endgames"
+    ],
+    "why": "The 'Chess Machine' — an effortless clarity that still teaches players a century later."
+  },
+  {
+    "slug": "mikhail-tal",
+    "name": "Mikhail Tal",
+    "wikiTitle": "Mikhail Tal",
+    "country": "Latvia / USSR",
+    "flag": "🇱🇻",
+    "era": "1957–1992",
+    "crown": "World Champion 1960–1961",
+    "achievements": [
+      "Youngest World Champion of his time, at 23",
+      "Legendary sacrificial 'Magician from Riga'",
+      "Record unbeaten streaks of 95 and 86 games"
+    ],
+    "why": "Romantic, fearless sacrifices that made chess feel like magic."
+  },
+  {
+    "slug": "anatoly-karpov",
+    "name": "Anatoly Karpov",
+    "wikiTitle": "Anatoly Karpov",
+    "country": "Russia",
+    "flag": "🇷🇺",
+    "era": "1970–2000s",
+    "crown": "World Champion 1975–1985",
+    "achievements": [
+      "Dominated the 1970s–80s with positional mastery",
+      "Over 160 tournament victories",
+      "Epic five-match rivalry with Kasparov"
+    ],
+    "why": "The boa constrictor — squeezing wins from the quietest positions."
+  },
+  {
+    "slug": "viswanathan-anand",
+    "name": "Viswanathan Anand",
+    "wikiTitle": "Viswanathan Anand",
+    "country": "India",
+    "flag": "🇮🇳",
+    "era": "1988–present",
+    "crown": "World Champion 2007–2013",
+    "peak": "2817",
+    "achievements": [
+      "Undisputed World Champion 2007–2013",
+      "India's first-ever grandmaster",
+      "World Champion in classical, rapid and knockout formats"
+    ],
+    "why": "The 'Lightning Kid' who sparked India's chess revolution."
+  },
+  {
+    "slug": "judit-polgar",
+    "name": "Judit Polgár",
+    "wikiTitle": "Judit Polgár",
+    "country": "Hungary",
+    "flag": "🇭🇺",
+    "era": "1988–2014",
+    "crown": "Strongest female player in history",
+    "peak": "2735",
+    "achievements": [
+      "Grandmaster at 15 — younger than Fischer was",
+      "Only woman ever to reach the world top 10 (No. 8)",
+      "Defeated eleven current or former world champions"
+    ],
+    "why": "Shattered the idea that chess had a gender ceiling."
+  },
+  {
+    "slug": "emanuel-lasker",
+    "name": "Emanuel Lasker",
+    "wikiTitle": "Emanuel Lasker",
+    "country": "Germany",
+    "flag": "🇩🇪",
+    "era": "1894–1921",
+    "crown": "World Champion 1894–1921",
+    "achievements": [
+      "Longest reign in history: 27 years",
+      "Also a mathematician and philosopher",
+      "Pioneered psychological, fighting chess"
+    ],
+    "why": "Held the crown longer than anyone — chess as a battle of wills."
+  },
+  {
+    "slug": "alexander-alekhine",
+    "name": "Alexander Alekhine",
+    "wikiTitle": "Alexander Alekhine",
+    "country": "Russia / France",
+    "flag": "🇫🇷",
+    "era": "1914–1946",
+    "crown": "World Champion 1927–1935, 1937–1946",
+    "achievements": [
+      "The only champion to die holding the title",
+      "Dazzling, deeply calculated attacking play",
+      "Crushing tournament results in the early 1930s"
+    ],
+    "why": "Attacking chess of breathtaking imagination and depth."
+  },
+  {
+    "slug": "paul-morphy",
+    "name": "Paul Morphy",
+    "wikiTitle": "Paul Morphy",
+    "country": "United States",
+    "flag": "🇺🇸",
+    "era": "1857–1859",
+    "crown": "Unofficial World Champion",
+    "achievements": [
+      "Crushed Europe's best players in 1858",
+      "Created the immortal 'Opera Game'",
+      "Father of modern open-game principles"
+    ],
+    "why": "A meteoric genius who played a century ahead of his time."
+  },
+  {
+    "slug": "vladimir-kramnik",
+    "name": "Vladimir Kramnik",
+    "wikiTitle": "Vladimir Kramnik",
+    "country": "Russia",
+    "flag": "🇷🇺",
+    "era": "1992–2019",
+    "crown": "World Champion 2000–2007",
+    "peak": "2817",
+    "achievements": [
+      "Dethroned Kasparov in 2000 without losing a game",
+      "Unified the world title in 2006",
+      "Architect of the Berlin Defence revival"
+    ],
+    "why": "Granite-solid strategy that toppled the greatest attacker alive."
+  },
+  {
+    "slug": "hikaru-nakamura",
+    "name": "Hikaru Nakamura",
+    "wikiTitle": "Hikaru Nakamura",
+    "country": "United States",
+    "flag": "🇺🇸",
+    "era": "2003–present",
+    "crown": "Five-time US Champion",
+    "achievements": [
+      "Climbed to World No. 2 in classical chess",
+      "Multiple-time world blitz medallist",
+      "Brought chess to millions as a streamer"
+    ],
+    "why": "Speed-chess wizard and a face of the online chess boom."
+  },
+  {
+    "slug": "ding-liren",
+    "name": "Ding Liren",
+    "wikiTitle": "Ding Liren",
+    "country": "China",
+    "flag": "🇨🇳",
+    "era": "2009–present",
+    "crown": "World Champion 2023–2024",
+    "peak": "2816",
+    "achievements": [
+      "China's first male World Champion (2023)",
+      "Once unbeaten across 100 classical games",
+      "Peak rating of 2816"
+    ],
+    "why": "Calm, creative brilliance that won China its first crown."
+  },
+  {
+    "slug": "hou-yifan",
+    "name": "Hou Yifan",
+    "wikiTitle": "Hou Yifan",
+    "country": "China",
+    "flag": "🇨🇳",
+    "era": "2007–present",
+    "crown": "Four-time Women's World Champion",
+    "peak": "2686",
+    "achievements": [
+      "Youngest Women's World Champion ever, at 16",
+      "Highest-rated active woman for years",
+      "Earned the grandmaster title at 14"
+    ],
+    "why": "The strongest woman of her generation, by a clear distance."
+  },
+  {
+    "slug": "wilhelm-steinitz",
+    "name": "Wilhelm Steinitz",
+    "wikiTitle": "Wilhelm Steinitz",
+    "country": "Austria / United States",
+    "flag": "🇦🇹",
+    "era": "1866–1894",
+    "crown": "First official World Champion 1886–1894",
+    "achievements": [
+      "First official World Champion (1886)",
+      "Founder of positional, scientific chess",
+      "32-game winning streak against the elite"
+    ],
+    "why": "The father of modern strategy — he taught chess how to think."
+  },
+  {
+    "slug": "bassem-amin",
+    "name": "Bassem Amin",
+    "wikiTitle": "Bassem Amin",
+    "country": "Egypt",
+    "flag": "🇪🇬",
+    "era": "2000s–present",
+    "crown": "Africa's strongest player",
+    "peak": "2707",
+    "achievements": [
+      "First African player to cross 2700",
+      "Five-time African Champion",
+      "A practising medical doctor and grandmaster"
+    ],
+    "why": "Africa's trailblazer — proof the continent belongs among the very best."
+  }
+]

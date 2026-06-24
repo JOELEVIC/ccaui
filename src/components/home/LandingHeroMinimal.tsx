@@ -1,12 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Box, Button, Container, Flex, Heading, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
-import { LoginPanel } from "@/components/auth/LoginPanel";
 import { ShowcaseBoard } from "./ShowcaseBoard";
 import { staggerContainer, staggerChild } from "@/lib/animations";
 
@@ -19,15 +17,13 @@ const STATS = [
 export function LandingHeroMinimal() {
   const { user } = useAuth();
   const router = useRouter();
-  const [showLogin, setShowLogin] = useState(false);
 
+  // Visitors go straight to a no-login game; members go to their games.
   const handlePlay = () => {
-    if (user) router.push("/games");
-    else setShowLogin(true);
+    router.push(user ? "/games" : "/play");
   };
 
   return (
-    <>
       <Box
         position="relative"
         minH={{ base: "auto", md: "100vh" }}
@@ -120,44 +116,52 @@ export function LandingHeroMinimal() {
                 </motion.div>
 
                 <motion.div variants={staggerChild}>
-                  <HStack gap={3} flexWrap="wrap" justify={{ base: "center", lg: "flex-start" }}>
-                    <Button
-                      size="lg"
-                      onClick={handlePlay}
-                      bg="gold"
-                      color="bgDark"
-                      px={8}
-                      borderRadius="soft"
-                      fontWeight="600"
-                      _hover={{ bg: "goldLight", boxShadow: "0 0 28px rgba(230,164,82,0.4)" }}
-                      transition="all 0.2s"
-                    >
-                      ▶ Play now
-                    </Button>
-                    <Link href="/road-to-master">
+                  <VStack align={{ base: "center", lg: "flex-start" }} gap={2}>
+                    <HStack gap={3} flexWrap="wrap" justify={{ base: "center", lg: "flex-start" }}>
                       <Button
                         size="lg"
-                        variant="outline"
-                        borderColor="blackAlpha.300"
-                        color="textPrimary"
+                        onClick={handlePlay}
+                        bg="gold"
+                        color="white"
+                        px={8}
                         borderRadius="soft"
-                        _hover={{ borderColor: "gold", color: "gold" }}
+                        fontWeight="600"
+                        _hover={{ bg: "goldLight", boxShadow: "0 0 28px rgba(197,160,89,0.4)" }}
+                        _active={{ transform: "scale(0.97)" }}
+                        transition="all 0.15s"
                       >
-                        Road to Master
+                        ♟ Play a bot
                       </Button>
-                    </Link>
-                    <Link href="/tournaments">
-                      <Button
-                        size="lg"
-                        variant="ghost"
-                        color="textSecondary"
-                        borderRadius="soft"
-                        _hover={{ color: "gold" }}
-                      >
-                        See tournaments →
-                      </Button>
-                    </Link>
-                  </HStack>
+                      <Link href="/road-to-master">
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          borderColor="blackAlpha.300"
+                          color="textPrimary"
+                          borderRadius="soft"
+                          _hover={{ borderColor: "gold", color: "gold" }}
+                          _active={{ transform: "scale(0.97)" }}
+                          transition="all 0.15s"
+                        >
+                          Start the Road to Master
+                        </Button>
+                      </Link>
+                      <Link href="/tournaments">
+                        <Button
+                          size="lg"
+                          variant="ghost"
+                          color="textSecondary"
+                          borderRadius="soft"
+                          _hover={{ color: "gold" }}
+                        >
+                          See tournaments →
+                        </Button>
+                      </Link>
+                    </HStack>
+                    <Text fontSize="xs" color="textMuted" letterSpacing="0.02em">
+                      Free to play — no sign-up needed.
+                    </Text>
+                  </VStack>
                 </motion.div>
 
                 <motion.div variants={staggerChild} style={{ width: "100%" }}>
@@ -206,7 +210,5 @@ export function LandingHeroMinimal() {
           </Flex>
         </Container>
       </Box>
-      <LoginPanel open={showLogin} onClose={() => setShowLogin(false)} />
-    </>
   );
 }

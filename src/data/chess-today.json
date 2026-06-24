@@ -1,0 +1,71 @@
+{
+  "updated": "2026-06-24T13:32:06.535Z",
+  "events": [
+    {
+      "id": "GtTXd69H",
+      "title": "2026 Chinese Chess League Division A",
+      "subtitle": "Round-Robin R1-6",
+      "status": "live",
+      "location": "Changxing, China",
+      "format": "12-Team Round Robin",
+      "dateLabel": "24–29 Jun 2026",
+      "url": "https://lichess.org/broadcast/2026-chinese-chess-league-division-a-round-robin-r1-6/GtTXd69H",
+      "image": "/chess-today/2026-chinese-chess-league-division-a-round-robin-r1-6.webp"
+    },
+    {
+      "id": "vHEkfqtN",
+      "title": "2026 African Individual Chess Championships",
+      "subtitle": null,
+      "status": "live",
+      "location": "Cresta Hotel,Jwaneng",
+      "format": "9-Round Swiss",
+      "dateLabel": "19–25 Jun 2026",
+      "url": "https://lichess.org/broadcast/2026-african-individual-chess-championships/vHEkfqtN",
+      "image": "/chess-today/2026-african-individual-chess-championships.webp"
+    },
+    {
+      "id": "mn3rbYN4",
+      "title": "FIDE World Cadets Cup 2026",
+      "subtitle": "G08",
+      "status": "live",
+      "location": "Batumi, Georgia",
+      "format": "11-round Swiss",
+      "dateLabel": "16–27 Jun 2026",
+      "url": "https://lichess.org/broadcast/fide-world-cadets-cup-2026-g08/mn3rbYN4",
+      "image": "/chess-today/fide-world-cadets-cup-2026-g08.webp"
+    },
+    {
+      "id": "Huzg9lnf",
+      "title": "LIX Internacional Capablanca in Memoriam 2026",
+      "subtitle": "OPEN",
+      "status": "live",
+      "location": "Hotel Nacional -La Habana -Cuba",
+      "format": "9 Rondas Suizo",
+      "dateLabel": "15–24 Jun 2026",
+      "url": "https://lichess.org/broadcast/lix-internacional-capablanca-in-memoriam-2026-open/Huzg9lnf",
+      "image": "/chess-today/lix-internacional-capablanca-in-memoriam-2026-open.webp"
+    },
+    {
+      "id": "d38gp1tH",
+      "title": "FIDE World Youth Chess Championships 2026",
+      "subtitle": "G14",
+      "status": "live",
+      "location": "Montesilvano, Italy",
+      "format": "11-round Swiss",
+      "dateLabel": "15–26 Jun 2026",
+      "url": "https://lichess.org/broadcast/fide-world-youth-chess-championships-2026-g14/d38gp1tH",
+      "image": "/chess-today/fide-world-youth-chess-championships-2026-g14.png"
+    },
+    {
+      "id": "NTfOT2uv",
+      "title": "3rd QUANG NINH GM OPEN CHESS TOURNAMENT 2026 - Masters",
+      "subtitle": null,
+      "status": "live",
+      "location": "Quang Ninh, Viet Nam",
+      "format": "10-round Swiss",
+      "dateLabel": "24–30 Jun 2026",
+      "url": "https://lichess.org/broadcast/3rd-quang-ninh-gm-open-chess-tournament-2026-masters/NTfOT2uv",
+      "image": "/chess-today/3rd-quang-ninh-gm-open-chess-tournament-2026-masters.webp"
+    }
+  ]
+}
