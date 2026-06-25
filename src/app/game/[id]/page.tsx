@@ -20,12 +20,16 @@ import {
   startGameSession,
   makeMove,
   resignGame,
+  abortGame,
   offerDraw,
   acceptDraw,
   rejectDraw,
+  sendChatMessage,
   type GameUpdatePayload,
 } from "@/lib/game-api";
 import { useGameSubscription } from "@/lib/useGameSubscription";
+import { LiveClock } from "@/components/chess/LiveClock";
+import { GameChat, type ChatMsg } from "@/components/chess/GameChat";
 import { parseMoveTokens } from "@/lib/gameMoveParsing";
 import {
   fenAfterMoves,
@@ -72,6 +76,30 @@ function movesToFen(moves: string): string {
   return chess.fen();
 }
 
+/** Half-moves (plies) played, derived from a FEN's side-to-move + fullmove number. */
+function plyFromFen(fen: string): number {
+  const parts = fen.split(" ");
+  const active = parts[1];
+  const fullmove = parseInt(parts[5] ?? "1", 10) || 1;
+  return (fullmove - 1) * 2 + (active === "b" ? 1 : 0);
+}
+
+/** Apply a UCI move (e2e4 / e7e8q) to a FEN, returning the resulting FEN or null if illegal. */
+function applyUciToFen(fen: string, uci: string): string | null {
+  const chess = new Chess();
+  try {
+    chess.load(fen);
+    const move = chess.move({
+      from: uci.slice(0, 2),
+      to: uci.slice(2, 4),
+      promotion: (uci.slice(4) || "q") as "q" | "r" | "b" | "n",
+    });
+    return move ? chess.fen() : null;
+  } catch {
+    return null;
+  }
+}
+
 function lastMoveSquares(moves: string): { from: string; to: string } | null {
   const chess = new Chess();
   const parts = parseMoveTokens(moves ?? "");
@@ -109,6 +137,27 @@ function resultToScore(result: string | null | undefined): string {
   return "—";
 }
 
+/** Human-readable game-over line from the server result + reason. */
+function describeGameEnd(result: string | null | undefined, reason: string | null | undefined): string {
+  const r = (reason ?? "").toLowerCase();
+  if (r.includes("abort")) return "Game aborted — no rating change";
+  if (result === "DRAW" || result === "STALEMATE") {
+    if (r.includes("stalemate")) return "Draw — stalemate";
+    if (r.includes("agreement")) return "Draw agreed";
+    if (r.includes("repetition")) return "Draw — threefold repetition";
+    if (r.includes("fifty")) return "Draw — fifty-move rule";
+    if (r.includes("insufficient")) return "Draw — insufficient material";
+    return "Draw";
+  }
+  const winner = result === "WHITE_WIN" ? "White" : result === "BLACK_WIN" ? "Black" : null;
+  if (!winner) return "Game over";
+  if (r.includes("checkmate")) return `${winner} wins by checkmate`;
+  if (r.includes("timeout")) return `${winner} wins on time`;
+  if (r.includes("resign")) return `${winner} wins — opponent resigned`;
+  if (r.includes("abandon")) return `${winner} wins — opponent left`;
+  return `${winner} wins`;
+}
+
 function GamePageInner() {
   const params = useParams();
   const router = useRouter();
@@ -121,6 +170,18 @@ function GamePageInner() {
   const [drawOfferBy, setDrawOfferBy] = useState<string | null>(null);
   const [movePending, setMovePending] = useState(false);
   const submittingMoveRef = useRef(false);
+  // Optimistic move: locally-predicted FEN shown instantly, before the server echoes it back.
+  const [optimisticFen, setOptimisticFen] = useState<string | null>(null);
+  const optimisticPlyRef = useRef<number | null>(null);
+  // Live clocks: anchored remaining time + the client timestamp it was received at (skew-free countdown).
+  const [clock, setClock] = useState<{ whiteMs: number; blackMs: number; anchorAt: number } | null>(null);
+  // In-game chat (players + spectators).
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
+  const chatIdRef = useRef(0);
+  const applyClocks = useCallback((s: { whiteMs?: number | null; blackMs?: number | null }) => {
+    if (s.whiteMs == null || s.blackMs == null) return;
+    setClock({ whiteMs: s.whiteMs, blackMs: s.blackMs, anchorAt: Date.now() });
+  }, []);
   const prevFenForSoundRef = useRef<string | null>(null);
   const [premoveEnabled, setPremoveEnabled] = useState(() => readStoredBool(LS_PREMOVE, false));
   const [soundsEnabled, setSoundsEnabled] = useState(() => readStoredBool(LS_SOUNDS, true));
@@ -156,9 +217,18 @@ function GamePageInner() {
   const isWhite = user && game?.white?.id === user.id;
   const orientation = isWhite ? "white" : "black";
   const myColor = isWhite ? "w" : "b";
-  const turnIsWhite = fen.split(" ")[1] === "w";
+  // The board the user actually sees: optimistic prediction if one is pending, else the confirmed FEN.
+  const liveFen = optimisticFen ?? fen;
+  const turnIsWhite = liveFen.split(" ")[1] === "w";
   const isMyTurn = isWhite ? turnIsWhite : !turnIsWhite;
   const gameEnded = status === "COMPLETED" || status === "ABANDONED";
+  // Abort is available only before both players have moved; after that it's resign-only.
+  const plies = plyFromFen(liveFen);
+  const canAbort = !!isParticipant && !gameEnded && plies < 2;
+  const turnColor: "w" | "b" = turnIsWhite ? "w" : "b";
+  const topColor: "w" | "b" = orientation === "white" ? "b" : "w";
+  const bottomColor: "w" | "b" = orientation === "white" ? "w" : "b";
+  const clockRunning = (c: "w" | "b") => status === "ACTIVE" && !gameEnded && turnColor === c;
   const sanMoves = useMemo(() => parseMoveTokens(game?.moves ?? ""), [game?.moves]);
   const hasReview = hasMoveReviewData(analysis);
 
@@ -181,7 +251,7 @@ function GamePageInner() {
   const reviewBoardFen =
     reviewMode && sanMoves.length > 0
       ? fenAfterMoves(sanMoves, Math.min(reviewStep, sanMoves.length))
-      : fen;
+      : liveFen;
 
   const reviewRow =
     reviewMode && analysis?.moveReviews && reviewStep >= 0 && reviewStep < analysis.moveReviews.length
@@ -261,18 +331,18 @@ function GamePageInner() {
 
   useEffect(() => {
     if (!soundsEnabled || gameEnded) {
-      prevFenForSoundRef.current = fen;
+      prevFenForSoundRef.current = liveFen;
       return;
     }
     if (prevFenForSoundRef.current === null) {
-      prevFenForSoundRef.current = fen;
+      prevFenForSoundRef.current = liveFen;
       return;
     }
-    if (prevFenForSoundRef.current === fen) return;
-    if (isCaptureByFenChange(prevFenForSoundRef.current, fen)) playCaptureSound();
+    if (prevFenForSoundRef.current === liveFen) return;
+    if (isCaptureByFenChange(prevFenForSoundRef.current, liveFen)) playCaptureSound();
     else playMoveSound();
-    prevFenForSoundRef.current = fen;
-  }, [fen, soundsEnabled, gameEnded]);
+    prevFenForSoundRef.current = liveFen;
+  }, [liveFen, soundsEnabled, gameEnded]);
 
   useEffect(() => {
     if (gameEnded) setPendingPremove(null);
@@ -293,29 +363,51 @@ function GamePageInner() {
     if (!whiteId || !blackId || !game.timeControl) return;
     startSessionDone.current = true;
     startGameSession(token, id, whiteId, blackId, game.timeControl)
-      .then(() => {})
+      .then((s) => applyClocks(s))
       .catch((err) => {
         startSessionDone.current = false;
         toaster.create({ title: err?.message ?? "Failed to start live session", type: "error" });
       });
-  }, [id, game, token, isParticipant]);
+  }, [id, game, token, isParticipant, applyClocks]);
 
   const handleSubscriptionPayload = useCallback((payload: GameUpdatePayload) => {
-    setFen(movesToFen(payload.moves ?? ""));
+    // Chat is delivered on the same channel — append and stop (it carries no move change).
+    if (payload.event === "CHAT") {
+      if (payload.chatUserId && payload.chatText) {
+        const id = chatIdRef.current++;
+        const userId = payload.chatUserId;
+        const text = payload.chatText;
+        setChatMessages((prev) => [...prev, { id, userId, text }]);
+      }
+      return;
+    }
+    applyClocks(payload);
+    const confirmedFen = movesToFen(payload.moves ?? "");
+    setFen(confirmedFen);
+    // Drop the optimistic prediction once the server has caught up to (or past) it,
+    // so a stale GAME_STATE refresh that predates our move can't snap the board backward.
+    if (
+      optimisticPlyRef.current === null ||
+      plyFromFen(confirmedFen) >= optimisticPlyRef.current
+    ) {
+      optimisticPlyRef.current = null;
+      setOptimisticFen(null);
+    }
     setStatus(payload.status);
     if (payload.result != null) setResult(payload.result);
     if (payload.drawOfferBy != null) setDrawOfferBy(payload.drawOfferBy);
     else setDrawOfferBy(null);
     if (payload.event === "GAME_END") {
-      toaster.create({ title: "Game ended", type: "info" });
+      toaster.create({ title: describeGameEnd(payload.result, payload.reason), type: "info" });
     }
     setMovePending(false);
     submittingMoveRef.current = false;
-  }, []);
+  }, [applyClocks]);
 
+  // Participants and spectators both watch live; only ended games skip the live feed.
   const { connected, error: subError } = useGameSubscription(
-    isParticipant ? id : null,
-    isParticipant ? token : null,
+    token && !gameEnded ? id : null,
+    token && !gameEnded ? token : null,
     handleSubscriptionPayload
   );
 
@@ -342,14 +434,27 @@ function GamePageInner() {
       if (!token || gameEnded) return;
       if (submittingMoveRef.current) return;
       submittingMoveRef.current = true;
-      setMovePending(true);
-      makeMove(token, id, move).catch((err) => {
-        setMovePending(false);
-        submittingMoveRef.current = false;
-        toaster.create({ title: err?.message ?? "Move failed", type: "error" });
-      });
+      // Optimistic: show the move immediately, then confirm against the server echo.
+      const predicted = applyUciToFen(optimisticFen ?? fen, move);
+      if (predicted) {
+        optimisticPlyRef.current = plyFromFen(predicted);
+        setOptimisticFen(predicted);
+      } else {
+        // Couldn't predict locally — fall back to the old "freeze until echo" behaviour.
+        setMovePending(true);
+      }
+      makeMove(token, id, move)
+        .then((s) => applyClocks(s))
+        .catch((err) => {
+          // Roll back the prediction; the confirmed FEN is the source of truth.
+          optimisticPlyRef.current = null;
+          setOptimisticFen(null);
+          setMovePending(false);
+          submittingMoveRef.current = false;
+          toaster.create({ title: err?.message ?? "Move failed", type: "error" });
+        });
     },
-    [id, token, gameEnded]
+    [id, token, gameEnded, fen, optimisticFen, applyClocks]
   );
 
   useEffect(() => {
@@ -389,6 +494,32 @@ function GamePageInner() {
       toaster.create({ title: err?.message ?? "Resign failed", type: "error" })
     );
   };
+
+  const handleAbort = () => {
+    if (!token) return;
+    abortGame(token, id).catch((err) =>
+      toaster.create({ title: err?.message ?? "Abort failed", type: "error" })
+    );
+  };
+
+  const handleSendChat = useCallback(
+    (text: string) => {
+      if (!token) return;
+      sendChatMessage(token, id, text).catch((err) =>
+        toaster.create({ title: err?.message ?? "Message failed", type: "error" })
+      );
+    },
+    [token, id]
+  );
+
+  const chatLabel = useCallback(
+    (userId: string) => {
+      if (game?.white?.id === userId) return { name: game.white.username, me: userId === user?.id };
+      if (game?.black?.id === userId) return { name: game.black.username, me: userId === user?.id };
+      return { name: "Spectator", me: userId === user?.id };
+    },
+    [game?.white?.id, game?.white?.username, game?.black?.id, game?.black?.username, user?.id]
+  );
 
   const handleOfferDraw = () => {
     if (!token) return;
@@ -439,7 +570,7 @@ function GamePageInner() {
 
   return (
     <Box minH="100vh" bg="bgDark" py={6} px={4}>
-      {isParticipant && !connected && !gameEnded && (
+      {!!token && !connected && !gameEnded && (
         <ConnectingBanner subError={subError} onRetry={() => window.location.reload()} />
       )}
       <Flex
@@ -459,14 +590,24 @@ function GamePageInner() {
             borderWidth="1px"
             borderColor="goldDark"
             minW="200px"
-            textAlign="center"
           >
-            <Text color="textSecondary" fontSize="sm">
-              {orientation === "white" ? game.black?.username : game.white?.username}
-            </Text>
-            <Text color="textMuted" fontSize="xs">
-              {orientation === "white" ? game.black?.rating : game.white?.rating}
-            </Text>
+            <HStack justify="space-between" align="center">
+              <Box textAlign="left">
+                <Text color="textSecondary" fontSize="sm">
+                  {orientation === "white" ? game.black?.username : game.white?.username}
+                </Text>
+                <Text color="textMuted" fontSize="xs">
+                  {orientation === "white" ? game.black?.rating : game.white?.rating}
+                </Text>
+              </Box>
+              {clock && (
+                <LiveClock
+                  ms={topColor === "w" ? clock.whiteMs : clock.blackMs}
+                  anchorAt={clock.anchorAt}
+                  running={clockRunning(topColor)}
+                />
+              )}
+            </HStack>
           </Box>
 
           <GameBoard
@@ -492,14 +633,24 @@ function GamePageInner() {
             borderWidth="1px"
             borderColor="goldDark"
             minW="200px"
-            textAlign="center"
           >
-            <Text color="textSecondary" fontSize="sm">
-              {orientation === "white" ? game.white?.username : game.black?.username}
-            </Text>
-            <Text color="textMuted" fontSize="xs">
-              {orientation === "white" ? game.white?.rating : game.black?.rating}
-            </Text>
+            <HStack justify="space-between" align="center">
+              <Box textAlign="left">
+                <Text color="textSecondary" fontSize="sm">
+                  {orientation === "white" ? game.white?.username : game.black?.username}
+                </Text>
+                <Text color="textMuted" fontSize="xs">
+                  {orientation === "white" ? game.white?.rating : game.black?.rating}
+                </Text>
+              </Box>
+              {clock && (
+                <LiveClock
+                  ms={bottomColor === "w" ? clock.whiteMs : clock.blackMs}
+                  anchorAt={clock.anchorAt}
+                  running={clockRunning(bottomColor)}
+                />
+              )}
+            </HStack>
           </Box>
         </VStack>
 
@@ -731,6 +882,10 @@ function GamePageInner() {
             </Button>
           )}
 
+          {user && (
+            <GameChat messages={chatMessages} label={chatLabel} onSend={handleSendChat} />
+          )}
+
           {opponentOfferedDraw && !gameEnded && (
             <HStack gap={2}>
               <Text color="gold" fontSize="sm">Draw offered</Text>
@@ -751,28 +906,43 @@ function GamePageInner() {
       <HStack justify="center" gap={4} mt={6} flexWrap="wrap">
         {isParticipant && !gameEnded && (
           <>
-            <Button
-              size="sm"
-              variant="outline"
-              borderColor="goldDark"
-              color="textSecondary"
-              borderRadius="soft"
-              _hover={{ color: "gold" }}
-              onClick={handleOfferDraw}
-              disabled={!!drawOfferBy}
-            >
-              Offer draw
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              borderColor="statusWarning"
-              color="statusWarning"
-              borderRadius="soft"
-              onClick={handleResign}
-            >
-              Resign
-            </Button>
+            {!canAbort && (
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor="goldDark"
+                color="textSecondary"
+                borderRadius="soft"
+                _hover={{ color: "gold" }}
+                onClick={handleOfferDraw}
+                disabled={!!drawOfferBy}
+              >
+                Offer draw
+              </Button>
+            )}
+            {canAbort ? (
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor="statusWarning"
+                color="statusWarning"
+                borderRadius="soft"
+                onClick={handleAbort}
+              >
+                Abort
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor="statusWarning"
+                color="statusWarning"
+                borderRadius="soft"
+                onClick={handleResign}
+              >
+                Resign
+              </Button>
+            )}
             <Link href="/analysis">
               <Button
                 size="sm"
@@ -795,7 +965,7 @@ function GamePageInner() {
 
       {!isParticipant && (
         <Text color="textMuted" textAlign="center" mt={4} fontSize="sm">
-          You are not a participant in this game.
+          👁 Spectating — watching this game live.
         </Text>
       )}
 

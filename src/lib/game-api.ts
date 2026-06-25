@@ -37,6 +37,9 @@ export interface GameSession {
   result?: string | null;
   timeControl: string;
   drawOfferBy?: string | null;
+  whiteMs?: number | null;
+  blackMs?: number | null;
+  serverTime?: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -50,20 +53,32 @@ export interface GameUpdatePayload {
   drawOfferBy?: string | null;
   move?: string;
   reason?: string;
+  whiteMs?: number | null;
+  blackMs?: number | null;
+  serverTime?: number | null;
+  chatUserId?: string | null;
+  chatText?: string | null;
 }
+
+// Clock fields shared by the session-returning operations.
+const CLOCKS = "whiteMs blackMs serverTime";
 
 const START_SESSION = `mutation StartGameSession($gameId: ID!, $whiteId: ID!, $blackId: ID!, $timeControl: String!) {
   startGameSession(gameId: $gameId, whiteId: $whiteId, blackId: $blackId, timeControl: $timeControl) {
-    gameId moves status result timeControl drawOfferBy
+    gameId moves status result timeControl drawOfferBy ${CLOCKS}
   }
 }`;
 
 const MAKE_MOVE = `mutation MakeMove($gameId: ID!, $move: String!) {
-  makeMove(gameId: $gameId, move: $move) { gameId moves status result }
+  makeMove(gameId: $gameId, move: $move) { gameId moves status result drawOfferBy ${CLOCKS} }
 }`;
 
 const RESIGN_GAME = `mutation ResignGame($gameId: ID!) {
-  resignGame(gameId: $gameId) { gameId status result }
+  resignGame(gameId: $gameId) { gameId status result ${CLOCKS} }
+}`;
+
+const ABORT_GAME = `mutation AbortGame($gameId: ID!) {
+  abortGame(gameId: $gameId) { gameId status result }
 }`;
 
 const OFFER_DRAW = `mutation OfferDraw($gameId: ID!) {
@@ -78,13 +93,19 @@ const REJECT_DRAW = `mutation RejectDraw($gameId: ID!) {
   rejectDraw(gameId: $gameId) { gameId drawOfferBy }
 }`;
 
+const SEND_CHAT = `mutation SendChatMessage($gameId: ID!, $text: String!) {
+  sendChatMessage(gameId: $gameId, text: $text)
+}`;
+
 export type CcaGameMutation =
   | { name: "startGameSession"; variables: { gameId: string; whiteId: string; blackId: string; timeControl: string } }
   | { name: "makeMove"; variables: { gameId: string; move: string } }
   | { name: "resignGame"; variables: { gameId: string } }
+  | { name: "abortGame"; variables: { gameId: string } }
   | { name: "offerDraw"; variables: { gameId: string } }
   | { name: "acceptDraw"; variables: { gameId: string } }
-  | { name: "rejectDraw"; variables: { gameId: string } };
+  | { name: "rejectDraw"; variables: { gameId: string } }
+  | { name: "sendChatMessage"; variables: { gameId: string; text: string } };
 
 async function ccaRequest<T>(token: string, query: string, variables: Record<string, unknown>): Promise<T> {
   const res = await fetch(GAME_API_URI, {
@@ -133,6 +154,16 @@ export async function makeMove(token: string, gameId: string, move: string): Pro
 export async function resignGame(token: string, gameId: string): Promise<GameSession> {
   const data = await ccaRequest<{ resignGame: GameSession }>(token, RESIGN_GAME, { gameId });
   return data.resignGame;
+}
+
+export async function abortGame(token: string, gameId: string): Promise<GameSession> {
+  const data = await ccaRequest<{ abortGame: GameSession }>(token, ABORT_GAME, { gameId });
+  return data.abortGame;
+}
+
+export async function sendChatMessage(token: string, gameId: string, text: string): Promise<boolean> {
+  const data = await ccaRequest<{ sendChatMessage: boolean }>(token, SEND_CHAT, { gameId, text });
+  return data.sendChatMessage;
 }
 
 export async function offerDraw(token: string, gameId: string): Promise<GameSession> {
