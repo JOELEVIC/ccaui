@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Box, Flex, HStack, Text, Button, IconButton } from "@chakra-ui/react";
 import { useAuth } from "@/lib/auth";
 import { APP_NAME } from "@/lib/appName";
 import { IconSearch, IconBell, IconMail } from "@/components/layout/HeaderIcons";
 import { MemberBadge } from "@/components/luxury/MemberBadge";
+import { useGameNotifications } from "@/lib/useGameNotifications";
 
 const CENTER_NAV: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Play" },
@@ -22,7 +23,9 @@ export interface AppHeaderProps {
 
 export function AppHeader({ onOpenMore, onOpenSearch }: AppHeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuth();
+  const { total: notifCount } = useGameNotifications();
 
   return (
     <Box
@@ -126,20 +129,43 @@ export function AppHeader({ onOpenMore, onOpenSearch }: AppHeaderProps) {
           >
             <IconSearch />
           </IconButton>
-          <IconButton
-            variant="ghost"
-            aria-label="Notifications"
-            display={{ base: "none", sm: "inline-flex" }}
-            size="sm"
-            w="40px"
-            h="40px"
-            minW="40px"
-            color="var(--lux-text-secondary)"
-            _hover={{ color: "var(--lux-gold-bright)", bg: "var(--lux-glass-surface)" }}
-            borderRadius="999px"
-          >
-            <IconBell />
-          </IconButton>
+          <Box position="relative" display={{ base: "none", sm: "inline-flex" }}>
+            <IconButton
+              variant="ghost"
+              aria-label={notifCount > 0 ? `Notifications (${notifCount})` : "Notifications"}
+              onClick={() => router.push("/games")}
+              size="sm"
+              w="40px"
+              h="40px"
+              minW="40px"
+              color={notifCount > 0 ? "var(--lux-gold-bright)" : "var(--lux-text-secondary)"}
+              _hover={{ color: "var(--lux-gold-bright)", bg: "var(--lux-glass-surface)" }}
+              borderRadius="999px"
+            >
+              <IconBell />
+            </IconButton>
+            {notifCount > 0 && (
+              <Box
+                position="absolute"
+                top="2px"
+                right="2px"
+                minW="16px"
+                h="16px"
+                px="4px"
+                borderRadius="999px"
+                bg="#e0655c"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                pointerEvents="none"
+                style={{ boxShadow: "0 0 0 2px var(--lux-obsidian)" }}
+              >
+                <Text fontSize="9px" fontWeight="800" color="#fff" lineHeight="1">
+                  {notifCount > 9 ? "9+" : notifCount}
+                </Text>
+              </Box>
+            )}
+          </Box>
           <IconButton
             variant="ghost"
             aria-label="Messages"

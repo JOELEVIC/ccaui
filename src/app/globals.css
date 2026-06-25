@@ -92,6 +92,8 @@ body {
   50% { opacity: 0.4; }
 }
 
+.lux-pulse { animation: pulse 1.8s ease-in-out infinite; }
+
 @keyframes gradientShift {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }

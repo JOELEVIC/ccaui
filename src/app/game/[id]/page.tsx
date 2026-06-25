@@ -181,6 +181,8 @@ function GamePageInner() {
   // The authoritative move list during live play comes from the subscription (ccanext's
   // game.moves only fills in at game end), so track it here and prefer it when present.
   const [liveMoves, setLiveMoves] = useState<string>("");
+  // Presence countdown: opponent disconnected (forfeit) or the opening auto-abort window.
+  const [awayInfo, setAwayInfo] = useState<{ deadline: number; kind: "abandon" | "abort" } | null>(null);
   const applyClocks = useCallback((s: { whiteMs?: number | null; blackMs?: number | null }) => {
     if (s.whiteMs == null || s.blackMs == null) return;
     setClock({ whiteMs: s.whiteMs, blackMs: s.blackMs, anchorAt: Date.now() });
@@ -386,6 +388,21 @@ function GamePageInner() {
       }
       return;
     }
+    // Presence countdowns — opponent disconnected (forfeit) or opening auto-abort armed.
+    if (payload.event === "OPPONENT_LEFT") {
+      if (payload.deadline) setAwayInfo({ deadline: payload.deadline, kind: "abandon" });
+      return;
+    }
+    if (payload.event === "ABORT_ARMED") {
+      if (payload.deadline) setAwayInfo({ deadline: payload.deadline, kind: "abort" });
+      return;
+    }
+    if (payload.event === "OPPONENT_RETURNED") {
+      setAwayInfo(null);
+      return;
+    }
+    // Any real move or a game end makes a pending countdown moot.
+    if (payload.event === "MOVE" || payload.event === "GAME_END") setAwayInfo(null);
     applyClocks(payload);
     setLiveMoves(payload.moves ?? "");
     const confirmedFen = movesToFen(payload.moves ?? "");
@@ -578,6 +595,9 @@ function GamePageInner() {
     <Box minH="100vh" bg="bgDark" py={6} px={4}>
       {!!token && !connected && !gameEnded && (
         <ConnectingBanner subError={subError} onRetry={() => window.location.reload()} />
+      )}
+      {awayInfo && !gameEnded && (
+        <AwayBanner info={awayInfo} onExpire={() => setAwayInfo(null)} />
       )}
       <Flex
         direction={{ base: "column", lg: "row" }}
@@ -1107,5 +1127,50 @@ function ConnectingBanner({ subError, onRetry }: { subError: string | null; onRe
         </Button>
       )}
     </VStack>
+  );
+}
+
+function AwayBanner({
+  info,
+  onExpire,
+}: {
+  info: { deadline: number; kind: "abandon" | "abort" };
+  onExpire: () => void;
+}) {
+  const [remaining, setRemaining] = useState(() => Math.max(0, info.deadline - Date.now()));
+  useEffect(() => {
+    const tick = () => {
+      const left = Math.max(0, info.deadline - Date.now());
+      setRemaining(left);
+      if (left <= 0) onExpire();
+    };
+    tick();
+    const iv = setInterval(tick, 250);
+    return () => clearInterval(iv);
+  }, [info.deadline, onExpire]);
+
+  const secs = Math.ceil(remaining / 1000);
+  const mmss = `${Math.floor(secs / 60)}:${(secs % 60).toString().padStart(2, "0")}`;
+  const isAbandon = info.kind === "abandon";
+
+  return (
+    <Box
+      mb={3}
+      mx="auto"
+      maxW="560px"
+      px={4}
+      py={2.5}
+      borderRadius="soft"
+      bg="bgCard"
+      borderWidth="1px"
+      borderColor="statusWarning"
+      textAlign="center"
+    >
+      <Text color="statusWarning" fontSize="sm" fontWeight="600">
+        {isAbandon
+          ? `Your opponent disconnected — they forfeit in ${mmss} unless they return.`
+          : `No move yet — the game aborts in ${mmss} if no one plays.`}
+      </Text>
+    </Box>
   );
 }

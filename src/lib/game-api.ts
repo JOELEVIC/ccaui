@@ -58,6 +58,8 @@ export interface GameUpdatePayload {
   serverTime?: number | null;
   chatUserId?: string | null;
   chatText?: string | null;
+  awayUserId?: string | null;
+  deadline?: number | null;
 }
 
 // Clock fields shared by the session-returning operations.

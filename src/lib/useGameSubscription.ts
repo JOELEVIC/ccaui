@@ -9,7 +9,7 @@ const GAME_UPDATED = `
   subscription GameUpdated($gameId: ID!) {
     gameUpdated(gameId: $gameId) {
       gameId event moves status result drawOfferBy move reason
-      whiteMs blackMs serverTime chatUserId chatText
+      whiteMs blackMs serverTime chatUserId chatText awayUserId deadline
     }
   }
 `;
