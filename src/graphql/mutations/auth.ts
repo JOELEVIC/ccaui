@@ -35,6 +35,23 @@ export const LOGIN = gql`
   }
 `;
 
+export const LOGIN_WITH_GOOGLE = gql`
+  mutation LoginWithGoogle($idToken: String!) {
+    loginWithGoogle(idToken: $idToken) {
+      token
+      user {
+        id
+        email
+        username
+        role
+        rating
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
 export const REGISTER = gql`
   mutation Register($input: RegisterInput!) {
     register(input: $input) {

@@ -6,6 +6,7 @@ import { useMutation } from "@apollo/client/react";
 import {
   Box,
   Button,
+  HStack,
   Input,
   Text,
   VStack,
@@ -15,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { toaster } from "@/lib/toaster";
 import { LOGIN } from "@/graphql/mutations/auth";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 
 export interface LoginFormProps {
   onSuccess?: (token: string) => void;
@@ -118,6 +120,14 @@ export function LoginForm({ onSuccess, compact = false, chessPro = false }: Logi
       >
         Sign in
       </Button>
+
+      <HStack w="full" align="center" gap={3}>
+        <Box flex={1} h="1px" bg={chessPro ? "blackAlpha.200" : "blackAlpha.300"} />
+        <Text fontSize="xs" color={chessPro ? "blackAlpha.500" : "blackAlpha.600"} textTransform="uppercase" letterSpacing="0.1em">or</Text>
+        <Box flex={1} h="1px" bg={chessPro ? "blackAlpha.200" : "blackAlpha.300"} />
+      </HStack>
+      <GoogleSignInButton onSuccess={onSuccess} />
+
       {!chessPro && (
         <Text color="blackAlpha.700" fontSize="sm">
           Don&apos;t have an account?{" "}

@@ -9,12 +9,14 @@ import {
   Button,
   Container,
   Heading,
+  HStack,
   Input,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { toaster } from "@/lib/toaster";
 import { REGISTER } from "@/graphql/mutations/auth";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import type { UserRole } from "@/lib/auth";
 
 const ROLES: { value: UserRole; label: string }[] = [
@@ -151,6 +153,14 @@ export default function RegisterPage() {
           <Button type="submit" w="full" bg="gold" color="black" loading={loading} _hover={{ bg: "goldLight" }}>
             Register
           </Button>
+
+          <HStack w="full" align="center" gap={3} py={1}>
+            <Box flex={1} h="1px" bg="blackAlpha.300" />
+            <Text fontSize="xs" color="blackAlpha.600" textTransform="uppercase" letterSpacing="0.1em">or</Text>
+            <Box flex={1} h="1px" bg="blackAlpha.300" />
+          </HStack>
+          <GoogleSignInButton />
+
           <Text color="blackAlpha.700">
             Already have an account?{" "}
             <Link href="/login" style={{ color: "var(--gold)" }}>
