@@ -127,6 +127,7 @@ function lastMoveSquares(moves: string): { from: string; to: string } | null {
 }
 
 const LS_PREMOVE = "dchess-game-premove";
+const LS_PREMOVE_CHAIN = "dchess-game-premove-chain";
 const LS_SOUNDS = "dchess-game-sounds";
 const LS_BOARD_THEME = "dchess-board-theme";
 const LS_CONFIRM = "dchess-game-confirm";
@@ -223,6 +224,8 @@ function GamePageInner() {
   }, []);
   const prevFenForSoundRef = useRef<string | null>(null);
   const [premoveEnabled, setPremoveEnabled] = useState(() => readStoredBool(LS_PREMOVE, false));
+  // false = a single premove (replace on each new one); true = chain multiple premoves.
+  const [premoveChain, setPremoveChain] = useState(() => readStoredBool(LS_PREMOVE_CHAIN, false));
   const [soundsEnabled, setSoundsEnabled] = useState(() => readStoredBool(LS_SOUNDS, true));
   const [boardTheme, setBoardTheme] = useState<BoardThemeKey>(
     () => readStoredStr(LS_BOARD_THEME, "classic") as BoardThemeKey
@@ -233,7 +236,7 @@ function GamePageInner() {
   const [bgTheme, setBgTheme] = useState<BgThemeKey>(() => readStoredStr(LS_BG_THEME, "default") as BgThemeKey);
   // A move staged for confirmation (when confirmMove is on): the UCI string awaiting Confirm/Cancel.
   const [pendingConfirm, setPendingConfirm] = useState<string | null>(null);
-  const [pendingPremove, setPendingPremove] = useState<PendingPremove | null>(null);
+  const [premoveQueue, setPremoveQueue] = useState<PendingPremove[]>([]);
   const startSessionDone = useRef(false);
   const recordedXpRef = useRef(false);
   const [recordGameCompleted] = useMutation<{ recordGameCompleted: { xpAwarded: number } }>(RECORD_GAME_COMPLETED);
@@ -422,10 +425,11 @@ function GamePageInner() {
   useEffect(() => {
     try {
       localStorage.setItem(LS_PREMOVE, premoveEnabled ? "1" : "0");
+      localStorage.setItem(LS_PREMOVE_CHAIN, premoveChain ? "1" : "0");
     } catch {
       /* ignore */
     }
-  }, [premoveEnabled]);
+  }, [premoveEnabled, premoveChain]);
 
   useEffect(() => {
     try {
@@ -470,15 +474,37 @@ function GamePageInner() {
   }, [liveFen, soundsEnabled, gameEnded]);
 
   useEffect(() => {
-    if (gameEnded) setPendingPremove(null);
-  }, [gameEnded]);
+    if (gameEnded || !premoveEnabled) setPremoveQueue([]);
+  }, [gameEnded, premoveEnabled]);
 
   useEffect(() => {
-    if (!isParticipant || !pendingPremove || isMyTurn) return;
-    if (!isPremoveStillValid(fen, myColor, pendingPremove.from, pendingPremove.to)) {
-      setPendingPremove(null);
+    if (!isParticipant || premoveQueue.length === 0 || isMyTurn) return;
+    // If the head premove became illegal (e.g. the opponent moved), cancel the whole chain.
+    const head = premoveQueue[0];
+    if (!isPremoveStillValid(fen, myColor, head.from, head.to)) {
+      setPremoveQueue([]);
     }
-  }, [fen, isMyTurn, pendingPremove, isParticipant, myColor]);
+  }, [fen, isMyTurn, premoveQueue, isParticipant, myColor]);
+
+  // Queue a premove: replace (single mode) or append (chain mode).
+  const handlePremove = useCallback(
+    (p: PendingPremove) => {
+      setPremoveQueue((q) => (premoveChain ? [...q, p] : [p]));
+    },
+    [premoveChain],
+  );
+
+  // Position premoves are computed against: after the queued premoves when chaining.
+  const premoveBaseFen = useMemo(() => {
+    if (!premoveChain || premoveQueue.length === 0) return boardFen;
+    let f = boardFen;
+    for (const p of premoveQueue) {
+      const next = applyUciToFen(f, p.from + p.to + (p.promotion ?? ""));
+      if (!next) break;
+      f = next;
+    }
+    return f;
+  }, [premoveChain, premoveQueue, boardFen]);
 
   // Start CCA game session when game is loaded and user is participant (once per mount)
   useEffect(() => {
@@ -626,34 +652,33 @@ function GamePageInner() {
   }, []);
 
   useEffect(() => {
-    if (!isParticipant || gameEnded || movePending || !isMyTurn || !pendingPremove) return;
+    if (!isParticipant || gameEnded || movePending || !isMyTurn || premoveQueue.length === 0) return;
+    const head = premoveQueue[0];
     const chess = new Chess();
     try {
       chess.load(fen);
     } catch {
-      setPendingPremove(null);
+      setPremoveQueue([]);
       return;
     }
     if (chess.turn() !== myColor) return;
-    const promotion = (pendingPremove.promotion as "q" | "r" | "b" | "n" | undefined) || "q";
+    const promotion = (head.promotion as "q" | "r" | "b" | "n" | undefined) || "q";
     let m;
     try {
-      m = chess.move({
-        from: pendingPremove.from,
-        to: pendingPremove.to,
-        promotion,
-      });
+      m = chess.move({ from: head.from, to: head.to, promotion });
     } catch {
       m = null;
     }
     if (!m) {
-      setPendingPremove(null);
+      // Head premove no longer legal — cancel the whole chain.
+      setPremoveQueue([]);
       return;
     }
     const uci = m.promotion ? `${m.from}${m.to}${m.promotion.toLowerCase()}` : `${m.from}${m.to}`;
-    setPendingPremove(null);
+    // Pop the head; any remaining premoves fire on subsequent turns.
+    setPremoveQueue((q) => q.slice(1));
     handleMove(uci, true);
-  }, [isParticipant, gameEnded, movePending, isMyTurn, pendingPremove, fen, myColor, handleMove]);
+  }, [isParticipant, gameEnded, movePending, isMyTurn, premoveQueue, fen, myColor, handleMove]);
 
   const handleResign = () => {
     if (!confirm("Resign this game?")) return;
@@ -828,8 +853,9 @@ function GamePageInner() {
                 allowMove={!gameEnded && !!isParticipant && !browsing}
                 lastMove={browsing ? null : lastSq}
                 premoveEnabled={premoveEnabled}
-                pendingPremove={pendingPremove}
-                onPendingPremove={setPendingPremove}
+                premoveQueue={premoveQueue}
+                premoveBaseFen={premoveBaseFen}
+                onPendingPremove={handlePremove}
                 extraSquareStyles={browsing ? reviewExtraSquares : undefined}
                 reviewArrows={browsing ? reviewArrows : undefined}
                 boardTheme={boardTheme}
@@ -925,6 +951,31 @@ function GamePageInner() {
               {isParticipant && !gameEnded && (
                 <HStack flexWrap="wrap" gap={1.5} align="center">
                   <ToggleChip label="Premove" active={premoveEnabled} onClick={() => setPremoveEnabled((v) => !v)} />
+                  {premoveEnabled && (
+                    <ToggleChip
+                      label="Chain"
+                      active={premoveChain}
+                      onClick={() => setPremoveChain((v) => !v)}
+                    />
+                  )}
+                  {premoveQueue.length > 0 && (
+                    <Box
+                      as="button"
+                      onClick={() => setPremoveQueue([])}
+                      px={2}
+                      py={1}
+                      borderRadius="full"
+                      fontSize="2xs"
+                      fontWeight="700"
+                      letterSpacing="0.04em"
+                      color="statusWarning"
+                      borderWidth="1px"
+                      borderColor="statusWarning"
+                      title="Cancel queued premoves"
+                    >
+                      ✕ {premoveQueue.length} premove{premoveQueue.length > 1 ? "s" : ""}
+                    </Box>
+                  )}
                   <ToggleChip label="Confirm" active={confirmMove} onClick={() => setConfirmMove((v) => !v)} />
                   <ToggleChip label="Auto-Q" active={autoQueen} onClick={() => setAutoQueen((v) => !v)} />
                   {premoveEnabled && (

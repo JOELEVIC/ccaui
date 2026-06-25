@@ -25,7 +25,10 @@ interface GameBoardProps {
   /** Highlight last move (gold) — squares in algebraic notation */
   lastMove?: { from: string; to: string } | null;
   premoveEnabled?: boolean;
-  pendingPremove?: PendingPremove | null;
+  /** Queued premoves — one for single mode, several when chaining. */
+  premoveQueue?: PendingPremove[];
+  /** Position premoves are computed against (after the queued premoves, for chaining). Defaults to `fen`. */
+  premoveBaseFen?: string;
   onPendingPremove?: (p: PendingPremove) => void;
   /** Drawn on top of last-move / selection highlights (e.g. review mode). */
   extraSquareStyles?: Record<string, React.CSSProperties>;
@@ -102,7 +105,8 @@ export function GameBoard({
   allowMove,
   lastMove,
   premoveEnabled = false,
-  pendingPremove = null,
+  premoveQueue = [],
+  premoveBaseFen,
   onPendingPremove,
   extraSquareStyles,
   reviewArrows,
@@ -140,6 +144,9 @@ export function GameBoard({
   }, [fen]);
 
   const myColor = orientation === "white" ? "w" : "b";
+  // Premoves are computed against the position AFTER any already-queued premoves
+  // (so chains stack); falls back to the live board when nothing is queued.
+  const premoveFen = premoveBaseFen ?? fen;
   const canPlayNow = allowMove && isMyTurn && !movePending;
   const premoveActive = !!(allowMove && premoveEnabled && onPendingPremove && !isMyTurn && !movePending);
 
@@ -203,7 +210,7 @@ export function GameBoard({
   const executePremove = useCallback(
     (sourceSquare: string, targetSquare: string) => {
       if (!premoveActive || !onPendingPremove) return false;
-      const m = findPremoveMove(fen, myColor, sourceSquare as Square, targetSquare as Square);
+      const m = findPremoveMove(premoveFen, myColor, sourceSquare as Square, targetSquare as Square);
       if (!m) return false;
       onPendingPremove({
         from: m.from,
@@ -212,7 +219,7 @@ export function GameBoard({
       });
       return true;
     },
-    [premoveActive, onPendingPremove, fen, myColor, premovePromotion]
+    [premoveActive, onPendingPremove, premoveFen, myColor, premovePromotion]
   );
 
   const onDrop = useCallback(
@@ -263,9 +270,9 @@ export function GameBoard({
 
   const premoveLegalTargets = useMemo(() => {
     if (!selectedSquare || !premoveActive) return new Set<string>();
-    const moves = legalMovesIfSideToMove(fen, myColor).filter((m) => m.from === selectedSquare);
+    const moves = legalMovesIfSideToMove(premoveFen, myColor).filter((m) => m.from === selectedSquare);
     return new Set(moves.map((m) => m.to));
-  }, [fen, myColor, selectedSquare, premoveActive]);
+  }, [premoveFen, myColor, selectedSquare, premoveActive]);
 
   const isMyPieceType = useCallback(
     (pieceType: string) => {
@@ -301,7 +308,7 @@ export function GameBoard({
       if (premoveActive && onPendingPremove) {
         if (selectedSquare) {
           if (premoveLegalTargets.has(square)) {
-            const m = findPremoveMove(fen, myColor, selectedSquare as Square, square as Square);
+            const m = findPremoveMove(premoveFen, myColor, selectedSquare as Square, square as Square);
             if (m) {
               onPendingPremove({
                 from: m.from,
@@ -333,7 +340,7 @@ export function GameBoard({
       premoveLegalTargets,
       isMyPieceType,
       executeMove,
-      fen,
+      premoveFen,
       myColor,
       premovePromotion,
     ]
@@ -348,14 +355,9 @@ export function GameBoard({
     const styles: Record<string, React.CSSProperties> = {};
     if (lastMove?.from) styles[lastMove.from] = { backgroundColor: LAST_MOVE_HIGHLIGHT };
     if (lastMove?.to) styles[lastMove.to] = { backgroundColor: LAST_MOVE_HIGHLIGHT };
-    if (pendingPremove?.from) {
-      styles[pendingPremove.from] = { backgroundColor: PREMOVE_HIGHLIGHT };
-    }
-    if (pendingPremove?.to) {
-      styles[pendingPremove.to] = {
-        ...styles[pendingPremove.to],
-        backgroundColor: PREMOVE_HIGHLIGHT,
-      };
+    for (const pm of premoveQueue) {
+      styles[pm.from] = { ...styles[pm.from], backgroundColor: PREMOVE_HIGHLIGHT };
+      styles[pm.to] = { ...styles[pm.to], backgroundColor: PREMOVE_HIGHLIGHT };
     }
     if (selectedSquare) {
       styles[selectedSquare] = {
@@ -382,7 +384,7 @@ export function GameBoard({
     legalTargets,
     premoveLegalTargets,
     lastMove,
-    pendingPremove,
+    premoveQueue,
     canPlayNow,
     extraSquareStyles,
     LAST_MOVE_HIGHLIGHT,

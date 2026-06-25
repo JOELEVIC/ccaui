@@ -559,7 +559,7 @@ export default function PlayBotPage() {
               onMove={handleMove}
               allowMove={!gameResult && atHead && !botThinking}
               premoveEnabled={premoveEnabled}
-              pendingPremove={pendingPremove}
+              premoveQueue={pendingPremove ? [pendingPremove] : []}
               onPendingPremove={setPendingPremove}
             />
           </HStack>
