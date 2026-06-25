@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useCallback } from "react";
+import { useCallback } from "react";
 import { Box, Button, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { LessonRunner } from "@/components/learn/LessonRunner";
@@ -8,8 +8,8 @@ import { ENTRY_WORLD } from "@/lib/learn/entryCurriculum";
 import { flattenLessons } from "@/lib/learn/types";
 import { useLearnProgress } from "@/lib/learn/useLearnProgress";
 
-export default function LessonPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function LessonPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const flat = flattenLessons(ENTRY_WORLD);
   const idx = flat.findIndex((x) => x.lesson.id === id);
   const { complete } = useLearnProgress(ENTRY_WORLD);
