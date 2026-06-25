@@ -93,6 +93,7 @@ export function LessonBoard({
         options={{
           position: fen,
           boardOrientation: orientation,
+          animationDurationInMs: 350,
           allowDragging: interactive,
           onPieceDrop: ({ sourceSquare, targetSquare }) =>
             interactive && targetSquare ? tryMove(sourceSquare, targetSquare) : false,

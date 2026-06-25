@@ -19,6 +19,12 @@ export type Goal =
 export type StepBase = {
   /** Spoken narration; falls back to `text` when omitted. */
   say?: string;
+  /**
+   * If set, the board first shows this position, then animates to `board` —
+   * replaying a move so the learner sees what just happened (e.g. the two-square
+   * pawn dash that makes en passant possible).
+   */
+  animateFrom?: string;
 };
 
 export type SayStep = StepBase & {

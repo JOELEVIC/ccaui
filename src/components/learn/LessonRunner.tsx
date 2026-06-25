@@ -10,6 +10,37 @@ import type { Lesson, LessonStep } from "@/lib/learn/types";
 
 const PIECE_NAME: Record<string, string> = { p: "pawn", n: "knight", b: "bishop", r: "rook", q: "queen", k: "king" };
 
+/** Expand a FEN board field to a square→piece map. */
+function expandBoard(fen: string): Record<string, string> {
+  const rows = (fen.split(" ")[0] ?? "").split("/");
+  const files = "abcdefgh";
+  const map: Record<string, string> = {};
+  for (let r = 0; r < 8; r++) {
+    const rank = 8 - r;
+    let f = 0;
+    for (const ch of rows[r] ?? "") {
+      if (/\d/.test(ch)) f += parseInt(ch, 10);
+      else map[files[f++] + rank] = ch;
+    }
+  }
+  return map;
+}
+
+/** The from/to squares of the move between two positions (for a last-move highlight). */
+function diffMove(fromFen: string, toFen: string): { from: string; to: string } | null {
+  const a = expandBoard(fromFen);
+  const b = expandBoard(toFen);
+  let from: string | null = null;
+  let to: string | null = null;
+  const squares = Array.from(new Set(Object.keys(a).concat(Object.keys(b))));
+  for (const sq of squares) {
+    if (a[sq] && !b[sq]) from = sq;
+    else if (!a[sq] && b[sq]) to = sq;
+    else if (a[sq] && b[sq] && a[sq] !== b[sq]) to = sq;
+  }
+  return from && to ? { from, to } : null;
+}
+
 /** Is `square` attacked by `attacker` in the given position? (piece sitting there ⇒ it's hanging.) */
 function landsAttacked(fen: string, square: string, attacker: "w" | "b"): boolean {
   const parts = fen.split(" ");
@@ -41,6 +72,7 @@ export function LessonRunner({
   const [captures, setCaptures] = useState(0);
   const [done, setDone] = useState(false);
   const [muted, setMutedState] = useState(false);
+  const [animating, setAnimating] = useState(false);
   const completedRef = useRef(false);
 
   const step: LessonStep | undefined = lesson.steps[i];
@@ -49,14 +81,33 @@ export function LessonRunner({
     setMutedState(isMuted());
   }, []);
 
-  // On entering each step: reset the board/UI and narrate.
+  // On entering each step: reset the board/UI and narrate. When the step has an
+  // `animateFrom`, first show that position then slide to `board` so the learner
+  // sees the move replay (e.g. the pawn's two-square dash) before they act.
   useEffect(() => {
     if (!step) return;
-    setFen((prev) => step.board ?? prev);
     setFlash(null);
-    setLastMove(null);
     setHint(null);
     setCaptures(0);
+    setLastMove(null);
+    if (step.animateFrom && step.board) {
+      setAnimating(true);
+      setFen(step.animateFrom);
+      const target = step.board;
+      const mv = diffMove(step.animateFrom, target);
+      const t = window.setTimeout(() => {
+        setFen(target);
+        if (mv) setLastMove(mv);
+        setAnimating(false);
+      }, 700);
+      speak(step.say ?? step.text);
+      return () => {
+        window.clearTimeout(t);
+        cancelSpeech();
+      };
+    }
+    setAnimating(false);
+    setFen((prev) => step.board ?? prev);
     speak(step.say ?? step.text);
     return () => cancelSpeech();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -170,7 +221,7 @@ export function LessonRunner({
 
   const orientation = (step?.kind !== undefined && "orientation" in step ? step.orientation : undefined) ?? "white";
   const spotlight = step && "spotlight" in step ? step.spotlight ?? [] : [];
-  const interactive = !!step && step.kind === "do" && !done;
+  const interactive = !!step && step.kind === "do" && !done && !animating;
   const stepNo = Math.min(i + 1, lesson.steps.length);
 
   return (
