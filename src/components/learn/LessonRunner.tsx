@@ -200,7 +200,7 @@ export function LessonRunner({
             </Button>
             <Button size="xs" variant="outline" borderColor="blackAlpha.300" color="textSecondary" borderRadius="soft"
               onClick={toggleMute}>
-              {muted ? "🔇 Muted" : "🔊 Sound"}
+              {muted ? "🔇 Sound off" : "🔊 Sound on"}
             </Button>
           </HStack>
         )}

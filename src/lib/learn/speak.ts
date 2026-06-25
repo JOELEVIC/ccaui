@@ -10,11 +10,12 @@ export function isSpeechSupported(): boolean {
 }
 
 export function isMuted(): boolean {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined") return true;
   try {
-    return localStorage.getItem(LS_MUTE) === "1";
+    // Muted by default — narration only plays once the user explicitly enables sound ("0").
+    return localStorage.getItem(LS_MUTE) !== "0";
   } catch {
-    return false;
+    return true;
   }
 }
 
