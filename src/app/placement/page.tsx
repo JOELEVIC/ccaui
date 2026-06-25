@@ -15,6 +15,7 @@ import {
 } from "@/components/luxury/LuxuryPrimitives";
 import { PLACEMENT_GAMES, SEED_CHOICES, seedElo, nextElo, pickBot } from "@/lib/placement/ladder";
 import { analyzePlacementGame } from "@/lib/placement/analyzeGame";
+import { preflightEngine, type EnginePreflight } from "@/lib/engineResource";
 import {
   startPlacementRun,
   savePlacementProgress,
@@ -105,6 +106,10 @@ export default function PlacementPage() {
   const [estimate, setEstimate] = useState<PlacementEstimate | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Engine pre-flight: check the wasm resource + backend, warm the backend, and
+  // set up durable caching BEFORE the user can start.
+  const [preflight, setPreflight] = useState<EnginePreflight | null>(null);
+
   const gamesRef = useRef<PlacementGamePayload[]>([]);
   const epochRef = useRef(0);
   const botRunningRef = useRef(false);
@@ -117,6 +122,17 @@ export default function PlacementPage() {
 
   const turnIsWhite = fen.split(" ")[1] === "w";
   const isUserTurn = userColor === "w" ? turnIsWhite : !turnIsWhite;
+
+  // ── engine pre-flight (resource + backend availability, warm, durable cache) ──
+  useEffect(() => {
+    let alive = true;
+    void preflightEngine().then((p) => {
+      if (alive) setPreflight(p);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   // ── start / resume ──────────────────────────────────────────────────────
   const beginRun = useCallback(async (chosenSeed?: string) => {
@@ -309,6 +325,9 @@ export default function PlacementPage() {
 
   // ── render ────────────────────────────────────────────────────────────────
   if (phase === "intro") {
+    const checking = preflight === null;
+    const engineReady = preflight?.ok ?? false;
+    const wasmReady = preflight?.wasm === "ready";
     return (
       <Shell>
         <VStack gap={5} maxW="480px" mx="auto" textAlign="center" py={{ base: 8, md: 16 }}>
@@ -335,9 +354,27 @@ export default function PlacementPage() {
               ))}
             </Flex>
           </Box>
-          <LuxuryButton variant="gold" size="lg" onClick={() => beginRun(seedKey)}>
-            Start placement
+          <LuxuryButton
+            variant="gold"
+            size="lg"
+            disabled={checking || !engineReady}
+            onClick={() => beginRun(seedKey)}
+          >
+            {checking ? "Preparing engine…" : "Start placement"}
           </LuxuryButton>
+          {checking ? (
+            <Text fontSize="xs" color="var(--lux-text-muted)" letterSpacing="0.12em">
+              ◇ Checking analysis engine…
+            </Text>
+          ) : !engineReady ? (
+            <Text fontSize="sm" color="#e0655c">
+              The analysis engine isn&apos;t available right now. Check your connection and try again.
+            </Text>
+          ) : !wasmReady ? (
+            <Text fontSize="xs" color="#e8c14b">
+              Running in server mode — analysis may be a little slower than usual.
+            </Text>
+          ) : null}
           {error ? <Text color="#e0655c" fontSize="sm">{error}</Text> : null}
         </VStack>
       </Shell>
