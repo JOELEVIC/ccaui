@@ -178,6 +178,9 @@ function GamePageInner() {
   // In-game chat (players + spectators).
   const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
   const chatIdRef = useRef(0);
+  // The authoritative move list during live play comes from the subscription (ccanext's
+  // game.moves only fills in at game end), so track it here and prefer it when present.
+  const [liveMoves, setLiveMoves] = useState<string>("");
   const applyClocks = useCallback((s: { whiteMs?: number | null; blackMs?: number | null }) => {
     if (s.whiteMs == null || s.blackMs == null) return;
     setClock({ whiteMs: s.whiteMs, blackMs: s.blackMs, anchorAt: Date.now() });
@@ -212,7 +215,9 @@ function GamePageInner() {
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewStep, setReviewStep] = useState(0);
   const analysis = game ? parseGameAnalysis(game.analysisJson) : null;
-  const lastSq = game ? lastMoveSquares(game.moves ?? "") : null;
+  // Live subscription moves win during play; fall back to the persisted moves for ended/historical games.
+  const movesStr = liveMoves || game?.moves || "";
+  const lastSq = movesStr ? lastMoveSquares(movesStr) : null;
   const isParticipant = user && game && (game.white?.id === user.id || game.black?.id === user.id);
   const isWhite = user && game?.white?.id === user.id;
   const orientation = isWhite ? "white" : "black";
@@ -229,7 +234,7 @@ function GamePageInner() {
   const topColor: "w" | "b" = orientation === "white" ? "b" : "w";
   const bottomColor: "w" | "b" = orientation === "white" ? "w" : "b";
   const clockRunning = (c: "w" | "b") => status === "ACTIVE" && !gameEnded && turnColor === c;
-  const sanMoves = useMemo(() => parseMoveTokens(game?.moves ?? ""), [game?.moves]);
+  const sanMoves = useMemo(() => parseMoveTokens(movesStr), [movesStr]);
   const hasReview = hasMoveReviewData(analysis);
 
   useEffect(() => {
@@ -382,6 +387,7 @@ function GamePageInner() {
       return;
     }
     applyClocks(payload);
+    setLiveMoves(payload.moves ?? "");
     const confirmedFen = movesToFen(payload.moves ?? "");
     setFen(confirmedFen);
     // Drop the optimistic prediction once the server has caught up to (or past) it,
