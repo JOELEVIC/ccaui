@@ -72,14 +72,15 @@ export default function GamesPage() {
   const [createGame, { loading: creating }] = useMutation<{ createGame: { id: string } }>(CREATE_GAME);
 
   const liveGames = liveData?.liveGames ?? [];
-  const myGames = myData?.myGames ?? [];
+  // Hide cancelled/abandoned games so they don't clutter the list.
+  const myGames = (myData?.myGames ?? []).filter((g) => g.status !== "ABANDONED");
   const users = usersData?.users ?? [];
 
   async function handleCreateGame(e: React.FormEvent) {
     e.preventDefault();
     const meId = user?.id;
     if (!meId) {
-      toaster.create({ title: "Sign in to start a match", type: "error" });
+      toaster.create({ title: "Sign in to play", type: "error" });
       return;
     }
     if (!opponentId || !timeControl) {
@@ -94,15 +95,14 @@ export default function GamesPage() {
         variables: { input: { whiteId, blackId, timeControl } },
       });
       if (error) {
-        toaster.create({ title: error.message || "Failed to create game", type: "error" });
+        toaster.create({ title: error.message || "Couldn't start the game", type: "error" });
         return;
       }
       if (data?.createGame?.id) {
-        toaster.create({ title: "Game created", type: "success" });
         router.push(`/game/${data.createGame.id}`);
       }
     } catch (err) {
-      toaster.create({ title: err instanceof Error ? err.message : "Failed to create game", type: "error" });
+      toaster.create({ title: err instanceof Error ? err.message : "Couldn't start the game", type: "error" });
     }
   }
 
@@ -205,7 +205,7 @@ export default function GamesPage() {
           {/* Start a match form */}
           <GlassCard hero>
             <Box as="form" onSubmit={handleCreateGame} px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }}>
-              <LuxuryHeading size="md">New match</LuxuryHeading>
+              <LuxuryHeading size="md">Play a friend</LuxuryHeading>
 
               <Box mt={5}>
                 <PlayerField
@@ -298,7 +298,7 @@ export default function GamesPage() {
 
               <Box mt={6}>
                 <LuxuryButton variant="gold" size="md" glyph="▸" type="submit" disabled={creating}>
-                  {creating ? "Creating…" : "Create match"}
+                  {creating ? "Starting…" : "▸ Play"}
                 </LuxuryButton>
               </Box>
             </Box>

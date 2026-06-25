@@ -440,9 +440,7 @@ function GamePageInner() {
   return (
     <Box minH="100vh" bg="bgDark" py={6} px={4}>
       {isParticipant && !connected && !gameEnded && (
-        <Text color="statusWarning" fontSize="sm" textAlign="center" mb={2}>
-          Connecting to live server…
-        </Text>
+        <ConnectingBanner subError={subError} onRetry={() => window.location.reload()} />
       )}
       <Flex
         direction={{ base: "column", lg: "row" }}
@@ -897,5 +895,41 @@ function StatRow({ label, value }: { label: string; value: number }) {
         {value}
       </Text>
     </HStack>
+  );
+}
+
+function ConnectingBanner({ subError, onRetry }: { subError: string | null; onRetry: () => void }) {
+  // After a few seconds with no connection, explain the likely wait (the live
+  // server can cold-start) and offer a retry instead of an endless spinner.
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 12000);
+    return () => clearTimeout(t);
+  }, []);
+
+  const isError = !!subError;
+  return (
+    <VStack gap={2} mb={3}>
+      <Text color={isError ? "statusWarning" : "textSecondary"} fontSize="sm" textAlign="center">
+        {isError
+          ? `Couldn't reach the live server — ${subError}.`
+          : slow
+            ? "Waking the live server — this can take up to a minute…"
+            : "Connecting to live server…"}
+      </Text>
+      {(isError || slow) && (
+        <Button
+          size="xs"
+          variant="outline"
+          borderColor="blackAlpha.300"
+          color="textPrimary"
+          borderRadius="soft"
+          _hover={{ borderColor: "gold", color: "gold" }}
+          onClick={onRetry}
+        >
+          Retry
+        </Button>
+      )}
+    </VStack>
   );
 }
