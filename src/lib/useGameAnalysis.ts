@@ -12,7 +12,7 @@ import {
   classifyByWinDelta,
 } from "./gameAnalysisReview";
 
-const CACHE_PREFIX = "dchess-analysis-v1-";
+const CACHE_PREFIX = "dchess-analysis-v2-";
 const MATE_CP = 1000; // eval-graph clamp for mate scores
 
 export interface AnalysisProgress {
@@ -149,9 +149,25 @@ export function useGameAnalysis() {
       for (let i = 0; i < positions; i++) {
         if (cancelRef.current) break;
         const r = await analyse(fens[i], REVIEW_DEPTH);
-        evalsWhite[i] = { cp: r.cp, mate: r.mate };
+        let cp = r.cp;
+        let mate = r.mate;
+        // Terminal position: engines report `mate 0` at a checkmate, which loses its
+        // sign. The side to move is the one that's mated (and lost), so resolve it
+        // from white's perspective explicitly.
+        try {
+          const probe = new Chess();
+          probe.load(fens[i]);
+          if (probe.isCheckmate()) {
+            const whiteToMove = fens[i].split(" ")[1] === "w";
+            cp = null;
+            mate = whiteToMove ? -1 : 1; // white mated → black wins; black mated → white wins
+          }
+        } catch {
+          /* ignore */
+        }
+        evalsWhite[i] = { cp, mate };
         bestUci[i] = r.bestMove;
-        evalSeries.push({ ply: i, cp: graphCp(r.cp, r.mate) });
+        evalSeries.push({ ply: i, cp: graphCp(cp, mate) });
 
         // Classify the move that LED to position i (move index i-1), using the
         // best move + eval of the position BEFORE it (already computed at i-1).
