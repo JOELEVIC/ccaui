@@ -33,10 +33,14 @@ import { GameChat, type ChatMsg } from "@/components/chess/GameChat";
 import { parseMoveTokens } from "@/lib/gameMoveParsing";
 import {
   fenAfterMoves,
-  hasMoveReviewData,
   parseGameAnalysis,
   sanToArrow,
+  CLASSIFICATION_META,
+  type SideStats,
 } from "@/lib/gameAnalysisReview";
+import { useGameAnalysis } from "@/lib/useGameAnalysis";
+import { EvaluationBar } from "@/components/chess/EvaluationBar";
+import { CREATE_CHALLENGE } from "@/graphql/challenges";
 import { GameOverDialog } from "@/components/chess/GameOverDialog";
 import type { Arrow } from "react-chessboard";
 
@@ -48,6 +52,7 @@ const GAME_QUERY = gql`
       result
       moves
       timeControl
+      rated
       analysisJson
       white {
         id
@@ -194,6 +199,7 @@ function GamePageInner() {
   const startSessionDone = useRef(false);
   const recordedXpRef = useRef(false);
   const [recordGameCompleted] = useMutation<{ recordGameCompleted: { xpAwarded: number } }>(RECORD_GAME_COMPLETED);
+  const [createChallenge] = useMutation<{ createChallenge: { id: string } }>(CREATE_CHALLENGE);
 
   const { data, loading } = useQuery<{
     game: {
@@ -202,6 +208,7 @@ function GamePageInner() {
       result?: string | null;
       moves: string;
       timeControl: string;
+      rated?: boolean;
       analysisJson?: string | null;
       white: { id: string; username: string; rating: number };
       black: { id: string; username: string; rating: number };
@@ -216,7 +223,10 @@ function GamePageInner() {
   const [gameOverModalDismissed, setGameOverModalDismissed] = useState(false);
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewStep, setReviewStep] = useState(0);
-  const analysis = game ? parseGameAnalysis(game.analysisJson) : null;
+  const serverAnalysis = game ? parseGameAnalysis(game.analysisJson) : null;
+  // In-browser Stockfish review; falls back to any stored server analysis.
+  const review = useGameAnalysis();
+  const analysis = review.analysis ?? serverAnalysis;
   // Live subscription moves win during play; fall back to the persisted moves for ended/historical games.
   const movesStr = liveMoves || game?.moves || "";
   const lastSq = movesStr ? lastMoveSquares(movesStr) : null;
@@ -237,7 +247,7 @@ function GamePageInner() {
   const bottomColor: "w" | "b" = orientation === "white" ? "w" : "b";
   const clockRunning = (c: "w" | "b") => status === "ACTIVE" && !gameEnded && turnColor === c;
   const sanMoves = useMemo(() => parseMoveTokens(movesStr), [movesStr]);
-  const hasReview = hasMoveReviewData(analysis);
+  const canAnalyze = gameEnded && sanMoves.length > 0;
 
   useEffect(() => {
     setGameOverModalDismissed(false);
@@ -248,9 +258,8 @@ function GamePageInner() {
   const wantsReviewUrl = searchParams.get("review") === "1";
 
   useEffect(() => {
-    if (!gameEnded || !wantsReviewUrl) return;
-    if (hasMoveReviewData(analysis)) setReviewMode(true);
-  }, [gameEnded, wantsReviewUrl, analysis]);
+    if (gameEnded && wantsReviewUrl) setReviewMode(true);
+  }, [gameEnded, wantsReviewUrl]);
 
   const showGameOverModal = gameEnded && !gameOverModalDismissed && !wantsReviewUrl;
   const postGameStatsVisible = gameEnded && !showGameOverModal;
@@ -263,6 +272,12 @@ function GamePageInner() {
   const reviewRow =
     reviewMode && analysis?.moveReviews && reviewStep >= 0 && reviewStep < analysis.moveReviews.length
       ? analysis.moveReviews[reviewStep]
+      : null;
+
+  // Eval (white POV) of the position currently shown in review, for the eval bar.
+  const reviewEval =
+    reviewMode && analysis?.evalSeries && analysis.evalSeries.length > 0
+      ? { cp: analysis.evalSeries[Math.min(reviewStep, analysis.evalSeries.length - 1)]?.cp ?? null, mate: null }
       : null;
 
   const { reviewArrows, reviewExtraSquares } = useMemo(() => {
@@ -296,13 +311,6 @@ function GamePageInner() {
     return { reviewArrows: arrows, reviewExtraSquares: squares };
   }, [reviewMode, reviewRow, reviewStep, sanMoves]);
 
-  const enterReview = useCallback(() => {
-    setGameOverModalDismissed(true);
-    setReviewMode(true);
-    setReviewStep(0);
-    router.replace(`/game/${id}?review=1`, { scroll: false });
-  }, [id, router]);
-
   const exitReview = useCallback(() => {
     setReviewMode(false);
     setReviewStep(0);
@@ -312,6 +320,38 @@ function GamePageInner() {
   const dismissGameOverModal = useCallback(() => {
     setGameOverModalDismissed(true);
   }, []);
+
+  const reviewRunRef = useRef(review.run);
+  reviewRunRef.current = review.run;
+  // Enter review and kick off the in-browser Stockfish analysis (if not already done).
+  const analyzeGame = useCallback(() => {
+    setGameOverModalDismissed(true);
+    setReviewMode(true);
+    setReviewStep(0);
+    router.replace(`/game/${id}?review=1`, { scroll: false });
+    if (sanMoves.length > 0) reviewRunRef.current(sanMoves);
+  }, [id, router, sanMoves]);
+
+  // Rematch: challenge the same opponent again, swapping colours, same time control + mode.
+  const handleRematch = useCallback(() => {
+    if (!game || !user) return;
+    const oppId = game.white?.id === user.id ? game.black?.id : game.white?.id;
+    if (!oppId) return;
+    // I had whatever colour; offer the opponent that colour so we swap.
+    const iWasWhite = game.white?.id === user.id;
+    const creatorColor = iWasWhite ? "black" : "white";
+    createChallenge({
+      variables: {
+        input: { opponentId: oppId, creatorColor, timeControl: game.timeControl, rated: game.rated ?? true },
+      },
+    })
+      .then(() => {
+        const oppName = game.white?.id === user.id ? game.black?.username : game.white?.username;
+        toaster.create({ title: `Rematch sent to ${oppName ?? "your opponent"}`, type: "success" });
+        router.push("/games");
+      })
+      .catch((err) => toaster.create({ title: err?.message ?? "Couldn't send rematch", type: "error" }));
+  }, [game, user, createChallenge, router]);
 
   useEffect(() => {
     if (!game) return;
@@ -636,20 +676,27 @@ function GamePageInner() {
             </HStack>
           </Box>
 
-          <GameBoard
-            fen={reviewBoardFen}
-            orientation={orientation}
-            isMyTurn={!!isParticipant && !gameEnded && isMyTurn}
-            movePending={movePending}
-            onMove={handleMove}
-            allowMove={!gameEnded && !!isParticipant}
-            lastMove={reviewMode ? null : lastSq}
-            premoveEnabled={premoveEnabled}
-            pendingPremove={pendingPremove}
-            onPendingPremove={setPendingPremove}
-            extraSquareStyles={reviewMode ? reviewExtraSquares : undefined}
-            reviewArrows={reviewMode ? reviewArrows : undefined}
-          />
+          <HStack gap={2} align="stretch">
+            {reviewMode && reviewEval && (
+              <EvaluationBar evaluation={reviewEval} orientation={orientation} />
+            )}
+            <Box flex={1} minW={0}>
+              <GameBoard
+                fen={reviewBoardFen}
+                orientation={orientation}
+                isMyTurn={!!isParticipant && !gameEnded && isMyTurn}
+                movePending={movePending}
+                onMove={handleMove}
+                allowMove={!gameEnded && !!isParticipant}
+                lastMove={reviewMode ? null : lastSq}
+                premoveEnabled={premoveEnabled}
+                pendingPremove={pendingPremove}
+                onPendingPremove={setPendingPremove}
+                extraSquareStyles={reviewMode ? reviewExtraSquares : undefined}
+                reviewArrows={reviewMode ? reviewArrows : undefined}
+              />
+            </Box>
+          </HStack>
 
           <Box
             py={2}
@@ -774,137 +821,154 @@ function GamePageInner() {
               pb={1}
               css={{ scrollbarWidth: "thin" }}
             >
-              {sanMoves.map((m, i) => (
-                <Text
-                  key={i}
-                  color={
-                    reviewMode && (i === reviewStep || (reviewStep === sanMoves.length && i === sanMoves.length - 1))
-                      ? "gold"
-                      : "textSecondary"
-                  }
-                  fontWeight={
-                    reviewMode && (i === reviewStep || (reviewStep === sanMoves.length && i === sanMoves.length - 1))
-                      ? "700"
-                      : "normal"
-                  }
-                  fontSize="sm"
-                  whiteSpace="nowrap"
-                  flexShrink={0}
-                  cursor={reviewMode && hasReview ? "pointer" : undefined}
-                  onClick={reviewMode && hasReview ? () => setReviewStep(i) : undefined}
-                >
-                  {i % 2 === 0 ? `${Math.floor(i / 2) + 1}. ` : ""}
-                  {m}
-                </Text>
-              ))}
+              {sanMoves.map((m, i) => {
+                const isCurrent =
+                  reviewMode && (i === reviewStep || (reviewStep === sanMoves.length && i === sanMoves.length - 1));
+                const cls = analysis?.moveReviews?.[i]?.classification;
+                const clsColor = cls ? CLASSIFICATION_META[cls].color : undefined;
+                const mark =
+                  cls === "blunder" || cls === "mistake" || cls === "inaccuracy" ? CLASSIFICATION_META[cls].symbol : "";
+                return (
+                  <Text
+                    key={i}
+                    color={isCurrent ? "gold" : clsColor ?? "textSecondary"}
+                    fontWeight={isCurrent || mark ? "700" : "normal"}
+                    fontSize="sm"
+                    whiteSpace="nowrap"
+                    flexShrink={0}
+                    cursor={reviewMode ? "pointer" : undefined}
+                    onClick={reviewMode ? () => setReviewStep(i) : undefined}
+                  >
+                    {i % 2 === 0 ? `${Math.floor(i / 2) + 1}. ` : ""}
+                    {m}
+                    {mark}
+                  </Text>
+                );
+              })}
               {sanMoves.length === 0 && (
                 <Text color="textMuted" fontSize="sm">—</Text>
               )}
             </Flex>
           </Box>
 
-          {reviewMode && hasReview && (
-            <Box
-              py={3}
-              px={4}
-              borderRadius="soft"
-              borderWidth="1px"
-              borderColor="purple.400"
-              bg="bgCard"
-            >
-              <Text color="gold" fontSize="xs" fontWeight="700" mb={2}>
-                Move review
-              </Text>
-              <Text color="textMuted" fontSize="xs" mb={2}>
-                Green arrow = best move · Gold = played (when different)
-              </Text>
-              <HStack flexWrap="wrap" gap={1} mb={3}>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  borderColor="goldDark"
-                  color="textSecondary"
-                  borderRadius="soft"
-                  onClick={() => setReviewStep(0)}
-                  disabled={reviewStep === 0}
-                >
-                  Start
-                </Button>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  borderColor="goldDark"
-                  color="textSecondary"
-                  borderRadius="soft"
-                  onClick={() => setReviewStep((s) => Math.max(0, s - 1))}
-                  disabled={reviewStep === 0}
-                >
-                  Prev
-                </Button>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  borderColor="goldDark"
-                  color="textSecondary"
-                  borderRadius="soft"
-                  onClick={() => setReviewStep((s) => Math.min(sanMoves.length, s + 1))}
-                  disabled={reviewStep >= sanMoves.length}
-                >
-                  Next
-                </Button>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  borderColor="goldDark"
-                  color="textSecondary"
-                  borderRadius="soft"
-                  onClick={() => setReviewStep(sanMoves.length)}
-                  disabled={reviewStep >= sanMoves.length}
-                >
-                  End
-                </Button>
-              </HStack>
-              {reviewStep >= sanMoves.length ? (
-                <Text color="textSecondary" fontSize="sm">
-                  Final position — end of game.
+          {reviewMode && (
+            <Box py={3} px={4} borderRadius="soft" borderWidth="1px" borderColor="goldDark" bg="bgCard">
+              <HStack justify="space-between" mb={2}>
+                <Text color="gold" fontSize="xs" fontWeight="700">
+                  Game review
                 </Text>
+                {review.running && (
+                  <Text color="textMuted" fontSize="2xs">
+                    Analyzing {review.progress.done}/{review.progress.total}
+                  </Text>
+                )}
+              </HStack>
+
+              {review.running && (
+                <Box h="3px" bg="bgSurface" borderRadius="full" mb={3} overflow="hidden">
+                  <Box
+                    h="full"
+                    bg="gold"
+                    style={{
+                      width: `${review.progress.total ? (review.progress.done / review.progress.total) * 100 : 0}%`,
+                      transition: "width 0.2s",
+                    }}
+                  />
+                </Box>
+              )}
+
+              {!analysis && !review.running && (
+                <Button
+                  size="sm"
+                  width="full"
+                  bg="gold"
+                  color="bgDark"
+                  borderRadius="soft"
+                  mb={3}
+                  onClick={() => reviewRunRef.current(sanMoves)}
+                >
+                  Run engine analysis
+                </Button>
+              )}
+
+              {analysis && (
+                <HStack justify="space-between" mb={3} gap={3} align="stretch">
+                  <AccuracyPill name={game.white.username} stats={analysis.white} />
+                  <AccuracyPill name={game.black.username} stats={analysis.black} />
+                </HStack>
+              )}
+
+              {analysis && analysis.evalSeries.length > 1 && (
+                <Box h="86px" mb={3}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={analysis.evalSeries} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+                      <XAxis dataKey="ply" hide />
+                      <YAxis domain={[-600, 600]} hide />
+                      <ReferenceLine y={0} stroke="#ffffff22" />
+                      <ReferenceLine x={Math.min(reviewStep, analysis.evalSeries.length - 1)} stroke="#d4af37" strokeWidth={1.5} />
+                      <Area type="monotone" dataKey="cp" stroke="#e6a452" fill="#e6a452" fillOpacity={0.2} isAnimationActive={false} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </Box>
+              )}
+
+              <HStack flexWrap="wrap" gap={1} mb={3}>
+                <NavBtn label="Start" onClick={() => setReviewStep(0)} disabled={reviewStep === 0} />
+                <NavBtn label="Prev" onClick={() => setReviewStep((s) => Math.max(0, s - 1))} disabled={reviewStep === 0} />
+                <NavBtn label="Next" onClick={() => setReviewStep((s) => Math.min(sanMoves.length, s + 1))} disabled={reviewStep >= sanMoves.length} />
+                <NavBtn label="End" onClick={() => setReviewStep(sanMoves.length)} disabled={reviewStep >= sanMoves.length} />
+              </HStack>
+
+              {reviewStep >= sanMoves.length ? (
+                <Text color="textSecondary" fontSize="sm">Final position — end of game.</Text>
               ) : reviewRow ? (
-                <VStack align="stretch" gap={1}>
+                <VStack align="stretch" gap={1.5}>
+                  {reviewRow.classification && (
+                    <HStack gap={2}>
+                      <Box
+                        px={2}
+                        py={0.5}
+                        borderRadius="full"
+                        style={{ background: `color-mix(in srgb, ${CLASSIFICATION_META[reviewRow.classification].color} 18%, transparent)` }}
+                      >
+                        <Text fontSize="2xs" fontWeight="800" letterSpacing="0.1em" textTransform="uppercase"
+                          style={{ color: CLASSIFICATION_META[reviewRow.classification].color }}>
+                          {CLASSIFICATION_META[reviewRow.classification].label}
+                        </Text>
+                      </Box>
+                      {typeof reviewRow.cpLoss === "number" && reviewRow.cpLoss > 0 && (
+                        <Text fontSize="2xs" color="textMuted">−{(reviewRow.cpLoss / 100).toFixed(1)}</Text>
+                      )}
+                    </HStack>
+                  )}
                   <Text color="textSecondary" fontSize="sm">
                     <Text as="span" fontWeight="700" color="textPrimary">
                       {reviewStep % 2 === 0 ? "White" : "Black"}
                     </Text>{" "}
                     played{" "}
-                    <Text as="span" color="gold" fontWeight="700">
-                      {reviewRow.playedSan}
-                    </Text>
+                    <Text as="span" color="gold" fontWeight="700">{reviewRow.playedSan}</Text>
                   </Text>
-                  <Text color="textSecondary" fontSize="sm">
-                    Best:{" "}
-                    <Text as="span" color="green.400" fontWeight="700">
-                      {reviewRow.bestSan}
+                  {reviewRow.playedSan !== reviewRow.bestSan && (
+                    <Text color="textSecondary" fontSize="sm">
+                      Best was <Text as="span" color="green.400" fontWeight="700">{reviewRow.bestSan}</Text>
                     </Text>
-                    {reviewRow.playedSan === reviewRow.bestSan ? (
-                      <Text as="span" color="textMuted" fontSize="xs" ml={1}>
-                        (same move)
-                      </Text>
-                    ) : null}
-                  </Text>
+                  )}
                 </VStack>
               ) : (
                 <Text color="textMuted" fontSize="sm">
-                  No best-move data for this ply.
+                  {review.running ? "Analyzing…" : "Step through the game; run analysis for best moves."}
                 </Text>
               )}
+
               <Button mt={3} size="sm" width="full" variant="outline" borderColor="gold" color="gold" borderRadius="soft" onClick={exitReview}>
                 Exit review
               </Button>
             </Box>
           )}
 
-          {gameEnded && hasReview && !reviewMode && (
-            <Button size="sm" bg="gold" color="bgDark" borderRadius="soft" onClick={enterReview}>
-              Review moves
+          {gameEnded && canAnalyze && !reviewMode && (
+            <Button size="sm" bg="gold" color="bgDark" borderRadius="soft" onClick={analyzeGame}>
+              Analyze game
             </Button>
           )}
 
@@ -1010,6 +1074,7 @@ function GamePageInner() {
                   <Text color="gold" fontWeight="700" mb={2}>
                     {game.white.username}
                   </Text>
+                  {analysis.white.accuracy != null && <StatRow label="Accuracy %" value={analysis.white.accuracy} />}
                   <StatRow label="Inaccuracies" value={analysis.white.inaccuracies} />
                   <StatRow label="Mistakes" value={analysis.white.mistakes} />
                   <StatRow label="Blunders" value={analysis.white.blunders} />
@@ -1019,6 +1084,7 @@ function GamePageInner() {
                   <Text color="gold" fontWeight="700" mb={2}>
                     {game.black.username}
                   </Text>
+                  {analysis.black.accuracy != null && <StatRow label="Accuracy %" value={analysis.black.accuracy} />}
                   <StatRow label="Inaccuracies" value={analysis.black.inaccuracies} />
                   <StatRow label="Mistakes" value={analysis.black.mistakes} />
                   <StatRow label="Blunders" value={analysis.black.blunders} />
@@ -1056,10 +1122,19 @@ function GamePageInner() {
       <GameOverDialog
         open={showGameOverModal}
         onDismiss={dismissGameOverModal}
-        onReview={enterReview}
+        onAnalyze={analyzeGame}
+        onRematch={isParticipant ? handleRematch : undefined}
         resultLabel={resultToScore(result)}
-        resultDetail={result ? `${result} · ${status}` : status}
-        hasReviewData={hasReview}
+        resultDetail={
+          result === "DRAW" || result === "STALEMATE"
+            ? "Draw"
+            : result === "WHITE_WIN"
+              ? `${game.white.username} wins`
+              : result === "BLACK_WIN"
+                ? `${game.black.username} wins`
+                : "Game over"
+        }
+        canAnalyze={canAnalyze}
       />
 
       <PremiumModal open={premiumOpen} onClose={() => setPremiumOpen(false)} />
@@ -1091,6 +1166,32 @@ function StatRow({ label, value }: { label: string; value: number }) {
         {value}
       </Text>
     </HStack>
+  );
+}
+
+function NavBtn({ label, onClick, disabled }: { label: string; onClick: () => void; disabled: boolean }) {
+  return (
+    <Button size="xs" variant="outline" borderColor="goldDark" color="textSecondary" borderRadius="soft" onClick={onClick} disabled={disabled}>
+      {label}
+    </Button>
+  );
+}
+
+function AccuracyPill({ name, stats }: { name: string; stats: SideStats }) {
+  const acc = stats.accuracy;
+  const accColor = acc == null ? "textMuted" : acc >= 90 ? "#3fb27f" : acc >= 75 ? "#7f9cf5" : acc >= 60 ? "#e8c14b" : "#e0655c";
+  return (
+    <VStack flex={1} gap={0.5} align="center" py={2} px={2} borderRadius="soft" bg="bgSurface" borderWidth="1px" borderColor="blackAlpha.200">
+      <Text fontSize="2xs" color="textMuted" letterSpacing="0.08em" maxW="100%" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+        {name}
+      </Text>
+      <Text fontSize="lg" fontWeight="800" style={{ color: accColor }}>
+        {acc == null ? "—" : `${acc}%`}
+      </Text>
+      <Text fontSize="3xs" color="textMuted">
+        {stats.blunders}B · {stats.mistakes}M · {stats.inaccuracies}I
+      </Text>
+    </VStack>
   );
 }
 

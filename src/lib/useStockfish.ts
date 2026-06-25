@@ -10,6 +10,15 @@ export interface Evaluation {
   mate: number | null;
 }
 
+export interface AnalysisResult {
+  cp: number | null;
+  mate: number | null;
+  bestMove: string | null;
+}
+
+/** Default search depth for game review — ~150ms/position in-browser. */
+export const REVIEW_DEPTH = 12;
+
 const ENGINE_URL = "/stockfish/stockfish-18-lite-single.js";
 const WASM_URL = "/stockfish/stockfish-18-lite-single.wasm";
 const BESTMOVE_DEPTH = 12;
@@ -349,6 +358,34 @@ class EngineDriver {
     });
   }
 
+  /** One full-strength search returning BOTH the eval and the best move (for game review). */
+  analyse(fen: string, depth: number): Promise<AnalysisResult> {
+    return this.enqueue(async () => {
+      if (this.deadReason) return { cp: null, mate: null, bestMove: null };
+      this.send("setoption name UCI_LimitStrength value false");
+      this.eloApplied = null;
+      this.send(`position fen ${fen}`);
+      this.send(`go depth ${depth}`);
+      const { lines, lastInfo } = await this.waitFor((line) => line.startsWith("bestmove"));
+      const bmLine = [...lines].reverse().find((l) => l.startsWith("bestmove"));
+      let bestMove: string | null = null;
+      if (bmLine) {
+        const mv = bmLine.split(/\s+/)[1];
+        bestMove = !mv || mv === "(none)" || mv === "0000" ? null : mv;
+      }
+      const sideToMove = fen.split(" ")[1] === "b" ? -1 : 1;
+      let cp: number | null = null;
+      let mate: number | null = null;
+      if (lastInfo) {
+        const mateMatch = lastInfo.match(/score mate (-?\d+)/);
+        const cpMatch = lastInfo.match(/score cp (-?\d+)/);
+        if (mateMatch) mate = parseInt(mateMatch[1], 10) * sideToMove;
+        else if (cpMatch) cp = parseInt(cpMatch[1], 10) * sideToMove;
+      }
+      return { cp, mate, bestMove };
+    });
+  }
+
   destroy() {
     if (this.pending) {
       clearTimeout(this.pending.timeout);
@@ -528,5 +565,25 @@ export function useStockfish(elo: number) {
     [wasmDead],
   );
 
-  return { getBestMove, getEvaluation, ready, error, wasmDead, warming, lastSource };
+  const analyse = useCallback(
+    async (fen: string, depth: number = REVIEW_DEPTH): Promise<AnalysisResult> => {
+      const driver = driverRef.current;
+      if (driver && !wasmDead && !driver.isDead()) {
+        try {
+          const r = await driver.analyse(fen, depth);
+          if (r.bestMove || r.cp !== null || r.mate !== null) return r;
+        } catch {
+          /* fall through to backend */
+        }
+      }
+      const [bestMove, evalv] = await Promise.all([
+        backendBestMove(fen, 3000),
+        backendEvaluation(fen),
+      ]);
+      return { cp: evalv.cp, mate: evalv.mate, bestMove };
+    },
+    [wasmDead],
+  );
+
+  return { getBestMove, getEvaluation, analyse, ready, error, wasmDead, warming, lastSource };
 }

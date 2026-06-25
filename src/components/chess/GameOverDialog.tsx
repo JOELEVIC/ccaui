@@ -5,19 +5,21 @@ import { Dialog, Button, Text, VStack } from "@chakra-ui/react";
 export interface GameOverDialogProps {
   open: boolean;
   onDismiss: () => void;
-  onReview: () => void;
+  onAnalyze: () => void;
+  onRematch?: () => void;
   resultLabel: string;
   resultDetail?: string;
-  hasReviewData: boolean;
+  canAnalyze: boolean;
 }
 
 export function GameOverDialog({
   open,
   onDismiss,
-  onReview,
+  onAnalyze,
+  onRematch,
   resultLabel,
   resultDetail,
-  hasReviewData,
+  canAnalyze,
 }: GameOverDialogProps) {
   return (
     <Dialog.Root
@@ -44,27 +46,37 @@ export function GameOverDialog({
               </Text>
             )}
             <Text color="textSecondary" fontSize="sm" textAlign="center" mt={4}>
-              Close to browse the board and move list. Review walks through each position and shows the best move for
-              the side to play.
+              Rematch your opponent, run a full engine review of every move, or close to browse the board.
             </Text>
           </Dialog.Body>
           <Dialog.Footer flexDirection="column" gap={2} pb={6} px={6}>
             <VStack width="full" gap={2}>
-              {hasReviewData && (
+              {onRematch && (
                 <Button
                   width="full"
                   bg="gold"
                   color="bgDark"
                   borderRadius="soft"
                   _hover={{ bg: "goldLight" }}
-                  onClick={() => {
-                    onReview();
-                  }}
+                  onClick={onRematch}
                 >
-                  Review moves
+                  Rematch
                 </Button>
               )}
-              <Button width="full" variant="outline" borderColor="gold" color="gold" borderRadius="soft" onClick={onDismiss}>
+              {canAnalyze && (
+                <Button
+                  width="full"
+                  variant="outline"
+                  borderColor="gold"
+                  color="gold"
+                  borderRadius="soft"
+                  _hover={{ bg: "whiteAlpha.50" }}
+                  onClick={onAnalyze}
+                >
+                  Analyze game
+                </Button>
+              )}
+              <Button width="full" variant="ghost" color="textSecondary" borderRadius="soft" onClick={onDismiss}>
                 Close
               </Button>
             </VStack>
