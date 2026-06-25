@@ -45,6 +45,8 @@ const MY_GAMES = gql`
       result
       timeControl
       rated
+      whiteRating
+      blackRating
       white { id username rating }
       black { id username rating }
     }
@@ -73,6 +75,8 @@ interface GameLite {
   result?: string | null;
   timeControl: string;
   rated: boolean;
+  whiteRating?: number | null;
+  blackRating?: number | null;
   white: Player;
   black: Player;
 }
@@ -521,6 +525,9 @@ function MyGameRow({ g, meId }: { g: GameLite; meId?: string }) {
   const oc = outcomeFor(g, meId);
   const iAmWhite = g.white.id === meId;
   const opp = iAmWhite ? g.black : g.white;
+  // Ratings as they were at the time of this game (fallback to current for older games).
+  const myRatingAtGame = iAmWhite ? g.whiteRating : g.blackRating;
+  const oppRatingAtGame = iAmWhite ? g.blackRating : g.whiteRating;
   return (
     <GlassCard href={`/game/${g.id}`}>
       <HStack px={5} py={3.5} justify="space-between" align="center" gap={4} flexWrap="wrap">
@@ -528,9 +535,14 @@ function MyGameRow({ g, meId }: { g: GameLite; meId?: string }) {
           <Text fontFamily="var(--font-playfair), Georgia, serif" fontSize="md" color="var(--lux-text-primary)" fontWeight="600">
             {opp?.username ?? "—"}
           </Text>
-          <Text fontSize="xs" color="var(--lux-text-muted)">{opp?.rating ?? ""}</Text>
+          <Text fontSize="xs" color="var(--lux-text-muted)">{oppRatingAtGame ?? opp?.rating ?? ""}</Text>
         </HStack>
         <HStack gap={3} align="center">
+          {myRatingAtGame != null && (
+            <Text fontFamily="var(--font-inter), sans-serif" fontSize="2xs" letterSpacing="0.1em" color="var(--lux-text-muted)" whiteSpace="nowrap">
+              you · {myRatingAtGame}
+            </Text>
+          )}
           <Text fontFamily="var(--font-inter), sans-serif" fontSize="2xs" letterSpacing="0.16em" color="var(--lux-text-muted)">
             {g.timeControl}{!g.rated && " · Casual"}
           </Text>
