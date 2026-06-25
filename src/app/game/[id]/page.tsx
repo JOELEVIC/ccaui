@@ -13,6 +13,7 @@ import { Chess } from "chess.js";
 import { useAuth } from "@/lib/auth";
 import { GameBoard, type PendingPremove } from "@/components/chess/GameBoard";
 import { BOARD_THEMES, type BoardThemeKey } from "@/components/chess/GameBoard";
+import { PlayerAvatar, ColorChip } from "@/components/chess/PlayerAvatar";
 import { isPremoveStillValid } from "@/lib/chessPremoves";
 import { isCaptureByFenChange, playCaptureSound, playMoveSound } from "@/lib/chessSounds";
 import { MaterialDisplay } from "@/components/chess/MaterialDisplay";
@@ -59,11 +60,13 @@ const GAME_QUERY = gql`
         id
         username
         rating
+        profile { avatarUrl }
       }
       black {
         id
         username
         rating
+        profile { avatarUrl }
       }
     }
   }
@@ -224,8 +227,8 @@ function GamePageInner() {
       timeControl: string;
       rated?: boolean;
       analysisJson?: string | null;
-      white: { id: string; username: string; rating: number };
-      black: { id: string; username: string; rating: number };
+      white: { id: string; username: string; rating: number; profile?: { avatarUrl?: string | null } | null };
+      black: { id: string; username: string; rating: number; profile?: { avatarUrl?: string | null } | null };
     };
   }>(GAME_QUERY, {
     variables: { id },
@@ -260,6 +263,8 @@ function GamePageInner() {
   const turnColor: "w" | "b" = turnIsWhite ? "w" : "b";
   const topColor: "w" | "b" = orientation === "white" ? "b" : "w";
   const bottomColor: "w" | "b" = orientation === "white" ? "w" : "b";
+  const topPlayer = orientation === "white" ? game?.black : game?.white;
+  const bottomPlayer = orientation === "white" ? game?.white : game?.black;
   const clockRunning = (c: "w" | "b") => status === "ACTIVE" && !gameEnded && turnColor === c;
   const sanMoves = useMemo(() => parseMoveTokens(movesStr), [movesStr]);
   const canAnalyze = gameEnded && sanMoves.length > 0;
@@ -674,6 +679,24 @@ function GamePageInner() {
 
   return (
     <Box minH="100vh" bg="bgDark" py={6} px={4}>
+      {/* Always-visible top bar: get back to the lobby + the live rated/casual + time control */}
+      <HStack maxW="1200px" mx="auto" mb={4} justify="space-between" align="center">
+        <Link href="/games">
+          <Button size="sm" variant="outline" borderColor="goldDark" color="textSecondary" borderRadius="soft" _hover={{ color: "gold", borderColor: "gold" }}>
+            ← Games
+          </Button>
+        </Link>
+        <HStack gap={2}>
+          <Text fontSize="xs" color="textMuted" letterSpacing="0.1em" textTransform="uppercase">
+            {game.timeControl} · {game.rated ? "Ranked" : "Casual"}
+          </Text>
+          {gameEnded && canAnalyze && !reviewMode && (
+            <Button size="sm" bg="gold" color="bgDark" borderRadius="soft" onClick={analyzeGame}>
+              Analyze
+            </Button>
+          )}
+        </HStack>
+      </HStack>
       {!!token && !connected && !gameEnded && (
         <ConnectingBanner subError={subError} onRetry={() => window.location.reload()} />
       )}
@@ -699,14 +722,18 @@ function GamePageInner() {
             minW="200px"
           >
             <HStack justify="space-between" align="center">
-              <Box textAlign="left">
-                <Text color="textSecondary" fontSize="sm">
-                  {orientation === "white" ? game.black?.username : game.white?.username}
-                </Text>
-                <Text color="textMuted" fontSize="xs">
-                  {orientation === "white" ? game.black?.rating : game.white?.rating}
-                </Text>
-              </Box>
+              <HStack gap={2.5} align="center" minW={0}>
+                <PlayerAvatar name={topPlayer?.username} avatarUrl={topPlayer?.profile?.avatarUrl} size={34} />
+                <Box minW={0}>
+                  <Text color="textSecondary" fontSize="sm" lineClamp={1}>
+                    {topPlayer?.username}
+                  </Text>
+                  <HStack gap={1.5} mt={0.5}>
+                    <Text color="textMuted" fontSize="xs">{topPlayer?.rating}</Text>
+                    <ColorChip color={topColor} />
+                  </HStack>
+                </Box>
+              </HStack>
               {clock && (
                 <LiveClock
                   ms={topColor === "w" ? clock.whiteMs : clock.blackMs}
@@ -750,14 +777,18 @@ function GamePageInner() {
             minW="200px"
           >
             <HStack justify="space-between" align="center">
-              <Box textAlign="left">
-                <Text color="textSecondary" fontSize="sm">
-                  {orientation === "white" ? game.white?.username : game.black?.username}
-                </Text>
-                <Text color="textMuted" fontSize="xs">
-                  {orientation === "white" ? game.white?.rating : game.black?.rating}
-                </Text>
-              </Box>
+              <HStack gap={2.5} align="center" minW={0}>
+                <PlayerAvatar name={bottomPlayer?.username} avatarUrl={bottomPlayer?.profile?.avatarUrl} size={34} />
+                <Box minW={0}>
+                  <Text color="textSecondary" fontSize="sm" lineClamp={1}>
+                    {bottomPlayer?.username}
+                  </Text>
+                  <HStack gap={1.5} mt={0.5}>
+                    <Text color="textMuted" fontSize="xs">{bottomPlayer?.rating}</Text>
+                    <ColorChip color={bottomColor} />
+                  </HStack>
+                </Box>
+              </HStack>
               {clock && (
                 <LiveClock
                   ms={bottomColor === "w" ? clock.whiteMs : clock.blackMs}

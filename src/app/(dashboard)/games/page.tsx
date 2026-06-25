@@ -21,8 +21,7 @@ import {
   LuxuryEyebrow,
   LuxuryHeading,
 } from "@/components/luxury/LuxuryPrimitives";
-
-const BOT_ELO_PRESETS = [230, 400, 600, 800, 1000, 1200, 1600, 2000, 2400, 2800, 3200];
+import { BOT_PERSONAS, BOT_LEVELS } from "@/lib/botPersonas";
 
 const LIVE_GAMES = gql`
   query GamesLiveGames {
@@ -91,10 +90,9 @@ export default function GamesPage() {
   const { user } = useAuth();
   const meId = user?.id;
   const [playMode, setPlayMode] = useState<PlayMode>("human");
-  const [selectedBotElo, setSelectedBotElo] = useState(1600);
   const [inviteMode, setInviteMode] = useState<InviteMode>("direct");
   const [opponentId, setOpponentId] = useState("");
-  const [colorChoice, setColorChoice] = useState<"white" | "black" | "random">("white");
+  const [colorChoice, setColorChoice] = useState<"white" | "black" | "random">("random");
   const [timeControl, setTimeControl] = useState("10+0");
   const [rated, setRated] = useState(true);
   const [openLink, setOpenLink] = useState<string | null>(null);
@@ -140,20 +138,32 @@ export default function GamesPage() {
       toaster.create({ title: "Sign in to play", type: "error" });
       return;
     }
-    if (inviteMode === "direct" && !opponentId) {
-      toaster.create({ title: "Pick an opponent, or switch to an open link", type: "error" });
-      return;
-    }
     if (!timeControl) {
       toaster.create({ title: "Pick a time control", type: "error" });
       return;
+    }
+    // Direct challenge with no opponent chosen → match against a random player.
+    let oppId: string | null = null;
+    let randomMatched = false;
+    if (inviteMode === "direct") {
+      if (opponentId) {
+        oppId = opponentId;
+      } else {
+        const pool = users.filter((u) => u.id !== meId);
+        if (pool.length === 0) {
+          toaster.create({ title: "No other players to match with yet", type: "error" });
+          return;
+        }
+        oppId = pool[Math.floor(Math.random() * pool.length)].id;
+        randomMatched = true;
+      }
     }
     setOpenLink(null);
     try {
       const { data, error } = await createChallenge({
         variables: {
           input: {
-            opponentId: inviteMode === "direct" ? opponentId : null,
+            opponentId: oppId,
             creatorColor: colorChoice,
             timeControl,
             rated,
@@ -172,8 +182,11 @@ export default function GamesPage() {
         setOpenLink(url);
         copy(url);
       } else {
-        const name = users.find((u) => u.id === opponentId)?.username ?? "your opponent";
-        toaster.create({ title: `Challenge sent to ${name}`, type: "success" });
+        const name = users.find((u) => u.id === oppId)?.username ?? "your opponent";
+        toaster.create({
+          title: randomMatched ? `Random match — challenge sent to ${name}` : `Challenge sent to ${name}`,
+          type: "success",
+        });
       }
     } catch (err) {
       toaster.create({ title: err instanceof Error ? err.message : "Couldn't create the challenge", type: "error" });
@@ -245,42 +258,48 @@ export default function GamesPage() {
       )}
 
       {playMode === "bot" && (
-        <GlassCard hero>
-          <Box px={{ base: 5, md: 7 }} py={{ base: 5, md: 6 }}>
-            <LuxuryHeading size="md">Select engine strength.</LuxuryHeading>
-            <SimpleGrid mt={4} columns={{ base: 3, sm: 4, md: 6 }} gap={2}>
-              {BOT_ELO_PRESETS.map((elo) => {
-                const active = selectedBotElo === elo;
-                return (
-                  <Box
-                    key={elo}
-                    as="button"
-                    onClick={() => setSelectedBotElo(elo)}
-                    py={2.5}
-                    borderRadius="6px"
-                    bg={active ? "rgba(212,175,55,0.18)" : "var(--lux-glass-surface)"}
-                    borderWidth="1px"
-                    borderColor={active ? "var(--lux-gold)" : "var(--lux-glass-border)"}
-                    transition="all 0.18s"
-                    _hover={{ borderColor: "var(--lux-gold-muted)" }}
-                    style={{ backdropFilter: "blur(10px)" }}
-                  >
-                    <Text fontFamily="var(--font-inter), sans-serif" fontSize="xs" fontWeight="700" letterSpacing="0.18em"
-                      color={active ? "var(--lux-gold-bright)" : "var(--lux-text-secondary)"}
-                      style={active ? { textShadow: "0 0 6px rgba(212,175,55,0.45)" } : undefined}>
-                      {elo}
-                    </Text>
-                  </Box>
-                );
-              })}
-            </SimpleGrid>
-            <Box mt={5}>
-              <LuxuryButton variant="gold" size="md" glyph="▸" href={`/play/bot?elo=${selectedBotElo}`}>
-                Begin · {selectedBotElo} Elo
-              </LuxuryButton>
-            </Box>
-          </Box>
-        </GlassCard>
+        <VStack align="stretch" gap={{ base: 6, md: 7 }}>
+          {BOT_LEVELS.map((level) => {
+            const bots = BOT_PERSONAS.filter((b) => b.level === level);
+            if (bots.length === 0) return null;
+            return (
+              <Section key={level} title={level} count={`${bots.length} bots`}>
+                <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={3}>
+                  {bots.map((b) => (
+                    <Box
+                      key={b.id}
+                      as="button"
+                      onClick={() => router.push(`/play/bot?elo=${b.elo}&bot=${b.id}`)}
+                      textAlign="left"
+                      p={4}
+                      borderRadius="10px"
+                      bg="var(--lux-glass-surface)"
+                      borderWidth="1px"
+                      borderColor="var(--lux-glass-border)"
+                      transition="all 0.18s"
+                      _hover={{ borderColor: "var(--lux-gold)", transform: "translateY(-2px)" }}
+                      style={{ backdropFilter: "blur(10px)" }}
+                    >
+                      <HStack gap={3} align="center" mb={2}>
+                        <Box fontSize="28px" lineHeight="1">{b.avatar}</Box>
+                        <Box minW={0} flex={1}>
+                          <Text fontFamily="var(--font-playfair), Georgia, serif" fontSize="md" color="var(--lux-text-primary)" fontWeight="600" lineClamp={1}>
+                            {b.name}
+                          </Text>
+                          <Text fontSize="xs" fontWeight="700" letterSpacing="0.1em" color="var(--lux-gold-bright)">
+                            {b.elo} ELO
+                          </Text>
+                        </Box>
+                        <Text color="var(--lux-gold-muted)" fontSize="lg">▸</Text>
+                      </HStack>
+                      <Text fontSize="xs" color="var(--lux-text-muted)" lineClamp={2}>{b.tagline}</Text>
+                    </Box>
+                  ))}
+                </SimpleGrid>
+              </Section>
+            );
+          })}
+        </VStack>
       )}
 
       {playMode === "human" && (
@@ -622,7 +641,7 @@ function PlayerField({
         border: "1px solid var(--lux-glass-border)", color: "var(--lux-text-primary)",
         fontFamily: "var(--font-inter), sans-serif", fontSize: 14, backdropFilter: "blur(10px)",
       }}>
-        <option value="">Select player</option>
+        <option value="">🎲 Random opponent</option>
         {users.map((u) => (
           <option key={u.id} value={u.id}>{u.username} ({u.rating})</option>
         ))}
