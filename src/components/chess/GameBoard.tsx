@@ -193,8 +193,9 @@ export function GameBoard({
     }) => {
       if (isSparePiece || !square) return false;
       if (!allowMove || movePending) return false;
-      const isWhite = piece.pieceType !== piece.pieceType.toLowerCase();
-      const mine = myColor === "w" ? isWhite : !isWhite;
+      // react-chessboard v5 piece types are colour-prefixed ("wP" / "bP"),
+      // so the colour is the first character — NOT the letter case.
+      const mine = piece.pieceType.charAt(0) === myColor;
       if (!mine) return false;
       if (canPlayNow) return true;
       if (premoveActive) return true;
@@ -217,8 +218,9 @@ export function GameBoard({
 
   const isMyPieceType = useCallback(
     (pieceType: string) => {
-      const isWhite = pieceType !== pieceType.toLowerCase();
-      return myColor === "w" ? isWhite : !isWhite;
+      // react-chessboard v5 piece types are colour-prefixed ("wP" / "bP"),
+      // so the colour is the first character — NOT the letter case.
+      return pieceType.charAt(0) === myColor;
     },
     [myColor]
   );
