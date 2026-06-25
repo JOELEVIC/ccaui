@@ -13,7 +13,7 @@ import { Box, HStack, Text } from "@chakra-ui/react";
 
 const ITEMS: { href: string; label: string; glyph: string }[] = [
   { href: "/dashboard", label: "Play", glyph: "♚" },
-  { href: "/learning", label: "Learn", glyph: "✦" },
+  { href: "/learn", label: "Learn", glyph: "✦" },
   { href: "/road-to-master", label: "Path", glyph: "◇" },
   { href: "/profile", label: "Profile", glyph: "○" },
 ];

@@ -29,8 +29,9 @@ const SECTIONS: { title: string; links: { href: string; label: string; auth?: bo
   {
     title: "Study",
     links: [
-      { href: "/learning", label: "Learn" },
+      { href: "/learn", label: "Learn" },
       { href: "/road-to-master", label: "Road to Master" },
+      { href: "/learning", label: "Lessons & Openings" },
       { href: "/analysis", label: "Analysis" },
     ],
   },
