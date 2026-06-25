@@ -14,6 +14,7 @@ import { useAuth } from "@/lib/auth";
 import { GameBoard, type PendingPremove } from "@/components/chess/GameBoard";
 import { BOARD_THEMES, type BoardThemeKey } from "@/components/chess/GameBoard";
 import { PlayerAvatar, ColorChip } from "@/components/chess/PlayerAvatar";
+import { CapturedPieces } from "@/components/chess/CapturedPieces";
 import { isPremoveStillValid } from "@/lib/chessPremoves";
 import { isCaptureByFenChange, playCaptureSound, playMoveSound } from "@/lib/chessSounds";
 import { MaterialDisplay } from "@/components/chess/MaterialDisplay";
@@ -131,6 +132,17 @@ const LS_BOARD_THEME = "dchess-board-theme";
 const LS_CONFIRM = "dchess-game-confirm";
 const LS_AUTOQUEEN = "dchess-game-autoqueen";
 const LS_PREMOVE_PROMO = "dchess-game-premovepromo";
+const LS_BG_THEME = "dchess-bg-theme";
+
+// Page background presets (the default keeps the theme's own bg).
+const BG_THEMES: Record<string, { label: string; color: string; swatch: string }> = {
+  default: { label: "Default", color: "", swatch: "#faf7f0" },
+  slate: { label: "Slate", color: "#e7e9ef", swatch: "#e7e9ef" },
+  blue: { label: "Blue", color: "#e6edf6", swatch: "#e6edf6" },
+  sand: { label: "Sand", color: "#f3ecdf", swatch: "#f3ecdf" },
+  charcoal: { label: "Charcoal", color: "#20222a", swatch: "#20222a" },
+};
+type BgThemeKey = keyof typeof BG_THEMES;
 
 function readStoredBool(key: string, defaultVal: boolean): boolean {
   if (typeof window === "undefined") return defaultVal;
@@ -218,6 +230,7 @@ function GamePageInner() {
   const [confirmMove, setConfirmMove] = useState(() => readStoredBool(LS_CONFIRM, false));
   const [autoQueen, setAutoQueen] = useState(() => readStoredBool(LS_AUTOQUEEN, true));
   const [premovePromotion, setPremovePromotion] = useState(() => readStoredStr(LS_PREMOVE_PROMO, "q"));
+  const [bgTheme, setBgTheme] = useState<BgThemeKey>(() => readStoredStr(LS_BG_THEME, "default") as BgThemeKey);
   // A move staged for confirmation (when confirmMove is on): the UCI string awaiting Confirm/Cancel.
   const [pendingConfirm, setPendingConfirm] = useState<string | null>(null);
   const [pendingPremove, setPendingPremove] = useState<PendingPremove | null>(null);
@@ -435,10 +448,11 @@ function GamePageInner() {
       localStorage.setItem(LS_CONFIRM, confirmMove ? "1" : "0");
       localStorage.setItem(LS_AUTOQUEEN, autoQueen ? "1" : "0");
       localStorage.setItem(LS_PREMOVE_PROMO, premovePromotion);
+      localStorage.setItem(LS_BG_THEME, bgTheme);
     } catch {
       /* ignore */
     }
-  }, [confirmMove, autoQueen, premovePromotion]);
+  }, [confirmMove, autoQueen, premovePromotion, bgTheme]);
 
   useEffect(() => {
     if (!soundsEnabled || gameEnded) {
@@ -723,7 +737,7 @@ function GamePageInner() {
   }
 
   return (
-    <Box minH="100vh" bg="bgDark" py={6} px={4}>
+    <Box minH="100vh" bg="bgDark" py={6} px={4} style={BG_THEMES[bgTheme].color ? { background: BG_THEMES[bgTheme].color } : undefined}>
       {/* Always-visible top bar: get back to the lobby + the live rated/casual + time control */}
       <HStack maxW="1200px" mx="auto" mb={4} justify="space-between" align="center">
         <Link href="/games">
@@ -787,6 +801,7 @@ function GamePageInner() {
                     <Text color="textMuted" fontSize="xs">{topPlayer?.rating}</Text>
                     <ColorChip color={topColor} />
                   </HStack>
+                  <CapturedPieces fen={boardFen} side={topColor} />
                 </Box>
               </HStack>
               {clock && (
@@ -844,6 +859,7 @@ function GamePageInner() {
                     <Text color="textMuted" fontSize="xs">{bottomPlayer?.rating}</Text>
                     <ColorChip color={bottomColor} />
                   </HStack>
+                  <CapturedPieces fen={boardFen} side={bottomColor} />
                 </Box>
               </HStack>
               {clock && (
@@ -869,21 +885,40 @@ function GamePageInner() {
           <Box order={{ base: 4, lg: 1 }} py={2.5} px={3} borderRadius="soft" borderWidth="1px" borderColor="goldDark" bg="bgCard">
             <VStack align="stretch" gap={2}>
               <HStack justify="space-between" flexWrap="wrap" gap={2}>
-                <HStack gap={1.5}>
-                  {(Object.keys(BOARD_THEMES) as BoardThemeKey[]).map((k) => (
-                    <Box
-                      key={k}
-                      as="button"
-                      onClick={() => setBoardTheme(k)}
-                      w="22px"
-                      h="22px"
-                      borderRadius="5px"
-                      borderWidth="2px"
-                      borderColor={boardTheme === k ? "gold" : "transparent"}
-                      title={BOARD_THEMES[k].label}
-                      style={{ background: `linear-gradient(135deg, ${BOARD_THEMES[k].lightSq} 50%, ${BOARD_THEMES[k].darkSq} 50%)` }}
-                    />
-                  ))}
+                <HStack gap={2} flexWrap="wrap" align="center">
+                  <HStack gap={1.5} title="Board colours">
+                    {(Object.keys(BOARD_THEMES) as BoardThemeKey[]).map((k) => (
+                      <Box
+                        key={k}
+                        as="button"
+                        onClick={() => setBoardTheme(k)}
+                        w="22px"
+                        h="22px"
+                        borderRadius="5px"
+                        borderWidth="2px"
+                        borderColor={boardTheme === k ? "gold" : "transparent"}
+                        title={BOARD_THEMES[k].label}
+                        style={{ background: `linear-gradient(135deg, ${BOARD_THEMES[k].lightSq} 50%, ${BOARD_THEMES[k].darkSq} 50%)` }}
+                      />
+                    ))}
+                  </HStack>
+                  <Box w="1px" h="18px" bg="blackAlpha.200" />
+                  <HStack gap={1.5} title="Background">
+                    {(Object.keys(BG_THEMES) as BgThemeKey[]).map((k) => (
+                      <Box
+                        key={k}
+                        as="button"
+                        onClick={() => setBgTheme(k)}
+                        w="22px"
+                        h="22px"
+                        borderRadius="full"
+                        borderWidth="2px"
+                        borderColor={bgTheme === k ? "gold" : "blackAlpha.200"}
+                        title={`Background: ${BG_THEMES[k].label}`}
+                        style={{ background: BG_THEMES[k].swatch }}
+                      />
+                    ))}
+                  </HStack>
                 </HStack>
                 <ToggleChip label="Sound" active={soundsEnabled} onClick={() => setSoundsEnabled((v) => !v)} />
               </HStack>
