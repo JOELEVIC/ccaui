@@ -5,13 +5,14 @@ import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
-import { Box, Button, Text, VStack, HStack, Flex, SimpleGrid, Heading, Switch } from "@chakra-ui/react";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { Box, Button, Text, VStack, HStack, Flex, SimpleGrid, Heading } from "@chakra-ui/react";
+import { EvalGraph } from "@/components/chess/EvalGraph";
 import { PremiumModal } from "@/components/chess-pro/PremiumModal";
 import { toaster } from "@/lib/toaster";
 import { Chess } from "chess.js";
 import { useAuth } from "@/lib/auth";
 import { GameBoard, type PendingPremove } from "@/components/chess/GameBoard";
+import { BOARD_THEMES, type BoardThemeKey } from "@/components/chess/GameBoard";
 import { isPremoveStillValid } from "@/lib/chessPremoves";
 import { isCaptureByFenChange, playCaptureSound, playMoveSound } from "@/lib/chessSounds";
 import { MaterialDisplay } from "@/components/chess/MaterialDisplay";
@@ -123,6 +124,7 @@ function lastMoveSquares(moves: string): { from: string; to: string } | null {
 
 const LS_PREMOVE = "dchess-game-premove";
 const LS_SOUNDS = "dchess-game-sounds";
+const LS_BOARD_THEME = "dchess-board-theme";
 
 function readStoredBool(key: string, defaultVal: boolean): boolean {
   if (typeof window === "undefined") return defaultVal;
@@ -130,6 +132,15 @@ function readStoredBool(key: string, defaultVal: boolean): boolean {
     const v = localStorage.getItem(key);
     if (v === null) return defaultVal;
     return v === "1" || v === "true";
+  } catch {
+    return defaultVal;
+  }
+}
+
+function readStoredStr(key: string, defaultVal: string): string {
+  if (typeof window === "undefined") return defaultVal;
+  try {
+    return localStorage.getItem(key) ?? defaultVal;
   } catch {
     return defaultVal;
   }
@@ -195,6 +206,9 @@ function GamePageInner() {
   const prevFenForSoundRef = useRef<string | null>(null);
   const [premoveEnabled, setPremoveEnabled] = useState(() => readStoredBool(LS_PREMOVE, false));
   const [soundsEnabled, setSoundsEnabled] = useState(() => readStoredBool(LS_SOUNDS, true));
+  const [boardTheme, setBoardTheme] = useState<BoardThemeKey>(
+    () => readStoredStr(LS_BOARD_THEME, "classic") as BoardThemeKey
+  );
   const [pendingPremove, setPendingPremove] = useState<PendingPremove | null>(null);
   const startSessionDone = useRef(false);
   const recordedXpRef = useRef(false);
@@ -222,7 +236,8 @@ function GamePageInner() {
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [gameOverModalDismissed, setGameOverModalDismissed] = useState(false);
   const [reviewMode, setReviewMode] = useState(false);
-  const [reviewStep, setReviewStep] = useState(0);
+  // Timeline scrub: null = following the live game / final position; a number = browsing that ply.
+  const [viewPly, setViewPly] = useState<number | null>(null);
   const serverAnalysis = game ? parseGameAnalysis(game.analysisJson) : null;
   // In-browser Stockfish review; falls back to any stored server analysis.
   const review = useGameAnalysis();
@@ -248,11 +263,14 @@ function GamePageInner() {
   const clockRunning = (c: "w" | "b") => status === "ACTIVE" && !gameEnded && turnColor === c;
   const sanMoves = useMemo(() => parseMoveTokens(movesStr), [movesStr]);
   const canAnalyze = gameEnded && sanMoves.length > 0;
+  // Timeline scrub state. browsing = viewing a past ply (board read-only); effStep = numeric position for nav.
+  const browsing = viewPly !== null;
+  const effStep = viewPly ?? sanMoves.length;
 
   useEffect(() => {
     setGameOverModalDismissed(false);
     setReviewMode(false);
-    setReviewStep(0);
+    setViewPly(null);
   }, [id]);
 
   const wantsReviewUrl = searchParams.get("review") === "1";
@@ -264,26 +282,27 @@ function GamePageInner() {
   const showGameOverModal = gameEnded && !gameOverModalDismissed && !wantsReviewUrl;
   const postGameStatsVisible = gameEnded && !showGameOverModal;
 
-  const reviewBoardFen =
-    reviewMode && sanMoves.length > 0
-      ? fenAfterMoves(sanMoves, Math.min(reviewStep, sanMoves.length))
+  // The board shows the browsed ply when scrubbing, else the live/final position.
+  const boardFen =
+    browsing && sanMoves.length > 0
+      ? fenAfterMoves(sanMoves, Math.min(viewPly!, sanMoves.length))
       : liveFen;
 
   const reviewRow =
-    reviewMode && analysis?.moveReviews && reviewStep >= 0 && reviewStep < analysis.moveReviews.length
-      ? analysis.moveReviews[reviewStep]
+    browsing && analysis?.moveReviews && viewPly! >= 0 && viewPly! < analysis.moveReviews.length
+      ? analysis.moveReviews[viewPly!]
       : null;
 
-  // Eval (white POV) of the position currently shown in review, for the eval bar.
+  // Eval (white POV) of the position currently shown, for the eval bar (when analysed).
   const reviewEval =
-    reviewMode && analysis?.evalSeries && analysis.evalSeries.length > 0
-      ? { cp: analysis.evalSeries[Math.min(reviewStep, analysis.evalSeries.length - 1)]?.cp ?? null, mate: null }
+    analysis?.evalSeries && analysis.evalSeries.length > 0
+      ? { cp: analysis.evalSeries[Math.min(effStep, analysis.evalSeries.length - 1)]?.cp ?? null, mate: null }
       : null;
 
   const { reviewArrows, reviewExtraSquares } = useMemo(() => {
     const empty = { reviewArrows: [] as Arrow[], reviewExtraSquares: {} as Record<string, React.CSSProperties> };
-    if (!reviewMode || !reviewRow || reviewStep >= sanMoves.length) return empty;
-    const posFen = fenAfterMoves(sanMoves, reviewStep);
+    if (!browsing || !reviewRow || viewPly! >= sanMoves.length) return empty;
+    const posFen = fenAfterMoves(sanMoves, viewPly!);
     const arrows: Arrow[] = [];
     const squares: Record<string, React.CSSProperties> = {};
     const best = sanToArrow(posFen, reviewRow.bestSan);
@@ -309,11 +328,11 @@ function GamePageInner() {
       }
     }
     return { reviewArrows: arrows, reviewExtraSquares: squares };
-  }, [reviewMode, reviewRow, reviewStep, sanMoves]);
+  }, [browsing, reviewRow, viewPly, sanMoves]);
 
   const exitReview = useCallback(() => {
     setReviewMode(false);
-    setReviewStep(0);
+    setViewPly(null);
     router.replace(`/game/${id}`, { scroll: false });
   }, [id, router]);
 
@@ -327,10 +346,24 @@ function GamePageInner() {
   const analyzeGame = useCallback(() => {
     setGameOverModalDismissed(true);
     setReviewMode(true);
-    setReviewStep(0);
+    setViewPly(0);
     router.replace(`/game/${id}?review=1`, { scroll: false });
     if (sanMoves.length > 0) reviewRunRef.current(sanMoves);
   }, [id, router, sanMoves]);
+
+  // Timeline navigation (works live + ended). null = follow the live game / final.
+  const goLive = useCallback(() => setViewPly(null), []);
+  const stepTo = useCallback(
+    (n: number) => setViewPly(Math.max(0, Math.min(n, sanMoves.length))),
+    [sanMoves.length]
+  );
+  const stepPrev = useCallback(() => setViewPly((p) => Math.max(0, (p ?? sanMoves.length) - 1)), [sanMoves.length]);
+  const stepNext = useCallback(() => {
+    setViewPly((p) => {
+      const next = (p ?? sanMoves.length) + 1;
+      return next >= sanMoves.length ? null : next;
+    });
+  }, [sanMoves.length]);
 
   // Rematch: challenge the same opponent again, swapping colours, same time control + mode.
   const handleRematch = useCallback(() => {
@@ -375,6 +408,14 @@ function GamePageInner() {
       /* ignore */
     }
   }, [soundsEnabled]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LS_BOARD_THEME, boardTheme);
+    } catch {
+      /* ignore */
+    }
+  }, [boardTheme]);
 
   useEffect(() => {
     if (!soundsEnabled || gameEnded) {
@@ -677,23 +718,24 @@ function GamePageInner() {
           </Box>
 
           <HStack gap={2} align="stretch">
-            {reviewMode && reviewEval && (
+            {reviewEval && (
               <EvaluationBar evaluation={reviewEval} orientation={orientation} />
             )}
             <Box flex={1} minW={0}>
               <GameBoard
-                fen={reviewBoardFen}
+                fen={boardFen}
                 orientation={orientation}
-                isMyTurn={!!isParticipant && !gameEnded && isMyTurn}
+                isMyTurn={!!isParticipant && !gameEnded && isMyTurn && !browsing}
                 movePending={movePending}
                 onMove={handleMove}
-                allowMove={!gameEnded && !!isParticipant}
-                lastMove={reviewMode ? null : lastSq}
+                allowMove={!gameEnded && !!isParticipant && !browsing}
+                lastMove={browsing ? null : lastSq}
                 premoveEnabled={premoveEnabled}
                 pendingPremove={pendingPremove}
                 onPendingPremove={setPendingPremove}
-                extraSquareStyles={reviewMode ? reviewExtraSquares : undefined}
-                reviewArrows={reviewMode ? reviewArrows : undefined}
+                extraSquareStyles={browsing ? reviewExtraSquares : undefined}
+                reviewArrows={browsing ? reviewArrows : undefined}
+                boardTheme={boardTheme}
               />
             </Box>
           </HStack>
@@ -735,53 +777,39 @@ function GamePageInner() {
           w={{ base: "100%", lg: "100%" }}
           flexShrink={{ lg: 1 }}
         >
-          <Box
-            py={3}
-            px={4}
-            borderRadius="soft"
-            borderWidth="1px"
-            borderColor="goldDark"
-            bg="bgCard"
-          >
-            <Text color="gold" fontSize="xs" fontWeight="600" mb={3}>
-              Gameplay
-            </Text>
-            <VStack align="stretch" gap={3}>
-              {isParticipant && !gameEnded && (
-                <HStack justify="space-between" align="center">
-                  <Text color="textSecondary" fontSize="sm">
-                    Premove
-                  </Text>
-                  <Switch.Root
-                    checked={premoveEnabled}
-                    onCheckedChange={(e) => setPremoveEnabled(!!e.checked)}
-                  >
-                    <Switch.HiddenInput />
-                    <Switch.Control bg={premoveEnabled ? "gold" : "bgSurface"} borderWidth="1px" borderColor="blackAlpha.200">
-                      <Switch.Thumb />
-                    </Switch.Control>
-                  </Switch.Root>
-                </HStack>
-              )}
-              <HStack justify="space-between" align="center">
-                <Text color="textSecondary" fontSize="sm">
-                  Sounds
-                </Text>
-                <Switch.Root
-                  checked={soundsEnabled}
-                  onCheckedChange={(e) => setSoundsEnabled(!!e.checked)}
-                >
-                  <Switch.HiddenInput />
-                  <Switch.Control bg={soundsEnabled ? "gold" : "bgSurface"} borderWidth="1px" borderColor="blackAlpha.200">
-                    <Switch.Thumb />
-                  </Switch.Control>
-                </Switch.Root>
+          {/* Compact utility bar: board theme + sound/premove */}
+          <Box order={{ base: 4, lg: 1 }} py={2.5} px={3} borderRadius="soft" borderWidth="1px" borderColor="goldDark" bg="bgCard">
+            <HStack justify="space-between" flexWrap="wrap" gap={2}>
+              <HStack gap={1.5}>
+                {(Object.keys(BOARD_THEMES) as BoardThemeKey[]).map((k) => (
+                  <Box
+                    key={k}
+                    as="button"
+                    onClick={() => setBoardTheme(k)}
+                    w="22px"
+                    h="22px"
+                    borderRadius="5px"
+                    borderWidth="2px"
+                    borderColor={boardTheme === k ? "gold" : "transparent"}
+                    title={BOARD_THEMES[k].label}
+                    style={{ background: `linear-gradient(135deg, ${BOARD_THEMES[k].lightSq} 50%, ${BOARD_THEMES[k].darkSq} 50%)` }}
+                  />
+                ))}
               </HStack>
-            </VStack>
+              <HStack gap={1.5}>
+                <ToggleChip label="Sound" active={soundsEnabled} onClick={() => setSoundsEnabled((v) => !v)} />
+                {isParticipant && !gameEnded && (
+                  <ToggleChip label="Premove" active={premoveEnabled} onClick={() => setPremoveEnabled((v) => !v)} />
+                )}
+              </HStack>
+            </HStack>
           </Box>
-          <MaterialDisplay fen={reviewBoardFen} />
+          <Box order={{ base: 5, lg: 5 }}>
+            <MaterialDisplay fen={boardFen} />
+          </Box>
           <Box
-            py={3}
+            order={{ base: 6, lg: 4 }}
+            py={2.5}
             px={4}
             borderRadius="soft"
             borderWidth="1px"
@@ -789,70 +817,69 @@ function GamePageInner() {
             bg="bgCard"
             textAlign="center"
           >
-            <Text color="textMuted" fontSize="xs" mb={1}>
-              Time control
-            </Text>
-            <Text color="gold" fontWeight="700" fontSize="lg">
+            <Text color="gold" fontWeight="700" fontSize="md">
               {game.timeControl}
+              {!game.rated && " · Casual"}
             </Text>
-            <Text color="textMuted" fontSize="xs" mt={1}>
+            <Text color="textMuted" fontSize="xs" mt={0.5}>
               {status}
               {result && ` · ${result}`}
             </Text>
           </Box>
-          <Box
-            py={3}
-            px={4}
-            borderRadius="soft"
-            borderWidth="1px"
-            borderColor="goldDark"
-            bg="bgCard"
-            maxH="300px"
-            overflowY="auto"
-          >
-            <Text color="gold" fontSize="xs" fontWeight="600" mb={2}>
-              Moves
-            </Text>
-            <Flex
-              gap={2}
-              flexWrap="wrap"
-              overflowY="auto"
-              maxW="100%"
-              pb={1}
-              css={{ scrollbarWidth: "thin" }}
-            >
-              {sanMoves.map((m, i) => {
-                const isCurrent =
-                  reviewMode && (i === reviewStep || (reviewStep === sanMoves.length && i === sanMoves.length - 1));
-                const cls = analysis?.moveReviews?.[i]?.classification;
-                const clsColor = cls ? CLASSIFICATION_META[cls].color : undefined;
-                const mark =
-                  cls === "blunder" || cls === "mistake" || cls === "inaccuracy" ? CLASSIFICATION_META[cls].symbol : "";
-                return (
-                  <Text
-                    key={i}
-                    color={isCurrent ? "gold" : clsColor ?? "textSecondary"}
-                    fontWeight={isCurrent || mark ? "700" : "normal"}
-                    fontSize="sm"
-                    whiteSpace="nowrap"
-                    flexShrink={0}
-                    cursor={reviewMode ? "pointer" : undefined}
-                    onClick={reviewMode ? () => setReviewStep(i) : undefined}
-                  >
-                    {i % 2 === 0 ? `${Math.floor(i / 2) + 1}. ` : ""}
-                    {m}
-                    {mark}
-                  </Text>
-                );
-              })}
-              {sanMoves.length === 0 && (
-                <Text color="textMuted" fontSize="sm">—</Text>
-              )}
-            </Flex>
-          </Box>
+
+          {/* Move timeline — clickable + scrub (live or ended). Sits right under the board on mobile. */}
+          {sanMoves.length > 0 && (
+            <Box order={{ base: 1, lg: 2 }} py={3} px={4} borderRadius="soft" borderWidth="1px" borderColor="goldDark" bg="bgCard">
+              <HStack justify="space-between" mb={2} align="center">
+                <Text color="gold" fontSize="xs" fontWeight="600">Moves</Text>
+                {browsing && !gameEnded && (
+                  <Box as="button" onClick={goLive} px={2} py={0.5} borderRadius="full" bg="rgba(212,175,55,0.18)">
+                    <Text fontSize="2xs" fontWeight="800" color="gold" letterSpacing="0.06em">● RETURN TO LIVE</Text>
+                  </Box>
+                )}
+              </HStack>
+              <Flex gap={2} flexWrap="wrap" maxH="150px" overflowY="auto" maxW="100%" pb={1} css={{ scrollbarWidth: "thin" }}>
+                {sanMoves.map((m, i) => {
+                  const isCurrent = browsing ? i === viewPly : i === sanMoves.length - 1;
+                  const cls = analysis?.moveReviews?.[i]?.classification;
+                  const clsColor = cls ? CLASSIFICATION_META[cls].color : undefined;
+                  const mark =
+                    cls === "blunder" || cls === "mistake" || cls === "inaccuracy" ? CLASSIFICATION_META[cls].symbol : "";
+                  return (
+                    <Text
+                      key={i}
+                      color={isCurrent ? "gold" : clsColor ?? "textSecondary"}
+                      fontWeight={isCurrent || mark ? "700" : "normal"}
+                      fontSize="sm"
+                      whiteSpace="nowrap"
+                      flexShrink={0}
+                      cursor="pointer"
+                      textDecoration={isCurrent ? "underline" : undefined}
+                      onClick={() => stepTo(i)}
+                    >
+                      {i % 2 === 0 ? `${Math.floor(i / 2) + 1}. ` : ""}
+                      {m}
+                      {mark}
+                    </Text>
+                  );
+                })}
+              </Flex>
+              <HStack flexWrap="wrap" gap={1} mt={3} align="center">
+                <NavBtn label="⏮" onClick={() => stepTo(0)} disabled={effStep === 0} />
+                <NavBtn label="◀" onClick={stepPrev} disabled={effStep === 0} />
+                <NavBtn label="▶" onClick={stepNext} disabled={effStep >= sanMoves.length} />
+                <NavBtn label="⏭" onClick={() => (gameEnded ? stepTo(sanMoves.length) : goLive())} disabled={!browsing} />
+                {canAnalyze && !reviewMode && (
+                  <Button size="xs" bg="gold" color="bgDark" borderRadius="soft" ml="auto" onClick={analyzeGame}>
+                    Analyze
+                  </Button>
+                )}
+              </HStack>
+            </Box>
+          )}
 
           {reviewMode && (
-            <Box py={3} px={4} borderRadius="soft" borderWidth="1px" borderColor="goldDark" bg="bgCard">
+            <Box order={{ base: 2, lg: 3 }} py={3} px={4} borderRadius="soft" borderWidth="1px" borderColor="goldDark" bg="bgCard">
               <HStack justify="space-between" mb={2}>
                 <Text color="gold" fontSize="xs" fontWeight="700">
                   Game review
@@ -899,27 +926,16 @@ function GamePageInner() {
               )}
 
               {analysis && analysis.evalSeries.length > 1 && (
-                <Box h="86px" mb={3}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={analysis.evalSeries} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-                      <XAxis dataKey="ply" hide />
-                      <YAxis domain={[-600, 600]} hide />
-                      <ReferenceLine y={0} stroke="#ffffff22" />
-                      <ReferenceLine x={Math.min(reviewStep, analysis.evalSeries.length - 1)} stroke="#d4af37" strokeWidth={1.5} />
-                      <Area type="monotone" dataKey="cp" stroke="#e6a452" fill="#e6a452" fillOpacity={0.2} isAnimationActive={false} />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                <Box mb={3}>
+                  <EvalGraph
+                    series={analysis.evalSeries}
+                    currentPly={browsing ? viewPly : null}
+                    onJump={(p) => stepTo(p)}
+                  />
                 </Box>
               )}
 
-              <HStack flexWrap="wrap" gap={1} mb={3}>
-                <NavBtn label="Start" onClick={() => setReviewStep(0)} disabled={reviewStep === 0} />
-                <NavBtn label="Prev" onClick={() => setReviewStep((s) => Math.max(0, s - 1))} disabled={reviewStep === 0} />
-                <NavBtn label="Next" onClick={() => setReviewStep((s) => Math.min(sanMoves.length, s + 1))} disabled={reviewStep >= sanMoves.length} />
-                <NavBtn label="End" onClick={() => setReviewStep(sanMoves.length)} disabled={reviewStep >= sanMoves.length} />
-              </HStack>
-
-              {reviewStep >= sanMoves.length ? (
+              {effStep >= sanMoves.length ? (
                 <Text color="textSecondary" fontSize="sm">Final position — end of game.</Text>
               ) : reviewRow ? (
                 <VStack align="stretch" gap={1.5}>
@@ -943,7 +959,7 @@ function GamePageInner() {
                   )}
                   <Text color="textSecondary" fontSize="sm">
                     <Text as="span" fontWeight="700" color="textPrimary">
-                      {reviewStep % 2 === 0 ? "White" : "Black"}
+                      {(viewPly ?? 0) % 2 === 0 ? "White" : "Black"}
                     </Text>{" "}
                     played{" "}
                     <Text as="span" color="gold" fontWeight="700">{reviewRow.playedSan}</Text>
@@ -966,14 +982,10 @@ function GamePageInner() {
             </Box>
           )}
 
-          {gameEnded && canAnalyze && !reviewMode && (
-            <Button size="sm" bg="gold" color="bgDark" borderRadius="soft" onClick={analyzeGame}>
-              Analyze game
-            </Button>
-          )}
-
           {user && (
-            <GameChat messages={chatMessages} label={chatLabel} onSend={handleSendChat} />
+            <Box order={{ base: 3, lg: 6 }}>
+              <GameChat messages={chatMessages} label={chatLabel} onSend={handleSendChat} />
+            </Box>
           )}
 
           {opponentOfferedDraw && !gameEnded && (
@@ -1091,19 +1103,11 @@ function GamePageInner() {
                   <StatRow label="Avg centipawn loss" value={analysis.black.acpl} />
                 </Box>
               </SimpleGrid>
-              <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="blackAlpha.100" h="220px">
+              <Box bg="bgCard" borderRadius="soft" p={4} borderWidth="1px" borderColor="blackAlpha.100">
                 <Text fontSize="xs" color="textMuted" mb={2}>
-                  Evaluation (opening · middlegame · endgame)
+                  Evaluation over the game
                 </Text>
-                <ResponsiveContainer width="100%" height="85%">
-                  <AreaChart data={analysis.evalSeries.map((e) => ({ ply: e.ply, cp: e.cp }))}>
-                    <XAxis dataKey="ply" tick={{ fill: "#6b728e", fontSize: 10 }} />
-                    <YAxis tick={{ fill: "#6b728e", fontSize: 10 }} />
-                    <Tooltip />
-                    <ReferenceLine y={0} stroke="#ffffff33" />
-                    <Area type="monotone" dataKey="cp" stroke="#e6a452" fill="#e6a452" fillOpacity={0.25} />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <EvalGraph series={analysis.evalSeries} height={150} />
               </Box>
             </>
           )}
@@ -1166,6 +1170,25 @@ function StatRow({ label, value }: { label: string; value: number }) {
         {value}
       </Text>
     </HStack>
+  );
+}
+
+function ToggleChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <Box
+      as="button"
+      onClick={onClick}
+      px={2.5}
+      py={1}
+      borderRadius="full"
+      borderWidth="1px"
+      borderColor={active ? "gold" : "goldDark"}
+      bg={active ? "rgba(212,175,55,0.18)" : "transparent"}
+    >
+      <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" color={active ? "gold" : "textMuted"}>
+        {label}
+      </Text>
+    </Box>
   );
 }
 

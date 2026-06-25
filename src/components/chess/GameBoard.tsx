@@ -37,6 +37,8 @@ interface GameBoardProps {
    *   • "system"            — dark void squares, cyan/purple highlight (R2M System UI)
    */
   variant?: "classic" | "system";
+  /** Board colour theme (square colours); ignored when variant === "system". */
+  boardTheme?: BoardThemeKey;
 }
 
 /* ── Classic palette — gold accents on neutral gray squares ─────────── */
@@ -52,6 +54,19 @@ const CLASSIC = {
   notationLight: "#6b7280",
   borderRadius: 12,
   ringShadow: "0 0 0 1px rgba(255,255,255,0.12)",
+};
+
+/* ── Board colour themes (square + notation colours; share Classic's highlights) ─ */
+export type BoardThemeKey = "classic" | "green" | "brown" | "blue" | "night";
+export const BOARD_THEMES: Record<
+  BoardThemeKey,
+  { label: string; darkSq: string; lightSq: string; notationDark: string; notationLight: string }
+> = {
+  classic: { label: "Classic", darkSq: "#9ca3af", lightSq: "#e5e7eb", notationDark: "#4b5563", notationLight: "#6b7280" },
+  green: { label: "Green", darkSq: "#769656", lightSq: "#eeeed2", notationDark: "#eeeed2", notationLight: "#6f8b4e" },
+  brown: { label: "Brown", darkSq: "#b58863", lightSq: "#f0d9b5", notationDark: "#f0d9b5", notationLight: "#9c6f4a" },
+  blue: { label: "Blue", darkSq: "#567a9e", lightSq: "#d9e4ef", notationDark: "#d9e4ef", notationLight: "#456486" },
+  night: { label: "Night", darkSq: "#3a3f5c", lightSq: "#737aa6", notationDark: "#dfe3ff", notationLight: "#c2c8f0" },
 };
 
 /* ── System palette — chamfered, neon, R2M HUD ──────────────────────── */
@@ -83,9 +98,10 @@ export function GameBoard({
   extraSquareStyles,
   reviewArrows,
   variant = "classic",
+  boardTheme = "classic",
 }: GameBoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
-  const palette = variant === "system" ? SYSTEM : CLASSIC;
+  const palette = variant === "system" ? SYSTEM : { ...CLASSIC, ...BOARD_THEMES[boardTheme] };
   const SELECTED_HIGHLIGHT = palette.selected;
   const LEGAL_MOVE_HIGHLIGHT = palette.legal;
   const LAST_MOVE_HIGHLIGHT = palette.last;
