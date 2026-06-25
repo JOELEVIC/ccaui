@@ -128,6 +128,9 @@ function lastMoveSquares(moves: string): { from: string; to: string } | null {
 const LS_PREMOVE = "dchess-game-premove";
 const LS_SOUNDS = "dchess-game-sounds";
 const LS_BOARD_THEME = "dchess-board-theme";
+const LS_CONFIRM = "dchess-game-confirm";
+const LS_AUTOQUEEN = "dchess-game-autoqueen";
+const LS_PREMOVE_PROMO = "dchess-game-premovepromo";
 
 function readStoredBool(key: string, defaultVal: boolean): boolean {
   if (typeof window === "undefined") return defaultVal;
@@ -212,6 +215,11 @@ function GamePageInner() {
   const [boardTheme, setBoardTheme] = useState<BoardThemeKey>(
     () => readStoredStr(LS_BOARD_THEME, "classic") as BoardThemeKey
   );
+  const [confirmMove, setConfirmMove] = useState(() => readStoredBool(LS_CONFIRM, false));
+  const [autoQueen, setAutoQueen] = useState(() => readStoredBool(LS_AUTOQUEEN, true));
+  const [premovePromotion, setPremovePromotion] = useState(() => readStoredStr(LS_PREMOVE_PROMO, "q"));
+  // A move staged for confirmation (when confirmMove is on): the UCI string awaiting Confirm/Cancel.
+  const [pendingConfirm, setPendingConfirm] = useState<string | null>(null);
   const [pendingPremove, setPendingPremove] = useState<PendingPremove | null>(null);
   const startSessionDone = useRef(false);
   const recordedXpRef = useRef(false);
@@ -423,6 +431,16 @@ function GamePageInner() {
   }, [boardTheme]);
 
   useEffect(() => {
+    try {
+      localStorage.setItem(LS_CONFIRM, confirmMove ? "1" : "0");
+      localStorage.setItem(LS_AUTOQUEEN, autoQueen ? "1" : "0");
+      localStorage.setItem(LS_PREMOVE_PROMO, premovePromotion);
+    } catch {
+      /* ignore */
+    }
+  }, [confirmMove, autoQueen, premovePromotion]);
+
+  useEffect(() => {
     if (!soundsEnabled || gameEnded) {
       prevFenForSoundRef.current = liveFen;
       return;
@@ -538,24 +556,14 @@ function GamePageInner() {
       .catch(() => {});
   }, [id, user?.id, status, isParticipant, recordGameCompleted]);
 
-  const handleMove = useCallback(
+  // Actually send a move to the server (optimistic FEN is already shown).
+  const sendMove = useCallback(
     (move: string) => {
-      if (!token || gameEnded) return;
-      if (submittingMoveRef.current) return;
+      if (!token) return;
       submittingMoveRef.current = true;
-      // Optimistic: show the move immediately, then confirm against the server echo.
-      const predicted = applyUciToFen(optimisticFen ?? fen, move);
-      if (predicted) {
-        optimisticPlyRef.current = plyFromFen(predicted);
-        setOptimisticFen(predicted);
-      } else {
-        // Couldn't predict locally — fall back to the old "freeze until echo" behaviour.
-        setMovePending(true);
-      }
       makeMove(token, id, move)
         .then((s) => applyClocks(s))
         .catch((err) => {
-          // Roll back the prediction; the confirmed FEN is the source of truth.
           optimisticPlyRef.current = null;
           setOptimisticFen(null);
           setMovePending(false);
@@ -563,8 +571,45 @@ function GamePageInner() {
           toaster.create({ title: err?.message ?? "Move failed", type: "error" });
         });
     },
-    [id, token, gameEnded, fen, optimisticFen, applyClocks]
+    [id, token, applyClocks]
   );
+
+  const handleMove = useCallback(
+    (move: string, immediate = false) => {
+      if (!token || gameEnded) return;
+      if (submittingMoveRef.current || pendingConfirm) return;
+      // Optimistic: show the move immediately.
+      const predicted = applyUciToFen(optimisticFen ?? fen, move);
+      if (predicted) {
+        optimisticPlyRef.current = plyFromFen(predicted);
+        setOptimisticFen(predicted);
+      } else {
+        setMovePending(true);
+      }
+      // Confirm-move: hold the move (shown optimistically) until the user confirms.
+      // Premoves bypass confirmation — they were already authorised.
+      if (confirmMove && !immediate) {
+        setPendingConfirm(move);
+        return;
+      }
+      sendMove(move);
+    },
+    [token, gameEnded, fen, optimisticFen, confirmMove, pendingConfirm, sendMove]
+  );
+
+  const confirmStagedMove = useCallback(() => {
+    if (!pendingConfirm) return;
+    const m = pendingConfirm;
+    setPendingConfirm(null);
+    sendMove(m);
+  }, [pendingConfirm, sendMove]);
+
+  const cancelStagedMove = useCallback(() => {
+    setPendingConfirm(null);
+    optimisticPlyRef.current = null;
+    setOptimisticFen(null);
+    setMovePending(false);
+  }, []);
 
   useEffect(() => {
     if (!isParticipant || gameEnded || movePending || !isMyTurn || !pendingPremove) return;
@@ -593,7 +638,7 @@ function GamePageInner() {
     }
     const uci = m.promotion ? `${m.from}${m.to}${m.promotion.toLowerCase()}` : `${m.from}${m.to}`;
     setPendingPremove(null);
-    handleMove(uci);
+    handleMove(uci, true);
   }, [isParticipant, gameEnded, movePending, isMyTurn, pendingPremove, fen, myColor, handleMove]);
 
   const handleResign = () => {
@@ -697,6 +742,16 @@ function GamePageInner() {
           )}
         </HStack>
       </HStack>
+      {pendingConfirm && (
+        <HStack maxW="1200px" mx="auto" mb={4} justify="center" gap={3} p={3} borderRadius="soft"
+          bg="rgba(212,175,55,0.12)" borderWidth="1px" borderColor="gold">
+          <Text color="textPrimary" fontSize="sm" fontWeight="600">Confirm your move?</Text>
+          <Button size="sm" bg="gold" color="bgDark" borderRadius="soft" onClick={confirmStagedMove}>Confirm</Button>
+          <Button size="sm" variant="outline" borderColor="statusWarning" color="statusWarning" borderRadius="soft" onClick={cancelStagedMove}>
+            Cancel
+          </Button>
+        </HStack>
+      )}
       {!!token && !connected && !gameEnded && (
         <ConnectingBanner subError={subError} onRetry={() => window.location.reload()} />
       )}
@@ -763,6 +818,8 @@ function GamePageInner() {
                 extraSquareStyles={browsing ? reviewExtraSquares : undefined}
                 reviewArrows={browsing ? reviewArrows : undefined}
                 boardTheme={boardTheme}
+                autoQueen={autoQueen}
+                premovePromotion={premovePromotion}
               />
             </Box>
           </HStack>
@@ -808,32 +865,63 @@ function GamePageInner() {
           w={{ base: "100%", lg: "100%" }}
           flexShrink={{ lg: 1 }}
         >
-          {/* Compact utility bar: board theme + sound/premove */}
+          {/* Compact utility bar: board theme + gameplay settings */}
           <Box order={{ base: 4, lg: 1 }} py={2.5} px={3} borderRadius="soft" borderWidth="1px" borderColor="goldDark" bg="bgCard">
-            <HStack justify="space-between" flexWrap="wrap" gap={2}>
-              <HStack gap={1.5}>
-                {(Object.keys(BOARD_THEMES) as BoardThemeKey[]).map((k) => (
-                  <Box
-                    key={k}
-                    as="button"
-                    onClick={() => setBoardTheme(k)}
-                    w="22px"
-                    h="22px"
-                    borderRadius="5px"
-                    borderWidth="2px"
-                    borderColor={boardTheme === k ? "gold" : "transparent"}
-                    title={BOARD_THEMES[k].label}
-                    style={{ background: `linear-gradient(135deg, ${BOARD_THEMES[k].lightSq} 50%, ${BOARD_THEMES[k].darkSq} 50%)` }}
-                  />
-                ))}
-              </HStack>
-              <HStack gap={1.5}>
+            <VStack align="stretch" gap={2}>
+              <HStack justify="space-between" flexWrap="wrap" gap={2}>
+                <HStack gap={1.5}>
+                  {(Object.keys(BOARD_THEMES) as BoardThemeKey[]).map((k) => (
+                    <Box
+                      key={k}
+                      as="button"
+                      onClick={() => setBoardTheme(k)}
+                      w="22px"
+                      h="22px"
+                      borderRadius="5px"
+                      borderWidth="2px"
+                      borderColor={boardTheme === k ? "gold" : "transparent"}
+                      title={BOARD_THEMES[k].label}
+                      style={{ background: `linear-gradient(135deg, ${BOARD_THEMES[k].lightSq} 50%, ${BOARD_THEMES[k].darkSq} 50%)` }}
+                    />
+                  ))}
+                </HStack>
                 <ToggleChip label="Sound" active={soundsEnabled} onClick={() => setSoundsEnabled((v) => !v)} />
-                {isParticipant && !gameEnded && (
-                  <ToggleChip label="Premove" active={premoveEnabled} onClick={() => setPremoveEnabled((v) => !v)} />
-                )}
               </HStack>
-            </HStack>
+              {isParticipant && !gameEnded && (
+                <HStack flexWrap="wrap" gap={1.5} align="center">
+                  <ToggleChip label="Premove" active={premoveEnabled} onClick={() => setPremoveEnabled((v) => !v)} />
+                  <ToggleChip label="Confirm" active={confirmMove} onClick={() => setConfirmMove((v) => !v)} />
+                  <ToggleChip label="Auto-Q" active={autoQueen} onClick={() => setAutoQueen((v) => !v)} />
+                  {premoveEnabled && (
+                    <HStack gap={1} align="center">
+                      <Text fontSize="2xs" color="textMuted" letterSpacing="0.04em">Premove→</Text>
+                      {(["q", "r", "b", "n"] as const).map((p) => (
+                        <Box
+                          key={p}
+                          as="button"
+                          onClick={() => setPremovePromotion(p)}
+                          title={`Premove promotes to ${p.toUpperCase()}`}
+                          w="22px"
+                          h="22px"
+                          borderRadius="4px"
+                          borderWidth="1px"
+                          borderColor={premovePromotion === p ? "gold" : "goldDark"}
+                          bg={premovePromotion === p ? "rgba(212,175,55,0.18)" : "transparent"}
+                          color="textPrimary"
+                          fontSize="15px"
+                          lineHeight="1"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          {{ q: "♛", r: "♜", b: "♝", n: "♞" }[p]}
+                        </Box>
+                      ))}
+                    </HStack>
+                  )}
+                </HStack>
+              )}
+            </VStack>
           </Box>
           <Box order={{ base: 5, lg: 5 }}>
             <MaterialDisplay fen={boardFen} />

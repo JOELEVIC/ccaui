@@ -22,6 +22,7 @@ import {
   LuxuryHeading,
 } from "@/components/luxury/LuxuryPrimitives";
 import { BOT_PERSONAS, BOT_LEVELS } from "@/lib/botPersonas";
+import { useOngoingGame } from "@/lib/useOngoingGame";
 
 const LIVE_GAMES = gql`
   query GamesLiveGames {
@@ -110,6 +111,7 @@ export default function GamesPage() {
   const [declineChallenge] = useMutation(DECLINE_CHALLENGE);
   const [cancelChallenge] = useMutation(CANCEL_CHALLENGE);
 
+  const { ongoingId, atLimit } = useOngoingGame();
   const liveGames = liveData?.liveGames ?? [];
   // Hide aborted/voided games — they're noise.
   const myGames = (myData?.myGames ?? []).filter((g) => g.status !== "ABANDONED");
@@ -136,6 +138,11 @@ export default function GamesPage() {
     e.preventDefault();
     if (!meId) {
       toaster.create({ title: "Sign in to play", type: "error" });
+      return;
+    }
+    if (atLimit && ongoingId) {
+      toaster.create({ title: "Finish your current game first", type: "error" });
+      router.push(`/game/${ongoingId}`);
       return;
     }
     if (!timeControl) {
@@ -233,6 +240,54 @@ export default function GamesPage() {
         </HStack>
       </Box>
 
+      {/* Resume the game already under way */}
+      {ongoingId && (
+        <Box
+          mb={{ base: 5, md: 7 }}
+          position="relative"
+          zIndex={1}
+          p={{ base: 4, md: 5 }}
+          borderRadius="12px"
+          bg="rgba(212,175,55,0.10)"
+          borderWidth="1px"
+          borderColor="var(--lux-gold)"
+        >
+          <HStack justify="space-between" flexWrap="wrap" gap={3}>
+            <HStack gap={2.5} align="center">
+              <Box w="9px" h="9px" borderRadius="full" bg="var(--lux-gold)" className="lux-pulse" />
+              <Text color="var(--lux-text-primary)" fontWeight="600">You have a game in progress.</Text>
+            </HStack>
+            <LuxuryButton variant="gold" size="md" glyph="▸" href={`/game/${ongoingId}`}>Resume game</LuxuryButton>
+          </HStack>
+        </Box>
+      )}
+
+      {/* Incoming challenges — surfaced at the very top so they're impossible to miss */}
+      {incoming.length > 0 && (
+        <Box
+          mb={{ base: 5, md: 7 }}
+          position="relative"
+          zIndex={1}
+          p={{ base: 4, md: 5 }}
+          borderRadius="12px"
+          bg="rgba(212,175,55,0.08)"
+          borderWidth="1px"
+          borderColor="var(--lux-gold-muted)"
+        >
+          <HStack mb={3} gap={2} align="center">
+            <Box w="8px" h="8px" borderRadius="full" bg="var(--lux-gold)" className="lux-pulse" />
+            <Text color="var(--lux-gold-bright)" fontSize="sm" fontWeight="700" letterSpacing="0.06em">
+              {incoming.length === 1 ? "You've been challenged" : `${incoming.length} challenges for you`}
+            </Text>
+          </HStack>
+          <VStack align="stretch" gap={2.5}>
+            {incoming.map((c) => (
+              <ChallengeRow key={c.id} c={c} mine={false} onAccept={() => onAccept(c.id)} onDecline={() => onDecline(c.id)} />
+            ))}
+          </VStack>
+        </Box>
+      )}
+
       {/* Mode tabs */}
       <HStack mb={{ base: 5, md: 7 }} gap={2} flexWrap="wrap" position="relative" zIndex={1}>
         {(
@@ -264,14 +319,14 @@ export default function GamesPage() {
             if (bots.length === 0) return null;
             return (
               <Section key={level} title={level} count={`${bots.length} bots`}>
-                <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={3}>
+                <SimpleGrid columns={{ base: 2, sm: 3, md: 4, lg: 5 }} gap={2.5}>
                   {bots.map((b) => (
                     <Box
                       key={b.id}
                       as="button"
+                      title={b.tagline}
                       onClick={() => router.push(`/play/bot?elo=${b.elo}&bot=${b.id}`)}
-                      textAlign="left"
-                      p={4}
+                      p={2.5}
                       borderRadius="10px"
                       bg="var(--lux-glass-surface)"
                       borderWidth="1px"
@@ -280,19 +335,17 @@ export default function GamesPage() {
                       _hover={{ borderColor: "var(--lux-gold)", transform: "translateY(-2px)" }}
                       style={{ backdropFilter: "blur(10px)" }}
                     >
-                      <HStack gap={3} align="center" mb={2}>
-                        <Box fontSize="28px" lineHeight="1">{b.avatar}</Box>
-                        <Box minW={0} flex={1}>
-                          <Text fontFamily="var(--font-playfair), Georgia, serif" fontSize="md" color="var(--lux-text-primary)" fontWeight="600" lineClamp={1}>
+                      <HStack gap={2.5} align="center">
+                        <Box fontSize="36px" lineHeight="1" flexShrink={0}>{b.avatar}</Box>
+                        <Box minW={0} textAlign="left">
+                          <Text fontSize="sm" color="var(--lux-text-primary)" fontWeight="600" lineClamp={1}>
                             {b.name}
                           </Text>
-                          <Text fontSize="xs" fontWeight="700" letterSpacing="0.1em" color="var(--lux-gold-bright)">
-                            {b.elo} ELO
+                          <Text fontSize="2xs" fontWeight="700" letterSpacing="0.1em" color="var(--lux-gold-bright)">
+                            {b.elo}
                           </Text>
                         </Box>
-                        <Text color="var(--lux-gold-muted)" fontSize="lg">▸</Text>
                       </HStack>
-                      <Text fontSize="xs" color="var(--lux-text-muted)" lineClamp={2}>{b.tagline}</Text>
                     </Box>
                   ))}
                 </SimpleGrid>
@@ -383,17 +436,6 @@ export default function GamesPage() {
               )}
             </Box>
           </GlassCard>
-
-          {/* Incoming challenges */}
-          {incoming.length > 0 && (
-            <Section title="Challenges for you" count={`${incoming.length} pending`}>
-              <VStack align="stretch" gap={2.5}>
-                {incoming.map((c) => (
-                  <ChallengeRow key={c.id} c={c} mine={false} onAccept={() => onAccept(c.id)} onDecline={() => onDecline(c.id)} />
-                ))}
-              </VStack>
-            </Section>
-          )}
 
           {/* Your open challenges */}
           {outgoing.length > 0 && (

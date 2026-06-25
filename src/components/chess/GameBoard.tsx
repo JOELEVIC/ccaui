@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Box } from "@chakra-ui/react";
+import { Box, HStack } from "@chakra-ui/react";
 import { Chessboard } from "react-chessboard";
 import type { Arrow } from "react-chessboard";
 import { Chess, type Square } from "chess.js";
@@ -39,6 +39,10 @@ interface GameBoardProps {
   variant?: "classic" | "system";
   /** Board colour theme (square colours); ignored when variant === "system". */
   boardTheme?: BoardThemeKey;
+  /** When false, a pawn reaching the last rank opens a Q/R/B/N picker instead of auto-queening. */
+  autoQueen?: boolean;
+  /** Piece a *premove* promotion becomes ("q"/"r"/"b"/"n"). */
+  premovePromotion?: string;
 }
 
 /* ── Classic palette — gold accents on neutral gray squares ─────────── */
@@ -84,6 +88,11 @@ const SYSTEM = {
   ringShadow: "0 0 0 1px rgba(0,240,255,0.35), 0 0 24px rgba(0,240,255,0.25)",
 };
 
+const PIECE_GLYPH: Record<"w" | "b", Record<"q" | "r" | "b" | "n", string>> = {
+  w: { q: "♕", r: "♖", b: "♗", n: "♘" },
+  b: { q: "♛", r: "♜", b: "♝", n: "♞" },
+};
+
 export function GameBoard({
   fen,
   orientation,
@@ -99,8 +108,11 @@ export function GameBoard({
   reviewArrows,
   variant = "classic",
   boardTheme = "classic",
+  autoQueen = true,
+  premovePromotion = "q",
 }: GameBoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
+  const [pendingPromotion, setPendingPromotion] = useState<{ from: string; to: string } | null>(null);
   const palette = variant === "system" ? SYSTEM : { ...CLASSIC, ...BOARD_THEMES[boardTheme] };
   const SELECTED_HIGHLIGHT = palette.selected;
   const LEGAL_MOVE_HIGHLIGHT = palette.legal;
@@ -142,6 +154,19 @@ export function GameBoard({
       } catch {
         return false;
       }
+      // Promotion? When auto-queen is off, hold the move and open the picker.
+      let isPromotion = false;
+      try {
+        isPromotion = probe
+          .moves({ square: sourceSquare as Square, verbose: true })
+          .some((m) => m.to === targetSquare && m.flags.includes("p"));
+      } catch {
+        /* ignore */
+      }
+      if (isPromotion && !autoQueen) {
+        setPendingPromotion({ from: sourceSquare, to: targetSquare });
+        return true;
+      }
       try {
         const move = probe.move({
           from: sourceSquare,
@@ -162,7 +187,17 @@ export function GameBoard({
       }
       return false;
     },
-    [fen, canPlayNow, onMove]
+    [fen, canPlayNow, onMove, autoQueen]
+  );
+
+  const completePromotion = useCallback(
+    (piece: "q" | "r" | "b" | "n") => {
+      if (!pendingPromotion) return;
+      onMove(`${pendingPromotion.from}${pendingPromotion.to}${piece}`);
+      setPendingPromotion(null);
+      setSelectedSquare(null);
+    },
+    [pendingPromotion, onMove]
   );
 
   const executePremove = useCallback(
@@ -173,11 +208,11 @@ export function GameBoard({
       onPendingPremove({
         from: m.from,
         to: m.to,
-        promotion: m.promotion ? m.promotion.toLowerCase() : undefined,
+        promotion: m.promotion ? premovePromotion : undefined,
       });
       return true;
     },
-    [premoveActive, onPendingPremove, fen, myColor]
+    [premoveActive, onPendingPremove, fen, myColor, premovePromotion]
   );
 
   const onDrop = useCallback(
@@ -271,7 +306,7 @@ export function GameBoard({
               onPendingPremove({
                 from: m.from,
                 to: m.to,
-                promotion: m.promotion ? m.promotion.toLowerCase() : undefined,
+                promotion: m.promotion ? premovePromotion : undefined,
               });
             }
             setSelectedSquare(null);
@@ -300,11 +335,13 @@ export function GameBoard({
       executeMove,
       fen,
       myColor,
+      premovePromotion,
     ]
   );
 
   useEffect(() => {
     setSelectedSquare(null);
+    setPendingPromotion(null);
   }, [fen]);
 
   const squareStyles = useMemo(() => {
@@ -359,7 +396,44 @@ export function GameBoard({
 
   return (
     <Box>
-      <div style={{ maxWidth: "min(90vmin, 720px)", margin: "0 auto" }}>
+      <div style={{ position: "relative", maxWidth: "min(90vmin, 720px)", margin: "0 auto" }}>
+        {pendingPromotion && (
+          <Box
+            position="absolute"
+            inset={0}
+            zIndex={10}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            bg="blackAlpha.600"
+            borderRadius={`${palette.borderRadius}px`}
+            onClick={() => setPendingPromotion(null)}
+          >
+            <HStack gap={2} bg="bgCard" p={3} borderRadius="soft" borderWidth="1px" borderColor="gold" onClick={(e) => e.stopPropagation()}>
+              {(["q", "r", "b", "n"] as const).map((p) => (
+                <Box
+                  key={p}
+                  as="button"
+                  onClick={() => completePromotion(p)}
+                  w="52px"
+                  h="52px"
+                  borderRadius="soft"
+                  bg="bgSurface"
+                  borderWidth="1px"
+                  borderColor="goldDark"
+                  _hover={{ borderColor: "gold", bg: "whiteAlpha.100" }}
+                  fontSize="34px"
+                  lineHeight="1"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  {PIECE_GLYPH[myColor][p]}
+                </Box>
+              ))}
+            </HStack>
+          </Box>
+        )}
         <Chessboard
           options={{
             position: fen,
