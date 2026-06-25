@@ -300,8 +300,12 @@ export default function PlacementPage() {
     return () => {
       cancelled = true;
     };
+    // Trigger on the finished-game score only. MUST NOT depend on `phase`: this
+    // effect calls setPhase("analyzing"), and if `phase` were a dependency that
+    // state change would fire the cleanup (cancelled = true) and re-run the
+    // effect, freezing progress at 0% and never advancing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, gameScore, runId]);
+  }, [gameScore, runId]);
 
   // ── render ────────────────────────────────────────────────────────────────
   if (phase === "intro") {
