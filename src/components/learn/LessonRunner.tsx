@@ -110,7 +110,12 @@ export function LessonRunner({
         return false;
       }
       if (!mv) return false;
-      const newFen = probe.fen();
+      // Single-colour lessons: keep the same side to move so the learner can make
+      // consecutive moves (e.g. march a pawn e2→e4→e5). Clear any stale en passant.
+      const parts = probe.fen().split(" ");
+      parts[1] = mv.color;
+      parts[3] = "-";
+      const newFen = parts.join(" ");
       const uci = from + to + (mv.promotion ?? "");
       const goal = step.goal;
 
