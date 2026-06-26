@@ -7,6 +7,7 @@ import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { staggerContainer, staggerChild } from "@/lib/animations";
 import { CourseCard } from "@/components/system/CourseCard";
+import { OPENINGS as OPENING_LIBRARY } from "@/lib/learn/openings";
 import {
   SYSTEM_KEYFRAMES,
   type GlowAccent,
@@ -106,14 +107,14 @@ export default function LearningPage() {
         <Section title="Openings" accent="purple">
           <motion.div variants={staggerContainer} initial="hidden" animate="visible">
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={3}>
-              {OPENINGS.map((o) => (
-                <motion.div key={o.title} variants={staggerChild}>
+              {OPENING_LIBRARY.map((o) => (
+                <motion.div key={o.slug} variants={staggerChild}>
                   <CourseCard
-                    href={o.href}
+                    href={`/learning/opening/${o.slug}`}
                     variant="tile"
                     accent="purple"
                     tag={o.color}
-                    title={o.title}
+                    title={o.name}
                     description={o.summary}
                     glyph={o.glyph}
                   />
@@ -300,57 +301,6 @@ function PuzzleScroller({
 }
 
 /* ─────────── Static content ─────────── */
-
-const OPENINGS = [
-  {
-    title: "Italian Game",
-    color: "White",
-    glyph: "♔",
-    summary: "1.e4 e5 2.Nf3 Nc6 3.Bc4 — fast development, attack f7.",
-    idea: "",
-    href: "/play/bot?elo=1600&fen=" + encodeURIComponent("r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3"),
-  },
-  {
-    title: "London System",
-    color: "White",
-    glyph: "♗",
-    summary: "1.d4 d5 2.Nf3 Nf6 3.Bf4 — solid, low-theory.",
-    idea: "",
-    href: "/play/bot?elo=1400&fen=" + encodeURIComponent("rnbqkb1r/pppppppp/5n2/3P4/3P1B2/5N2/PPP1PPPP/RN1QKB1R b KQkq - 3 3"),
-  },
-  {
-    title: "Sicilian Defence",
-    color: "Black",
-    glyph: "♛",
-    summary: "1.e4 c5 — the sharpest answer to 1.e4.",
-    idea: "",
-    href: "/play/bot?elo=1800&fen=" + encodeURIComponent("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2"),
-  },
-  {
-    title: "Caro-Kann",
-    color: "Black",
-    glyph: "♚",
-    summary: "1.e4 c6 — principled, pawn-chain defence.",
-    idea: "",
-    href: "/play/bot?elo=1600&fen=" + encodeURIComponent("rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2"),
-  },
-  {
-    title: "Queen's Gambit",
-    color: "White",
-    glyph: "♕",
-    summary: "1.d4 d5 2.c4 — pressure on d5.",
-    idea: "",
-    href: "/play/bot?elo=1700&fen=" + encodeURIComponent("rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq - 0 2"),
-  },
-  {
-    title: "King's Indian Defence",
-    color: "Black",
-    glyph: "♞",
-    summary: "1.d4 Nf6 2.c4 g6 — kingside attack with …f5.",
-    idea: "",
-    href: "/play/bot?elo=1900&fen=" + encodeURIComponent("rnbqkb1r/pppppp1p/5np1/8/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3"),
-  },
-];
 
 const ENDGAMES = [
   {
