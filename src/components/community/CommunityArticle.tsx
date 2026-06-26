@@ -11,6 +11,7 @@ import {
   renderTiptap,
   toEmbedUrl,
 } from "@/lib/community/activityHelpers";
+import { ShareBar } from "@/components/community/ShareBar";
 
 /**
  * The community article body — shared by the public and dashboard detail routes.
@@ -129,6 +130,10 @@ export function CommunityArticle({
               {a.excerpt}
             </Text>
           ) : null}
+
+          <Box mt={5} pt={5} borderTopWidth="1px" borderColor="goldDark">
+            <ShareBar slug={a.slug} title={a.title} />
+          </Box>
 
           {embed ? (
             <AspectRatio ratio={16 / 9} mt={6} borderRadius="cca" overflow="hidden">
