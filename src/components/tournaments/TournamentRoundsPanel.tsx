@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { Badge, Box, Heading, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react";
+import { useAuth } from "@/lib/auth";
 
 const TOURNAMENT_ROUNDS = gql`
   query TournamentRoundsView($id: ID!) {
@@ -15,6 +17,7 @@ const TOURNAMENT_ROUNDS = gql`
         boardNumber
         whiteUserId
         blackUserId
+        gameId
         result
       }
     }
@@ -37,6 +40,7 @@ interface Pairing {
   boardNumber: number;
   whiteUserId: string | null;
   blackUserId: string | null;
+  gameId: string | null;
   result: string | null;
 }
 interface Round {
@@ -64,19 +68,29 @@ const RESULT_LABEL: Record<string, string> = {
   bye: "Bye",
 };
 
-function PairingLine({ p, nameOf }: { p: Pairing; nameOf: (id: string | null) => string }) {
+function PairingLine({
+  p,
+  nameOf,
+  meId,
+}: {
+  p: Pairing;
+  nameOf: (id: string | null) => string;
+  meId?: string | null;
+}) {
   const isBye = p.result === "bye" || !p.blackUserId;
   const whiteWon = p.result === "1-0";
   const blackWon = p.result === "0-1";
+  const mine = !!meId && (p.whiteUserId === meId || p.blackUserId === meId);
+  const canPlay = mine && !isBye && !!p.gameId && !p.result;
   return (
     <HStack
       justify="space-between"
       px={3}
       py={2}
       borderRadius="cca"
-      bg="bgSurface"
+      bg={mine ? "rgba(197,160,89,0.08)" : "bgSurface"}
       borderWidth="1px"
-      borderColor="goldDark"
+      borderColor={mine ? "gold" : "goldDark"}
       gap={3}
     >
       <HStack gap={2} minW={0} flex={1}>
@@ -93,14 +107,41 @@ function PairingLine({ p, nameOf }: { p: Pairing; nameOf: (id: string | null) =>
           {isBye ? "—" : nameOf(p.blackUserId)}
         </Text>
       </HStack>
-      <Text fontSize="sm" color={p.result ? "gold" : "textMuted"} fontWeight="600" whiteSpace="nowrap">
-        {p.result ? RESULT_LABEL[p.result] ?? p.result : "live"}
-      </Text>
+      {canPlay ? (
+        <Link href={`/game/${p.gameId}`}>
+          <Box
+            as="span"
+            px={3}
+            py={1}
+            borderRadius="full"
+            bg="gold"
+            color="textPrimary"
+            fontSize="xs"
+            fontWeight="700"
+            whiteSpace="nowrap"
+            _hover={{ bg: "goldLight" }}
+          >
+            ▶ Play
+          </Box>
+        </Link>
+      ) : p.gameId && !p.result && !isBye ? (
+        <Link href={`/game/${p.gameId}`}>
+          <Text fontSize="xs" color="textMuted" _hover={{ color: "gold" }} whiteSpace="nowrap">
+            Watch
+          </Text>
+        </Link>
+      ) : (
+        <Text fontSize="sm" color={p.result ? "gold" : "textMuted"} fontWeight="600" whiteSpace="nowrap">
+          {p.result ? RESULT_LABEL[p.result] ?? p.result : "live"}
+        </Text>
+      )}
     </HStack>
   );
 }
 
 export function TournamentRoundsPanel({ tournamentId, format }: { tournamentId: string; format?: string }) {
+  const { user } = useAuth();
+  const meId = user?.id;
   const { data } = useQuery<{ tournamentRounds: Round[]; tournamentStandings: Standing[] }>(TOURNAMENT_ROUNDS, {
     variables: { id: tournamentId },
     pollInterval: 20000,
@@ -197,7 +238,7 @@ export function TournamentRoundsPanel({ tournamentId, format }: { tournamentId: 
                     {[...r.pairings]
                       .sort((a, b) => a.boardNumber - b.boardNumber)
                       .map((p) => (
-                        <PairingLine key={p.id} p={p} nameOf={nameOf} />
+                        <PairingLine key={p.id} p={p} nameOf={nameOf} meId={meId} />
                       ))}
                   </VStack>
                 ))}
@@ -227,7 +268,7 @@ export function TournamentRoundsPanel({ tournamentId, format }: { tournamentId: 
                     {[...r.pairings]
                       .sort((a, b) => a.boardNumber - b.boardNumber)
                       .map((p) => (
-                        <PairingLine key={p.id} p={p} nameOf={nameOf} />
+                        <PairingLine key={p.id} p={p} nameOf={nameOf} meId={meId} />
                       ))}
                   </SimpleGrid>
                 </Box>
