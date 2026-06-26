@@ -41,7 +41,9 @@ type TabKey = "ongoing" | "upcoming" | "completed";
 
 export default function PublicTournamentsPage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabKey>("ongoing");
+  // Default to Upcoming — for an academy the "Live" tab is usually empty, so
+  // leading with it made the page look dead on arrival.
+  const [activeTab, setActiveTab] = useState<TabKey>("upcoming");
 
   const { data: upcoming, refetch: refetchUpcoming } = useQuery<{ tournaments: TournamentItem[] }>(TOURNAMENTS, { variables: { status: "UPCOMING" } });
   const { data: ongoing } = useQuery<{ tournaments: TournamentItem[] }>(TOURNAMENTS, { variables: { status: "ONGOING" } });
