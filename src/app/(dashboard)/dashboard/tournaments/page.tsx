@@ -55,11 +55,23 @@ export default function DashboardTournamentsPage() {
   // Default to Upcoming — Live is usually empty, so leading with it looked dead.
   const [tab, setTab] = useState<TabKey>("upcoming");
 
-  const { data: upcoming, refetch: refetchUpcoming } = useQuery<{ tournaments: TournamentItem[] }>(TOURNAMENTS, {
-    variables: { status: "UPCOMING" },
+  const { data: upcoming, loading: upLoading, refetch: refetchUpcoming } = useQuery<{ tournaments: TournamentItem[] }>(
+    TOURNAMENTS,
+    { variables: { status: "UPCOMING" }, fetchPolicy: "cache-and-network" }
+  );
+  const { data: ongoing, loading: onLoading } = useQuery<{ tournaments: TournamentItem[] }>(TOURNAMENTS, {
+    variables: { status: "ONGOING" },
+    fetchPolicy: "cache-and-network",
   });
-  const { data: ongoing } = useQuery<{ tournaments: TournamentItem[] }>(TOURNAMENTS, { variables: { status: "ONGOING" } });
-  const { data: completed } = useQuery<{ tournaments: TournamentItem[] }>(TOURNAMENTS, { variables: { status: "COMPLETED" } });
+  const { data: completed, loading: compLoading } = useQuery<{ tournaments: TournamentItem[] }>(TOURNAMENTS, {
+    variables: { status: "COMPLETED" },
+    fetchPolicy: "cache-and-network",
+  });
+  const loadingByTab: Record<TabKey, boolean> = {
+    ongoing: onLoading,
+    upcoming: upLoading,
+    completed: compLoading,
+  };
 
   const { data: lbData } = useQuery<{ playersLeaderboard: LeaderboardRow[] }>(PLAYERS_LEADERBOARD, {
     variables: { limit: 10 },
@@ -123,6 +135,7 @@ export default function DashboardTournamentsPage() {
 
       <TournamentGrid
         list={lists[tab]}
+        loading={loadingByTab[tab]}
         upcoming={tab === "upcoming"}
         tournamentsBasePath="/dashboard/tournaments"
         currentUserId={user?.id}

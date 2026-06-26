@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Text, VStack, Button, HStack } from "@chakra-ui/react";
-import Link from "next/link";
+import { Box, VStack, Button, HStack } from "@chakra-ui/react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
@@ -17,6 +16,7 @@ const TOURNAMENTS = gql`
       id
       name
       status
+      format
       startDate
       endDate
       school {
@@ -45,9 +45,19 @@ export default function PublicTournamentsPage() {
   // leading with it made the page look dead on arrival.
   const [activeTab, setActiveTab] = useState<TabKey>("upcoming");
 
-  const { data: upcoming, refetch: refetchUpcoming } = useQuery<{ tournaments: TournamentItem[] }>(TOURNAMENTS, { variables: { status: "UPCOMING" } });
-  const { data: ongoing } = useQuery<{ tournaments: TournamentItem[] }>(TOURNAMENTS, { variables: { status: "ONGOING" } });
-  const { data: completed } = useQuery<{ tournaments: TournamentItem[] }>(TOURNAMENTS, { variables: { status: "COMPLETED" } });
+  // cache-and-network: instant from cache on revisit, refreshed in the background.
+  const { data: upcoming, loading: upLoading, refetch: refetchUpcoming } = useQuery<{ tournaments: TournamentItem[] }>(
+    TOURNAMENTS,
+    { variables: { status: "UPCOMING" }, fetchPolicy: "cache-and-network" }
+  );
+  const { data: ongoing, loading: onLoading } = useQuery<{ tournaments: TournamentItem[] }>(TOURNAMENTS, {
+    variables: { status: "ONGOING" },
+    fetchPolicy: "cache-and-network",
+  });
+  const { data: completed, loading: compLoading } = useQuery<{ tournaments: TournamentItem[] }>(TOURNAMENTS, {
+    variables: { status: "COMPLETED" },
+    fetchPolicy: "cache-and-network",
+  });
 
   const [joinTournament, { loading: joining }] = useMutation<{ joinTournament: { id: string } }>(JOIN_TOURNAMENT);
 
@@ -73,18 +83,7 @@ export default function PublicTournamentsPage() {
 
   return (
     <VStack align="stretch" gap={8}>
-      <PageHeader
-        label="Upcoming chess events"
-        title="Tournaments"
-        subtitle="Join official CCA tournaments. Live, upcoming, and completed events."
-      />
-
-      {activeTab === "upcoming" && !user && (
-        <Text color="textMuted" fontSize="sm">
-          <Link href="/login">Sign in</Link> to register for upcoming tournaments, or{" "}
-          <Link href="/dashboard/tournaments">open in dashboard</Link> for full features.
-        </Text>
-      )}
+      <PageHeader title="Tournaments" subtitle="Live, upcoming & completed events." />
 
       <Box>
         <HStack gap={2} mb={6}>
@@ -103,10 +102,13 @@ export default function PublicTournamentsPage() {
             </Button>
           ))}
         </HStack>
-        {activeTab === "ongoing" && <TournamentGrid list={ongoingList} tournamentsBasePath="/tournaments" />}
+        {activeTab === "ongoing" && (
+          <TournamentGrid list={ongoingList} loading={onLoading} tournamentsBasePath="/tournaments" />
+        )}
         {activeTab === "upcoming" && (
           <TournamentGrid
             list={upcomingList}
+            loading={upLoading}
             upcoming
             tournamentsBasePath="/tournaments"
             currentUserId={user?.id}
@@ -114,7 +116,9 @@ export default function PublicTournamentsPage() {
             joining={joining}
           />
         )}
-        {activeTab === "completed" && <TournamentGrid list={completedList} tournamentsBasePath="/tournaments" />}
+        {activeTab === "completed" && (
+          <TournamentGrid list={completedList} loading={compLoading} tournamentsBasePath="/tournaments" />
+        )}
       </Box>
     </VStack>
   );
