@@ -153,6 +153,12 @@ export default function PuzzlePage() {
           });
         }
       });
+    } else {
+      // Multi-move puzzle: auto-play the opponent's forced reply after a beat.
+      const reply = solutionMoves[next.length];
+      window.setTimeout(() => {
+        setMoves((cur) => (cur.length === next.length ? [...cur, reply] : cur));
+      }, 450);
     }
     return true;
   };
