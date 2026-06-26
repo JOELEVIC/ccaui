@@ -34,6 +34,7 @@ import { useGameSubscription } from "@/lib/useGameSubscription";
 import { LiveClock } from "@/components/chess/LiveClock";
 import { NetworkBars } from "@/components/chess/NetworkBars";
 import { useNetworkQuality } from "@/lib/useNetworkQuality";
+import { haptic, HAPTIC } from "@/lib/haptics";
 import { GameChat, type ChatMsg } from "@/components/chess/GameChat";
 import { parseMoveTokens } from "@/lib/gameMoveParsing";
 import {
@@ -568,6 +569,7 @@ function GamePageInner() {
     else setDrawOfferBy(null);
     if (payload.event === "GAME_END") {
       toaster.create({ title: describeGameEnd(payload.result, payload.reason), type: "info" });
+      haptic(HAPTIC.success);
     }
     setMovePending(false);
     submittingMoveRef.current = false;
@@ -631,6 +633,7 @@ function GamePageInner() {
       } else {
         setMovePending(true);
       }
+      haptic(HAPTIC.move);
       // Confirm-move: hold the move (shown optimistically) until the user confirms.
       // Premoves bypass confirmation — they were already authorised.
       if (confirmMove && !immediate) {

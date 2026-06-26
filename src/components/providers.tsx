@@ -7,6 +7,7 @@ import { system } from "@/lib/theme";
 import { AuthProvider } from "@/lib/auth";
 import { ServerWarmup } from "@/components/system/ServerWarmup";
 import { PlacementGate } from "@/components/placement/PlacementGate";
+import { GlobalHaptics } from "@/components/common/GlobalHaptics";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <ChakraProvider value={system}>
         <AuthProvider>
           <ServerWarmup />
+          <GlobalHaptics />
           {children}
           {/* App-wide: shows the placement modal on any page once a logged-in
               user needs placement (the component self-gates on auth + status). */}
