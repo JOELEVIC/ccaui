@@ -12,6 +12,7 @@ import { LandingCameroonChess } from "./LandingCameroonChess";
 import { LandingStats } from "./LandingStats";
 import { LandingPlayCompete } from "./LandingPlayCompete";
 import { LandingEventsPreview } from "./LandingEventsPreview";
+import { LandingActivitiesPreview } from "./LandingActivitiesPreview";
 import { LandingCoursesPreview } from "./LandingCoursesPreview";
 import { LandingTestimonialsCarousel } from "./LandingTestimonialsCarousel";
 import { LandingGallery } from "./LandingGallery";
@@ -63,6 +64,7 @@ export function HomeOverview() {
       <LandingCameroonChess />
       <LandingStats />
       <LandingEventsPreview />
+      <LandingActivitiesPreview />
       <LandingCoursesPreview />
       <ChessDivider />
       <LandingTestimonialsCarousel />
