@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, Button, Text, VStack } from "@chakra-ui/react";
+import { Box, Dialog, Button, Text, VStack } from "@chakra-ui/react";
 
 export interface GameOverDialogProps {
   open: boolean;
@@ -30,7 +30,32 @@ export function GameOverDialog({
     >
       <Dialog.Backdrop bg="blackAlpha.700" />
       <Dialog.Positioner>
-        <Dialog.Content bg="bgCard" borderWidth="1px" borderColor="goldDark" borderRadius="soft" maxW="sm" mx={4}>
+        <Dialog.Content position="relative" bg="bgCard" borderWidth="1px" borderColor="goldDark" borderRadius="soft" maxW="sm" mx={4}>
+          <Dialog.CloseTrigger asChild>
+            <Box
+              as="button"
+              onClick={onDismiss}
+              position="absolute"
+              top="12px"
+              right="12px"
+              w="32px"
+              h="32px"
+              borderRadius="full"
+              bg="whiteAlpha.100"
+              color="textSecondary"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              fontSize="md"
+              lineHeight="1"
+              transition="all 0.15s"
+              _hover={{ color: "gold", bg: "whiteAlpha.200" }}
+              aria-label="Close"
+              zIndex={2}
+            >
+              ✕
+            </Box>
+          </Dialog.CloseTrigger>
           <Dialog.Body pt={6} pb={2}>
             <Dialog.Title>
               <Text color="gold" fontSize="2xl" fontWeight="800" textAlign="center" mb={2}>

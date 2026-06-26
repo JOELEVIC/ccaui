@@ -13,7 +13,7 @@ const CENTER_NAV: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Play" },
   { href: "/learn", label: "Learn" },
   { href: "/watch", label: "Watch" },
-  { href: "/community", label: "Community" },
+  { href: "/dashboard/community", label: "Community" },
 ];
 
 export interface AppHeaderProps {

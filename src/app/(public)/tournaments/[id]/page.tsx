@@ -4,8 +4,9 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
-import { Box, Button, Heading, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Text, VStack } from "@chakra-ui/react";
 import { PageHeader } from "@/components/common/PageHeader";
+import { TournamentRoundsPanel } from "@/components/tournaments/TournamentRoundsPanel";
 import { toaster } from "@/lib/toaster";
 import { useAuth } from "@/lib/auth";
 import {
@@ -20,6 +21,7 @@ const TOURNAMENT = gql`
       id
       name
       status
+      format
       startDate
       endDate
       school {
@@ -54,6 +56,7 @@ export default function PublicTournamentDetailPage() {
       id: string;
       name: string;
       status: string;
+      format: string;
       startDate: string;
       endDate?: string | null;
       school: { id: string; name: string; region: string };
@@ -119,8 +122,6 @@ export default function PublicTournamentDetailPage() {
     );
   }
 
-  const sorted = [...(t.participants ?? [])].sort((a, b) => b.score - a.score);
-
   return (
     <VStack align="stretch" gap={6}>
       <Link href="/tournaments">
@@ -159,41 +160,7 @@ export default function PublicTournamentDetailPage() {
         )}
       </Box>
 
-      <Box
-        p={6}
-        borderRadius="soft"
-        bg="bgCard"
-        borderWidth="1px"
-        borderColor="goldDark"
-        w="full"
-      >
-        <Heading size="md" color="gold" mb={3} fontFamily="var(--font-playfair), Georgia, serif">
-          Standings
-        </Heading>
-        <VStack align="stretch" gap={2}>
-          {sorted.map((p, i) => (
-            <Box
-              key={p.id}
-              p={3}
-              borderRadius="cca"
-              bg="bgSurface"
-              borderWidth="1px"
-              borderColor="goldDark"
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Text color="textPrimary">
-                #{i + 1} {p.user.username} ({p.user.rating})
-              </Text>
-              <Text color="gold">{p.score} pts</Text>
-            </Box>
-          ))}
-        </VStack>
-      </Box>
-      <Text color="blackAlpha.600" fontSize="sm">
-        {t.games?.length ?? 0} games
-      </Text>
+      <TournamentRoundsPanel tournamentId={id} format={t.format} />
     </VStack>
   );
 }

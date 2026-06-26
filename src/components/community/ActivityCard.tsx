@@ -59,9 +59,15 @@ function MetaRow({ activity }: { activity: ActivityListItem }) {
 }
 
 /** Large featured card — used for the hero of the feed / landing preview. */
-export function ActivityFeatured({ activity }: { activity: ActivityListItem }) {
+export function ActivityFeatured({
+  activity,
+  basePath = "/community",
+}: {
+  activity: ActivityListItem;
+  basePath?: string;
+}) {
   return (
-    <Link href={`/community/${activity.slug}`}>
+    <Link href={`${basePath}/${activity.slug}`}>
       <Box
         position="relative"
         borderRadius="soft"
@@ -101,9 +107,15 @@ export function ActivityFeatured({ activity }: { activity: ActivityListItem }) {
 }
 
 /** Standard card for the grid. */
-export function ActivityCard({ activity }: { activity: ActivityListItem }) {
+export function ActivityCard({
+  activity,
+  basePath = "/community",
+}: {
+  activity: ActivityListItem;
+  basePath?: string;
+}) {
   return (
-    <Link href={`/community/${activity.slug}`}>
+    <Link href={`${basePath}/${activity.slug}`}>
       <Box
         h="full"
         borderRadius="soft"

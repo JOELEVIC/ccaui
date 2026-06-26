@@ -38,7 +38,7 @@ const SECTIONS: { title: string; links: { href: string; label: string; auth?: bo
   {
     title: "Community",
     links: [
-      { href: "/community", label: "Community" },
+      { href: "/dashboard/community", label: "Community" },
       { href: "/dashboard/tournaments", label: "Tournaments" },
       { href: "/players", label: "Players" },
       { href: "/dashboard/rankings", label: "Rankings" },
