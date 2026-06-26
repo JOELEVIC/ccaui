@@ -3,18 +3,18 @@
 import { Box, Button, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { StudyPlayer } from "@/components/learn/StudyPlayer";
-import { findOpening } from "@/lib/learn/openings";
+import { findEndgame } from "@/lib/learn/endgames";
 
-export default function OpeningPage({ params }: { params: { slug: string } }) {
-  const opening = findOpening(params.slug);
+export default function EndgamePage({ params }: { params: { slug: string } }) {
+  const eg = findEndgame(params.slug);
 
-  if (!opening) {
+  if (!eg) {
     return (
       <VStack align="stretch" gap={4} maxW="600px" mx="auto" py={10}>
         <Text fontFamily="var(--font-playfair), Georgia, serif" fontSize="2xl" color="textPrimary">
-          Opening not found
+          Technique not found
         </Text>
-        <Text color="textSecondary">That opening isn’t in the library yet.</Text>
+        <Text color="textSecondary">That endgame isn’t in the library yet.</Text>
         <Link href="/learning">
           <Button bg="gold" color="white" borderRadius="soft" _hover={{ bg: "goldLight" }} w="fit-content">
             ← Back to Learn
@@ -27,15 +27,16 @@ export default function OpeningPage({ params }: { params: { slug: string } }) {
   return (
     <Box py={2}>
       <StudyPlayer
-        glyph={opening.glyph}
-        title={opening.name}
+        glyph={eg.glyph}
+        title={eg.name}
         chips={[
-          { label: opening.color === "White" ? "○ White" : "● Black", tone: opening.color === "White" ? "light" : "dark" },
-          { label: opening.eco, tone: "muted" },
+          { label: "Endgame", tone: "light" },
+          { label: eg.result, tone: "muted" },
         ]}
-        idea={opening.idea}
-        orientation={opening.color === "White" ? "white" : "black"}
-        lines={opening.lines}
+        idea={eg.idea}
+        startFen={eg.startFen}
+        orientation={eg.orientation}
+        lines={eg.lines}
       />
     </Box>
   );

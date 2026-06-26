@@ -8,6 +8,7 @@ import { gql } from "@apollo/client";
 import { staggerContainer, staggerChild } from "@/lib/animations";
 import { CourseCard } from "@/components/system/CourseCard";
 import { OPENINGS as OPENING_LIBRARY } from "@/lib/learn/openings";
+import { ENDGAME_TECHNIQUES as ENDGAME_LIBRARY } from "@/lib/learn/endgames";
 import {
   SYSTEM_KEYFRAMES,
   type GlowAccent,
@@ -124,7 +125,28 @@ export default function LearningPage() {
           </motion.div>
         </Section>
 
-        {/* Endgames */}
+        {/* Checkmate techniques — guided, interactive walkthroughs */}
+        <Section title="Checkmate techniques" accent="gold">
+          <motion.div variants={staggerContainer} initial="hidden" animate="visible">
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={3}>
+              {ENDGAME_LIBRARY.map((e) => (
+                <motion.div key={e.slug} variants={staggerChild}>
+                  <CourseCard
+                    href={`/learning/endgame/${e.slug}`}
+                    variant="tile"
+                    accent="gold"
+                    tag={e.result}
+                    title={e.name}
+                    description={e.summary}
+                    glyph={e.glyph}
+                  />
+                </motion.div>
+              ))}
+            </SimpleGrid>
+          </motion.div>
+        </Section>
+
+        {/* Endgames — practise the classic positions against the engine */}
         <Section title="Endgames" accent="gold">
           <motion.div variants={staggerContainer} initial="hidden" animate="visible">
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={3}>
@@ -134,7 +156,7 @@ export default function LearningPage() {
                     href={e.href}
                     variant="tile"
                     accent="gold"
-                    tag="Endgame"
+                    tag="Practise"
                     title={e.title}
                     description={e.summary}
                     glyph={e.glyph}
