@@ -1,28 +1,38 @@
 #!/usr/bin/env node
 /**
  * Pre-generate natural-voice narration for the Entry curriculum using Piper
- * (free, open-source neural TTS). Output: public/learn-audio/<key>.m4a, one per
- * unique say/text string. The lesson player hashes the spoken text the same way
- * (see narrationKey in src/lib/learn/speak.ts) and plays the matching file,
- * falling back to the browser voice if a file is missing.
+ * (free, open-source neural TTS). Output: public/learn-audio/<voice>/<key>.m4a,
+ * one clip per unique say/text string, for every voice in VOICES. The lesson
+ * player hashes the spoken text the same way (narrationKey in
+ * src/lib/learn/speak.ts), picks the learner's chosen voice folder, and plays
+ * the matching file — falling back to the browser voice if a file is missing.
  *
- * This is a DEV tool — run it locally to (re)generate audio when lessons change;
- * it is never part of the Vercel build. Requires: piper (pip install piper-tts)
- * and macOS `afconvert` (WAV → AAC). Re-run is idempotent (skips existing files).
+ * DEV tool — run locally to (re)generate audio when lessons change; never part
+ * of the Vercel build. Requires: piper (pip install piper-tts) and macOS
+ * `afconvert`. Idempotent (skips existing files).
  *
- *   VOICE=en_US-amy-medium node scripts/gen-learn-audio.mjs
+ *   node scripts/gen-learn-audio.mjs
+ *
+ * Keep VOICES in sync with LEARN_VOICES in src/lib/learn/speak.ts.
  */
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir, homedir } from "node:os";
 import { join } from "node:path";
 
-const VOICE = process.env.VOICE || "en_US-amy-medium";
+// id, region, name, quality
+const VOICES = [
+  ["en_US-ryan-high", "en_US", "ryan", "high"],
+  ["en_US-amy-medium", "en_US", "amy", "medium"],
+  ["en_US-lessac-medium", "en_US", "lessac", "medium"],
+  ["en_GB-alba-medium", "en_GB", "alba", "medium"],
+  ["en_US-hfc_female-medium", "en_US", "hfc_female", "medium"],
+];
+
 const ROOT = process.cwd();
-const OUT_DIR = join(ROOT, "public", "learn-audio");
+const OUT_ROOT = join(ROOT, "public", "learn-audio");
 const CURRICULUM = join(ROOT, "src", "lib", "learn", "entryCurriculum.ts");
 const CACHE = join(homedir(), ".cache", "piper-voices");
-const MODEL = join(CACHE, `${VOICE}.onnx`);
 const PIPER = join(homedir(), "Library", "Python", "3.9", "bin", "piper");
 
 // Keep in sync with narrationKey() in src/lib/learn/speak.ts
@@ -33,17 +43,15 @@ function narrationKey(text) {
   return h.toString(36);
 }
 
-function ensureModel() {
-  if (existsSync(MODEL)) return;
+function ensureModel(voice, region, name, quality) {
+  const model = join(CACHE, `${voice}.onnx`);
+  if (existsSync(model)) return model;
   mkdirSync(CACHE, { recursive: true });
-  const lang = VOICE.slice(0, 5).replace("_", "/"); // en_US -> en/en_US handled below
-  const region = VOICE.split("-")[0]; // en_US
-  const name = VOICE.split("-")[1]; // amy
-  const quality = VOICE.split("-")[2]; // medium
-  const base = `https://huggingface.co/rhasspy/piper-voices/resolve/main/${region.slice(0, 2)}/${region}/${name}/${quality}/${VOICE}`;
-  console.log(`Downloading voice ${VOICE}…`);
-  execFileSync("curl", ["-sL", "-o", MODEL, `${base}.onnx`]);
-  execFileSync("curl", ["-sL", "-o", `${MODEL}.json`, `${base}.onnx.json`]);
+  const base = `https://huggingface.co/rhasspy/piper-voices/resolve/main/${region.slice(0, 2)}/${region}/${name}/${quality}/${voice}`;
+  console.log(`Downloading voice ${voice}…`);
+  execFileSync("curl", ["-sL", "-o", model, `${base}.onnx`]);
+  execFileSync("curl", ["-sL", "-o", `${model}.json`, `${base}.onnx.json`]);
+  return model;
 }
 
 function extractTexts() {
@@ -59,27 +67,29 @@ function extractTexts() {
 }
 
 function main() {
-  ensureModel();
-  mkdirSync(OUT_DIR, { recursive: true });
   const texts = extractTexts();
   const tmp = mkdtempSync(join(tmpdir(), "learn-audio-"));
-  let made = 0;
-  for (const text of texts) {
-    const key = narrationKey(text);
-    const out = join(OUT_DIR, `${key}.m4a`);
-    if (existsSync(out)) continue;
-    const wav = join(tmp, `${key}.wav`);
-    execFileSync(PIPER, ["-m", MODEL, "-f", wav], { input: text });
-    execFileSync("afconvert", ["-f", "m4af", "-d", "aac", "-b", "48000", wav, out]);
-    made++;
-    console.log(`  ✓ ${key}.m4a  «${text.slice(0, 48)}…»`);
+  for (const [voice, region, name, quality] of VOICES) {
+    const model = ensureModel(voice, region, name, quality);
+    const outDir = join(OUT_ROOT, voice);
+    mkdirSync(outDir, { recursive: true });
+    let made = 0;
+    for (const text of texts) {
+      const key = narrationKey(text);
+      const out = join(outDir, `${key}.m4a`);
+      if (existsSync(out)) continue;
+      const wav = join(tmp, `${voice}-${key}.wav`);
+      execFileSync(PIPER, ["-m", model, "-f", wav], { input: text });
+      execFileSync("afconvert", ["-f", "m4af", "-d", "aac", "-b", "48000", wav, out]);
+      made++;
+    }
+    console.log(`  ${voice}: ${made} new, ${texts.length} total`);
   }
-  // Manifest so the runtime/devs can see what's covered.
   writeFileSync(
-    join(OUT_DIR, "manifest.json"),
-    JSON.stringify({ voice: VOICE, count: texts.length, keys: texts.map(narrationKey) }, null, 2),
+    join(OUT_ROOT, "manifest.json"),
+    JSON.stringify({ voices: VOICES.map((v) => v[0]), count: extractTexts().length }, null, 2),
   );
-  console.log(`\nVoice: ${VOICE} — ${made} new clip(s), ${texts.length} total in public/learn-audio/`);
+  console.log(`\n${VOICES.length} voices × ${texts.length} clips in public/learn-audio/<voice>/`);
 }
 
 main();

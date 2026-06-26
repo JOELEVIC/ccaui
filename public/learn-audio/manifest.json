@@ -1,38 +1,10 @@
 {
-  "voice": "en_US-amy-medium",
-  "count": 32,
-  "keys": [
-    "s7i4je",
-    "19s5eub",
-    "ufb3m8",
-    "1m2fzxf",
-    "15xpk0p",
-    "1ll7tu2",
-    "1mokxu0",
-    "666r32",
-    "1vztf99",
-    "1w6crdi",
-    "fqjvvo",
-    "pogu6p",
-    "2lm9op",
-    "1l5sxwb",
-    "qw6dwv",
-    "mccmlh",
-    "1ntk52m",
-    "6x2ons",
-    "xywvk2",
-    "1gpio1y",
-    "wtikp1",
-    "1whl3sg",
-    "y2ulvm",
-    "18nwcpn",
-    "jr0jpx",
-    "132r2y9",
-    "1j1jtxf",
-    "1mayfj0",
-    "164drz1",
-    "k5m61z",
-    "16zoym2",
-    "lbh1yl"
-  ]
+  "voices": [
+    "en_US-ryan-high",
+    "en_US-amy-medium",
+    "en_US-lessac-medium",
+    "en_GB-alba-medium",
+    "en_US-hfc_female-medium"
+  ],
+  "count": 32
 }

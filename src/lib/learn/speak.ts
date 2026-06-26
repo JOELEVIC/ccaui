@@ -1,9 +1,38 @@
 /**
- * Browser text-to-speech for lesson narration. No assets, no network.
- * Picks a calm English voice when available; silently no-ops if unsupported.
+ * Lesson narration: plays pre-generated natural-voice clips (public/learn-audio),
+ * falling back to the browser's built-in speech when a clip is missing.
  */
 
 const LS_MUTE = "dchess-learn-muted";
+const LS_VOICE = "dchess-learn-voice";
+
+/** Pre-generated narration voices (keep in sync with VOICES in scripts/gen-learn-audio.mjs). */
+export const LEARN_VOICES: { id: string; label: string }[] = [
+  { id: "en_US-ryan-high", label: "Ryan · US male" },
+  { id: "en_US-amy-medium", label: "Amy · US female" },
+  { id: "en_US-lessac-medium", label: "Lessac · US, clear" },
+  { id: "en_GB-alba-medium", label: "Alba · UK female" },
+  { id: "en_US-hfc_female-medium", label: "Heather · US female" },
+];
+export const DEFAULT_VOICE = "en_US-ryan-high";
+
+export function getVoice(): string {
+  if (typeof window === "undefined") return DEFAULT_VOICE;
+  try {
+    const v = localStorage.getItem(LS_VOICE);
+    return v && LEARN_VOICES.some((x) => x.id === v) ? v : DEFAULT_VOICE;
+  } catch {
+    return DEFAULT_VOICE;
+  }
+}
+
+export function setVoice(id: string) {
+  try {
+    localStorage.setItem(LS_VOICE, id);
+  } catch {
+    /* ignore */
+  }
+}
 
 export function isSpeechSupported(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
@@ -82,7 +111,7 @@ export function playNarration(text: string) {
     return;
   }
   try {
-    const audio = new Audio(`/learn-audio/${narrationKey(text)}.m4a`);
+    const audio = new Audio(`/learn-audio/${getVoice()}/${narrationKey(text)}.m4a`);
     currentAudio = audio;
     const fallback = () => {
       if (currentAudio === audio) currentAudio = null;

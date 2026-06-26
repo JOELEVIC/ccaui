@@ -5,7 +5,16 @@ import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { Chess } from "chess.js";
 import { LessonBoard } from "./LessonBoard";
-import { playNarration, cancelSpeech, isMuted, setMuted, isSpeechSupported } from "@/lib/learn/speak";
+import {
+  playNarration,
+  cancelSpeech,
+  isMuted,
+  setMuted,
+  getVoice,
+  setVoice,
+  LEARN_VOICES,
+  DEFAULT_VOICE,
+} from "@/lib/learn/speak";
 import type { Lesson, LessonStep } from "@/lib/learn/types";
 
 const PIECE_NAME: Record<string, string> = { p: "pawn", n: "knight", b: "bishop", r: "rook", q: "queen", k: "king" };
@@ -72,6 +81,7 @@ export function LessonRunner({
   const [captures, setCaptures] = useState(0);
   const [done, setDone] = useState(false);
   const [muted, setMutedState] = useState(false);
+  const [voice, setVoiceState] = useState(DEFAULT_VOICE);
   const [animating, setAnimating] = useState(false);
   const completedRef = useRef(false);
 
@@ -79,6 +89,7 @@ export function LessonRunner({
 
   useEffect(() => {
     setMutedState(isMuted());
+    setVoiceState(getVoice());
   }, []);
 
   // On entering each step: reset the board/UI and narrate. When the step has an
@@ -243,18 +254,41 @@ export function LessonRunner({
             </Text>
           </Box>
         </HStack>
-        {isSpeechSupported() && (
-          <HStack gap={2}>
-            <Button size="xs" variant="outline" borderColor="blackAlpha.300" color="textSecondary" borderRadius="soft"
-              onClick={() => step && playNarration(step.say ?? step.text)} title="Replay narration">
-              ▶ Replay
-            </Button>
-            <Button size="xs" variant="outline" borderColor="blackAlpha.300" color="textSecondary" borderRadius="soft"
-              onClick={toggleMute}>
-              {muted ? "🔇 Sound off" : "🔊 Sound on"}
-            </Button>
-          </HStack>
-        )}
+        <HStack gap={2}>
+          <select
+            value={voice}
+            onChange={(e) => {
+              const v = e.target.value;
+              setVoiceState(v);
+              setVoice(v);
+              if (!muted && step) playNarration(step.say ?? step.text);
+            }}
+            title="Narration voice"
+            style={{
+              fontSize: "12px",
+              padding: "4px 8px",
+              borderRadius: "8px",
+              backgroundColor: "transparent",
+              border: "1px solid rgba(0,0,0,0.2)",
+              color: "var(--lux-text-secondary)",
+              cursor: "pointer",
+            }}
+          >
+            {LEARN_VOICES.map((v) => (
+              <option key={v.id} value={v.id}>
+                🎙 {v.label}
+              </option>
+            ))}
+          </select>
+          <Button size="xs" variant="outline" borderColor="blackAlpha.300" color="textSecondary" borderRadius="soft"
+            onClick={() => step && playNarration(step.say ?? step.text)} title="Replay narration">
+            ▶ Replay
+          </Button>
+          <Button size="xs" variant="outline" borderColor="blackAlpha.300" color="textSecondary" borderRadius="soft"
+            onClick={toggleMute}>
+            {muted ? "🔇 Sound off" : "🔊 Sound on"}
+          </Button>
+        </HStack>
       </HStack>
 
       {/* progress dots */}
