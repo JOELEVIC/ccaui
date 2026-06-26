@@ -23,6 +23,16 @@ export function getGameApiUrl(): string {
   return GAME_API_URI;
 }
 
+/** The live server's HTTP origin (for lightweight latency pings). */
+export function getGameHttpOrigin(): string {
+  try {
+    const u = new URL(GAME_API_URI);
+    return `${u.protocol}//${u.host}`;
+  } catch {
+    return "";
+  }
+}
+
 /** Base URL of CCA API (without /graphql). Used for Stockfish endpoint. */
 export function getCcaApiBase(): string {
   return GAME_API_URI.replace(/\/graphql$/, "");

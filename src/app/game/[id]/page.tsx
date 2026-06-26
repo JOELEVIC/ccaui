@@ -32,6 +32,8 @@ import {
 } from "@/lib/game-api";
 import { useGameSubscription } from "@/lib/useGameSubscription";
 import { LiveClock } from "@/components/chess/LiveClock";
+import { NetworkBars } from "@/components/chess/NetworkBars";
+import { useNetworkQuality } from "@/lib/useNetworkQuality";
 import { GameChat, type ChatMsg } from "@/components/chess/GameChat";
 import { parseMoveTokens } from "@/lib/gameMoveParsing";
 import {
@@ -582,6 +584,9 @@ function GamePageInner() {
     if (subError) toaster.create({ title: subError, type: "error" });
   }, [subError]);
 
+  // Your own live-connection quality (chess.com-style bars) while playing.
+  const netQuality = useNetworkQuality(!!isParticipant && !gameEnded, connected);
+
   // Record XP once when viewing a completed game as participant
   useEffect(() => {
     if (!id || !user?.id || status !== "COMPLETED" || !isParticipant || recordedXpRef.current) return;
@@ -884,6 +889,7 @@ function GamePageInner() {
                   <HStack gap={1.5} mt={0.5}>
                     <Text color="textMuted" fontSize="xs">{bottomPlayer?.rating}</Text>
                     <ColorChip color={bottomColor} />
+                    {isParticipant ? <NetworkBars quality={netQuality} /> : null}
                   </HStack>
                   <CapturedPieces fen={boardFen} side={bottomColor} />
                 </Box>
