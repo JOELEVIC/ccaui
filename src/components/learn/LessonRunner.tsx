@@ -5,7 +5,7 @@ import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { Chess } from "chess.js";
 import { LessonBoard } from "./LessonBoard";
-import { speak, cancelSpeech, isMuted, setMuted, isSpeechSupported } from "@/lib/learn/speak";
+import { playNarration, cancelSpeech, isMuted, setMuted, isSpeechSupported } from "@/lib/learn/speak";
 import type { Lesson, LessonStep } from "@/lib/learn/types";
 
 const PIECE_NAME: Record<string, string> = { p: "pawn", n: "knight", b: "bishop", r: "rook", q: "queen", k: "king" };
@@ -100,7 +100,7 @@ export function LessonRunner({
         if (mv) setLastMove(mv);
         setAnimating(false);
       }, 700);
-      speak(step.say ?? step.text);
+      playNarration(step.say ?? step.text);
       return () => {
         window.clearTimeout(t);
         cancelSpeech();
@@ -108,7 +108,7 @@ export function LessonRunner({
     }
     setAnimating(false);
     setFen((prev) => step.board ?? prev);
-    speak(step.say ?? step.text);
+    playNarration(step.say ?? step.text);
     return () => cancelSpeech();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i, lesson.id]);
@@ -216,7 +216,7 @@ export function LessonRunner({
     const m = !muted;
     setMutedState(m);
     setMuted(m);
-    if (!m && step) speak(step.say ?? step.text);
+    if (!m && step) playNarration(step.say ?? step.text);
   };
 
   const orientation = (step?.kind !== undefined && "orientation" in step ? step.orientation : undefined) ?? "white";
@@ -246,7 +246,7 @@ export function LessonRunner({
         {isSpeechSupported() && (
           <HStack gap={2}>
             <Button size="xs" variant="outline" borderColor="blackAlpha.300" color="textSecondary" borderRadius="soft"
-              onClick={() => step && speak(step.say ?? step.text)} title="Replay narration">
+              onClick={() => step && playNarration(step.say ?? step.text)} title="Replay narration">
               ▶ Replay
             </Button>
             <Button size="xs" variant="outline" borderColor="blackAlpha.300" color="textSecondary" borderRadius="soft"
