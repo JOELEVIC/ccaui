@@ -703,6 +703,60 @@ export const ENTRY_WORLD: World = [
         ],
         tip: "Two rooks mate a lone king with a ladder: one cuts off a row, the other checks on the next.",
       },
+      {
+        id: "mate-scholars",
+        title: "The Four-Move Mate",
+        blurb: "Scholar's Mate",
+        icon: "♛",
+        steps: [
+          {
+            kind: "say",
+            text: "Here's the most famous trap of all — the four-move checkmate. Your queen and bishop gang up on f7, the weakest square in Black's camp.",
+            board: "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 4",
+            spotlight: ["h5", "c4", "f7"],
+          },
+          {
+            kind: "do",
+            text: "Your bishop on c4 already guards f7. Crash the queen in — take the f7 pawn for checkmate!",
+            board: "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 4",
+            goal: { type: "move", uci: ["h5f7"] },
+            spotlight: ["f7"],
+            hint: "Move the queen from h5 to f7, capturing the pawn. Your bishop protects her.",
+          },
+          {
+            kind: "say",
+            text: "Checkmate! The king can't take the queen — the bishop guards her — and it has no escape. Now you know it, so watch your own f7 in every game!",
+          },
+        ],
+        tip: "Queen + bishop aimed at f7 (f2 for Black) is the four-move mate. Defend that square early.",
+      },
+      {
+        id: "mate-smothered",
+        title: "Smothered Mate",
+        blurb: "Trapped by its own pieces",
+        icon: "♞",
+        steps: [
+          {
+            kind: "say",
+            text: "Sometimes a king is trapped not by the enemy, but by its OWN pieces. Then a single knight can deliver mate — a smothered mate.",
+            board: "6rk/6pp/3N4/8/8/8/8/4K3 w - - 0 1",
+            spotlight: ["h8", "g8", "g7", "h7"],
+          },
+          {
+            kind: "do",
+            text: "The black king on h8 is boxed in by its own rook and pawns — every escape square is blocked. Leap your knight to f7 for checkmate!",
+            board: "6rk/6pp/3N4/8/8/8/8/4K3 w - - 0 1",
+            goal: { type: "move", uci: ["d6f7"] },
+            spotlight: ["f7"],
+            hint: "Hop the knight from d6 to f7 — it checks the king, and nothing can stop it.",
+          },
+          {
+            kind: "say",
+            text: "Checkmate! The knight attacks the king, and the king is smothered by its own army — nowhere to run. Only a knight can pull this off. That's a great place to graduate to the Road to Master!",
+          },
+        ],
+        tip: "A king hemmed in by its own pieces can be smothered — a lone knight delivers the mate.",
+      },
     ],
   },
 ];
