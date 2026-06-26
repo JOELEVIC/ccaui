@@ -130,7 +130,7 @@ export function LandingHeroMinimal() {
                         _active={{ transform: "scale(0.97)" }}
                         transition="all 0.15s"
                       >
-                        ♟ Play a bot
+                        ♟ Play
                       </Button>
                       <Link href="/road-to-master">
                         <Button
@@ -158,6 +158,15 @@ export function LandingHeroMinimal() {
                         </Button>
                       </Link>
                     </HStack>
+                    <Text fontSize="sm" color="textMuted">
+                      Play a bot instantly — or{" "}
+                      <Link href="/login">
+                        <Text as="span" color="gold" fontWeight="600" _hover={{ textDecoration: "underline" }}>
+                          sign in
+                        </Text>
+                      </Link>{" "}
+                      to challenge real players.
+                    </Text>
                   </VStack>
                 </motion.div>
 

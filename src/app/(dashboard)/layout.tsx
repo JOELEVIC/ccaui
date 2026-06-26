@@ -7,6 +7,7 @@ import { AppBottomNav } from "@/components/layout/AppBottomNav";
 import { MoreDrawer } from "@/components/layout/MoreDrawer";
 import { PageTransition } from "@/components/common/PageTransition";
 import { ProtectedRoute } from "@/components/common/ProtectedRoute";
+import { OngoingGameRedirect } from "@/components/common/OngoingGameRedirect";
 
 export default function DashboardLayout({
   children,
@@ -17,6 +18,7 @@ export default function DashboardLayout({
 
   return (
     <ProtectedRoute>
+      <OngoingGameRedirect />
       <Flex minH="100vh" bg="var(--lux-obsidian)" color="var(--lux-text-primary)">
         <Flex flex={1} direction="column" minW={0} w="full">
           <AppHeader onOpenMore={() => setMoreOpen(true)} />

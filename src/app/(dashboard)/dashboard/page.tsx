@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Box, HStack, SimpleGrid, Text, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { useAuth } from "@/lib/auth";
-import { useOngoingGame } from "@/lib/useOngoingGame";
 import { PremiumModal } from "@/components/chess-pro/PremiumModal";
 import { PLATFORM_METRICS } from "@/graphql/queries/chessPro";
 import { APP_NAME } from "@/lib/appName";
@@ -48,13 +46,8 @@ const LIVE_GAMES = gql`
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const router = useRouter();
-  // Coming to the site with a game already under way? Take the player straight to it.
-  // (The /games lobby — reached via "← Games" — never redirects, so it's the escape hatch.)
-  const { ongoingId } = useOngoingGame();
-  useEffect(() => {
-    if (ongoingId) router.replace(`/game/${ongoingId}`);
-  }, [ongoingId, router]);
+  // The "resume your game on entry" redirect now lives globally in the dashboard
+  // layout (OngoingGameRedirect), so it fires on any page you land on / refresh.
   const [proOn, setProOn] = useState(false);
   const [premiumOpen, setPremiumOpen] = useState(false);
   const { data: metricsData } = useQuery<{ platformMetrics: { playersTotal: number; playingNow: number } }>(

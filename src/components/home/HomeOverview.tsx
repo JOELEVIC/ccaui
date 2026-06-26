@@ -58,17 +58,32 @@ export function HomeOverview() {
       <LandingPlayCompete />
       <LandingMemory />
       <LandingRoadToMaster />
-      <LandingLegends />
+      {/* Tall legends gallery — desktop/tablet only, to keep mobile lean. */}
+      <Box display={{ base: "none", md: "block" }}>
+        <LandingLegends />
+      </Box>
       <LandingChessToday />
       <LandingRankingsPreview />
-      <LandingCameroonChess />
-      <LandingStats />
+      {/* Second "about" band — desktop/tablet only (footer/About covers it on mobile). */}
+      <Box display={{ base: "none", md: "block" }}>
+        <LandingCameroonChess />
+      </Box>
+      {/* Stats counters — rankings already show real numbers; hide on mobile. */}
+      <Box display={{ base: "none", md: "block" }}>
+        <LandingStats />
+      </Box>
       <LandingEventsPreview />
       <LandingActivitiesPreview />
-      <LandingCoursesPreview />
+      {/* Courses teaser — overlaps Road to Master; desktop/tablet only. */}
+      <Box display={{ base: "none", md: "block" }}>
+        <LandingCoursesPreview />
+      </Box>
       <ChessDivider />
       <LandingTestimonialsCarousel />
-      <LandingGallery />
+      {/* Photo gallery — supplementary; desktop/tablet only. */}
+      <Box display={{ base: "none", md: "block" }}>
+        <LandingGallery />
+      </Box>
       <LandingAcademy />
       <ChessDivider />
       <LandingCta />
