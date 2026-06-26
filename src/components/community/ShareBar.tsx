@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Box, HStack, Text } from "@chakra-ui/react";
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL ?? "https://dchessacademy.com";
+const SITE = process.env.NEXT_PUBLIC_APP_URL ?? "https://cameroonchessacademy.com";
 
 /**
  * Share controls for a community post. Always shares the canonical PUBLIC URL

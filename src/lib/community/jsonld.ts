@@ -1,6 +1,6 @@
 import type { ServerActivity } from "@/lib/serverActivities";
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL ?? "https://dchessacademy.com";
+const SITE = process.env.NEXT_PUBLIC_APP_URL ?? "https://cameroonchessacademy.com";
 const APP = process.env.NEXT_PUBLIC_APP_NAME ?? "DChessAcademy";
 
 /**

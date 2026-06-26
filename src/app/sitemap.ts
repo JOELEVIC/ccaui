@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { fetchPublishedActivities } from "@/lib/serverActivities";
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://dchessacademy.com";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://cameroonchessacademy.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const publicRoutes = [
