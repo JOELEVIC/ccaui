@@ -62,6 +62,9 @@ export const CREATE_CHALLENGE = gql`
         id
         username
       }
+      game {
+        id
+      }
     }
   }
 `;

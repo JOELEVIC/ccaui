@@ -185,19 +185,29 @@ export default function GamesPage() {
         toaster.create({ title: error.message || "Couldn't create the challenge", type: "error" });
         return;
       }
-      const id = data?.createChallenge?.id;
-      if (!id) return;
-      await refetchChallenges();
-      if (inviteMode === "open") {
-        const url = inviteUrl(id);
-        setOpenLink(url);
-        copy(url);
-      } else {
+      const challenge = data?.createChallenge as
+        | { id: string; game?: { id: string } | null }
+        | undefined;
+      if (!challenge?.id) return;
+
+      // Direct challenge: a game was created up-front — drop the challenger
+      // straight into it to wait. The opponent gets a global prompt and joins
+      // the same game when they accept.
+      if (inviteMode === "direct" && challenge.game?.id) {
         const name = users.find((u) => u.id === oppId)?.username ?? "your opponent";
         toaster.create({
-          title: randomMatched ? `Random match — challenge sent to ${name}` : `Challenge sent to ${name}`,
+          title: randomMatched ? `Matched with ${name} — waiting for them` : `Waiting for ${name} to accept`,
           type: "success",
         });
+        router.push(`/game/${challenge.game.id}`);
+        return;
+      }
+
+      await refetchChallenges();
+      if (inviteMode === "open") {
+        const url = inviteUrl(challenge.id);
+        setOpenLink(url);
+        copy(url);
       }
     } catch (err) {
       toaster.create({ title: err instanceof Error ? err.message : "Couldn't create the challenge", type: "error" });
