@@ -9,10 +9,6 @@ import { staggerContainer, staggerChild } from "@/lib/animations";
 import { CourseCard } from "@/components/system/CourseCard";
 import { OPENINGS as OPENING_LIBRARY } from "@/lib/learn/openings";
 import { ENDGAME_TECHNIQUES as ENDGAME_LIBRARY } from "@/lib/learn/endgames";
-import {
-  SYSTEM_KEYFRAMES,
-  type GlowAccent,
-} from "@/components/system/SystemPrimitives";
 
 /**
  * The Curriculum — System-themed catalogue for /learning.
@@ -57,26 +53,23 @@ export default function LearningPage() {
   const puzzles = puzzlesData?.puzzles ?? [];
 
   return (
-    <Box position="relative" minH="100vh" bg="sys.void" mx={{ base: -3, md: -6 }} px={{ base: 3, md: 6 }} pt={{ base: 2, md: 4 }} pb={10}>
-      <style dangerouslySetInnerHTML={{ __html: SYSTEM_KEYFRAMES }} />
-      <Backdrop />
-
-      <VStack align="stretch" gap={{ base: 8, md: 10 }} position="relative" zIndex={1} maxW="1180px" mx="auto">
+    <VStack align="stretch" gap={{ base: 8, md: 10 }} maxW="1100px" mx="auto" py={2}>
         {/* Header */}
-        <HStack justify="space-between" align="flex-end" flexWrap="wrap" gap={4}>
-          <Box>
-            <Text
-              fontFamily="var(--font-playfair), Georgia, serif"
-              fontSize={{ base: "3xl", md: "5xl" }}
-              color="textPrimary"
-              fontWeight="700"
-              lineHeight="1.0"
-              letterSpacing="-0.01em"
-            >
-              Learn
-            </Text>
-          </Box>
-        </HStack>
+        <Box>
+          <Text
+            fontFamily="var(--font-playfair), Georgia, serif"
+            fontSize={{ base: "3xl", md: "4xl" }}
+            color="textPrimary"
+            fontWeight="700"
+            lineHeight="1.0"
+            letterSpacing="-0.01em"
+          >
+            Learn
+          </Text>
+          <Text color="textSecondary" mt={1} fontSize="sm">
+            Daily puzzles, opening walkthroughs, checkmate techniques, and endgame practice.
+          </Text>
+        </Box>
 
         {/* Daily puzzle */}
         {dailyPuzzle && (
@@ -166,8 +159,7 @@ export default function LearningPage() {
             </SimpleGrid>
           </motion.div>
         </Section>
-      </VStack>
-    </Box>
+    </VStack>
   );
 }
 
@@ -178,7 +170,7 @@ function Section({
   children,
 }: {
   title: string;
-  accent?: GlowAccent;
+  accent?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -205,17 +197,6 @@ function Section({
       </HStack>
       {children}
     </Box>
-  );
-}
-
-function Backdrop() {
-  return (
-    <Box
-      position="absolute"
-      inset={0}
-      background="radial-gradient(ellipse at 50% 0%, rgba(197,160,89,0.06) 0%, transparent 55%)"
-      pointerEvents="none"
-    />
   );
 }
 

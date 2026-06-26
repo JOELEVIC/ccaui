@@ -6,18 +6,10 @@ import { useMemo, useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { Chess } from "chess.js";
-import { Box, HStack, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toaster } from "@/lib/toaster";
-import { ClassicBoard } from "@/components/system/ClassicBoard";
-import { SystemBoardFrame } from "@/components/system/SystemBoardFrame";
-import {
-  SystemPanel,
-  SystemButton,
-  SystemLabel,
-  SYSTEM_KEYFRAMES,
-} from "@/components/system/SystemPrimitives";
-import { ManaBurst } from "@/components/system/ManaBeam";
+import { LessonBoard } from "@/components/learn/LessonBoard";
 
 const PUZZLE = gql`
   query PuzzleDetail($id: ID!) {
@@ -50,17 +42,13 @@ const CHECK_SOLUTION = gql`
   }
 `;
 
-/**
- * Build a UCI string from a from/to square pair. Validates legality
- * against the current FEN and auto-promotes pawns to queens.
- */
+/** UCI from a from/to pair, validated against the FEN; auto-queens promotions. */
 function buildUci(fen: string, from: string, to: string): string | null {
   try {
     const c = new Chess(fen);
     const move = c.move({ from, to, promotion: "q" });
     if (!move) return null;
-    const promo = move.promotion ? move.promotion.toLowerCase() : "";
-    return `${move.from}${move.to}${promo}`;
+    return `${move.from}${move.to}${move.promotion ? move.promotion.toLowerCase() : ""}`;
   } catch {
     return null;
   }
@@ -74,7 +62,7 @@ export default function PuzzlePage() {
   const [solved, setSolved] = useState(false);
   const [reward, setReward] = useState<{ xp: number; streak: number } | null>(null);
   const [misses, setMisses] = useState(0);
-  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
+  const [flash, setFlash] = useState<{ square: string; tone: "good" | "bad" } | null>(null);
 
   const { data, loading } = useQuery<{
     puzzle: { id: string; fen: string; solution: string; difficulty: number; theme: string[] };
@@ -92,20 +80,17 @@ export default function PuzzlePage() {
   const puzzle = data?.puzzle;
 
   const currentFen = useMemo(() => {
-    if (!puzzle) return "start";
+    if (!puzzle) return "8/8/8/8/8/8/8/8 w - - 0 1";
     let chess: Chess;
     try {
       chess = new Chess(puzzle.fen);
     } catch {
-      return "start";
+      return "8/8/8/8/8/8/8/8 w - - 0 1";
     }
     for (const m of moves) {
       try {
-        if (m.length >= 4) {
-          chess.move({ from: m.slice(0, 2), to: m.slice(2, 4) });
-        } else {
-          chess.move(m);
-        }
+        if (m.length >= 4) chess.move({ from: m.slice(0, 2), to: m.slice(2, 4), promotion: "q" });
+        else chess.move(m);
       } catch {
         break;
       }
@@ -113,490 +98,229 @@ export default function PuzzlePage() {
     return chess.fen();
   }, [puzzle, moves]);
 
-  const orientation: "white" | "black" = useMemo(() => {
-    if (!puzzle) return "white";
-    return puzzle.fen.split(" ")[1] === "w" ? "white" : "black";
-  }, [puzzle]);
+  const orientation: "white" | "black" = useMemo(
+    () => (puzzle && puzzle.fen.split(" ")[1] === "b" ? "black" : "white"),
+    [puzzle],
+  );
 
   const turn: "white" | "black" = useMemo(() => {
     try {
-      const c = new Chess(currentFen);
-      return c.turn() === "w" ? "white" : "black";
+      return new Chess(currentFen).turn() === "w" ? "white" : "black";
     } catch {
       return "white";
     }
   }, [currentFen]);
 
+  const lastMove = useMemo(() => {
+    const m = moves[moves.length - 1];
+    return m && m.length >= 4 ? { from: m.slice(0, 2), to: m.slice(2, 4) } : null;
+  }, [moves]);
+
   const solutionLen = useMemo(
-    () => (puzzle?.solution?.trim().split(/\s+/).filter(Boolean).length ?? 0),
-    [puzzle?.solution]
+    () => puzzle?.solution?.trim().split(/\s+/).filter(Boolean).length ?? 0,
+    [puzzle?.solution],
   );
 
-  const handleMove = (move: string) => {
-    const next = [...moves, move];
-    setMoves(next);
-    const solutionMoves = puzzle?.solution?.trim().split(/\s+/) ?? [];
-    const attempt = next.join(" ");
-    if (attempt === solutionMoves.slice(0, next.length).join(" ")) {
-      if (next.length === solutionMoves.length) {
-        checkSolution({
-          variables: { puzzleId: id, solution: attempt },
-        }).then(({ data: res }) => {
-          const result = res?.checkPuzzleSolution;
-          if (result?.correct) {
-            setSolved(true);
-            const xp = result.xpAwarded ?? 0;
-            const streak = result.streakAfter ?? 0;
-            setReward({ xp, streak });
-            const msg = streak > 0
-              ? `Correct! · Streak: ${streak}`
-              : "Correct! Puzzle solved.";
-            toaster.create({ title: msg, type: "success" });
-          }
-        });
-      }
-    } else {
+  const flashSoon = (square: string, tone: "good" | "bad") => {
+    setFlash({ square, tone });
+    window.setTimeout(() => setFlash(null), 550);
+  };
+
+  const onBoardMove = (from: string, to: string): boolean => {
+    if (solved || !puzzle) return false;
+    const uci = buildUci(currentFen, from, to);
+    if (!uci) return false;
+    const solutionMoves = puzzle.solution.trim().split(/\s+/);
+    const next = [...moves, uci];
+    const correctSoFar = next.join(" ") === solutionMoves.slice(0, next.length).join(" ");
+    if (!correctSoFar) {
       setMisses((m) => m + 1);
-      toaster.create({ title: "Not the best move.", type: "error" });
-      setMoves(moves);
+      flashSoon(to, "bad");
+      toaster.create({ title: "Not the best move — try again.", type: "error" });
+      return false;
     }
+    setMoves(next);
+    flashSoon(to, "good");
+    if (next.length === solutionMoves.length) {
+      checkSolution({ variables: { puzzleId: id, solution: next.join(" ") } }).then(({ data: res }) => {
+        const result = res?.checkPuzzleSolution;
+        if (result?.correct) {
+          setSolved(true);
+          setReward({ xp: result.xpAwarded ?? 0, streak: result.streakAfter ?? 0 });
+          toaster.create({
+            title: (result.streakAfter ?? 0) > 0 ? `Solved! · Streak ${result.streakAfter}` : "Solved!",
+            type: "success",
+          });
+        }
+      });
+    }
+    return true;
   };
 
   const goNext = () => {
-    const all = nextData?.puzzles ?? [];
-    const next = all.find((p) => p.id !== id);
-    if (next) {
-      router.push(`/learning/puzzle/${next.id}`);
-    } else {
-      router.push("/learning");
-    }
+    const next = (nextData?.puzzles ?? []).find((p) => p.id !== id);
+    router.push(next ? `/learning/puzzle/${next.id}` : "/learning");
   };
 
   const resetAttempt = () => {
     setMoves([]);
     setMisses(0);
+    setFlash(null);
   };
 
   if (loading || !puzzle) {
     return (
-      <Box bg="sys.void" minH="100vh" mx={{ base: -3, md: -6 }} px={{ base: 3, md: 6 }} py={10}>
-        <Text color="sys.cyan" textAlign="center">[ System ] · syncing position…</Text>
+      <Box py={16}>
+        <Text color="textMuted" textAlign="center">Loading puzzle…</Text>
       </Box>
     );
   }
 
   return (
-    <Box
-      position="relative"
-      bg="sys.void"
-      minH="100vh"
-      mx={{ base: -3, md: -6 }}
-      px={{ base: 3, md: 6 }}
-      pt={{ base: 2, md: 4 }}
-      pb={10}
-      color="textPrimary"
-    >
-      <style dangerouslySetInnerHTML={{ __html: SYSTEM_KEYFRAMES }} />
-      <Backdrop />
-
-      <Box position="relative" zIndex={1} maxW="1180px" mx="auto">
-        {/* Breadcrumb */}
-        <HStack gap={2} fontSize="xs" color="textMuted" mb={3} fontFamily="var(--font-oswald), var(--font-inter), sans-serif" letterSpacing="0.18em" textTransform="uppercase">
-          <Link href="/dashboard"><Text _hover={{ color: "sys.cyan" }}>Dashboard</Text></Link>
-          <Text>›</Text>
-          <Link href="/learning"><Text _hover={{ color: "sys.cyan" }}>Learn</Text></Link>
-          <Text>›</Text>
-          <Text color="sys.cyan" style={{ textShadow: "0 0 6px var(--sys-cyan)" }}>
-            Trial #{puzzle.id.slice(-4)}
-          </Text>
-        </HStack>
-
+    <Box py={2}>
+      <VStack align="stretch" gap={5} maxW="1040px" mx="auto">
         {/* Header */}
-        <HStack justify="space-between" align="flex-end" flexWrap="wrap" gap={4} mb={5}>
-          <Box>
-            <SystemLabel accent="cyan">[ Puzzle ]</SystemLabel>
-            <Text
-              fontFamily="var(--font-playfair), Georgia, serif"
-              fontSize={{ base: "3xl", md: "4xl" }}
-              color="textPrimary"
-              fontWeight="700"
-              lineHeight="1.05"
-              mt={1}
-            >
-              Find the best move
-            </Text>
-            <HStack gap={2} mt={2} flexWrap="wrap">
-              <MetaPill label="Elo" value={String(puzzle.difficulty)} accent="cyan" />
-              <MetaPill label="Solution" value={`${solutionLen} ply`} accent="purple" />
-              {puzzle.theme?.slice(0, 3).map((t) => (
-                <ThemeTag key={t} label={t} />
-              ))}
-            </HStack>
-          </Box>
-          <SystemButton accent="purple" emphasis="ghost" size="md" href="/learning" glyph="←">
-            Learn
-          </SystemButton>
+        <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
+          <HStack gap={3} align="center" minW={0}>
+            <Link href="/learning">
+              <Button size="sm" variant="outline" borderColor="blackAlpha.300" color="textPrimary" borderRadius="soft" _hover={{ borderColor: "gold", color: "gold" }}>
+                ← Learn
+              </Button>
+            </Link>
+            <Box w="44px" h="44px" borderRadius="12px" flexShrink={0} display="flex" alignItems="center" justifyContent="center" fontSize="22px" color="white" bg="gold">
+              ♟
+            </Box>
+            <Box minW={0}>
+              <Text fontFamily="var(--font-playfair), Georgia, serif" fontSize="xl" color="textPrimary" lineHeight="1.1">
+                Find the best move
+              </Text>
+              <HStack gap={2} mt={1} flexWrap="wrap">
+                <Pill label="Elo" value={String(puzzle.difficulty)} />
+                <Pill label="Solution" value={`${solutionLen} ply`} />
+                {puzzle.theme?.slice(0, 3).map((t) => (
+                  <Text key={t} fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase"
+                    px={2} py={0.5} borderRadius="full" bg="rgba(212,175,55,0.12)" color="goldDark">
+                    {t.replace(/_/g, " ")}
+                  </Text>
+                ))}
+              </HStack>
+            </Box>
+          </HStack>
         </HStack>
 
-        {/* Board + rail */}
-        <SystemBoardFrame
-          accent="cyan"
-          turn={turn}
-          tag="◆ PUZZLE"
-          topMeta={puzzle.theme?.length ? puzzle.theme.join(" · ") : "Single position"}
-          rightRail={
-            <RightRail
-              moves={moves}
-              misses={misses}
-              solutionLen={solutionLen}
-              onReset={resetAttempt}
-              onSkip={goNext}
-              onLearn={() => router.push("/learning")}
+        <Box display="grid" gridTemplateColumns={{ base: "1fr", md: "minmax(0, 1fr) minmax(0, 340px)" }} gap={6} alignItems="start">
+          {/* Board */}
+          <VStack align="stretch" gap={2}>
+            <HStack justify="space-between" px={1}>
+              <Text fontSize="2xs" color="textMuted" letterSpacing="0.14em" textTransform="uppercase">
+                {puzzle.theme?.length ? puzzle.theme.join(" · ") : "Single position"}
+              </Text>
+              <HStack gap={1.5}>
+                <Box w="10px" h="10px" borderRadius="full" bg={turn === "white" ? "white" : "#2b2b2b"} borderWidth="1px" borderColor="blackAlpha.400" />
+                <Text fontSize="2xs" color="textSecondary" letterSpacing="0.1em" textTransform="uppercase">{turn} to move</Text>
+              </HStack>
+            </HStack>
+            <LessonBoard
+              fen={currentFen}
+              orientation={orientation}
+              interactive={!solved}
+              onMove={onBoardMove}
+              flash={flash}
+              lastMove={lastMove}
             />
-          }
-        >
-          <ClassicBoard
-            fen={currentFen}
-            orientation={orientation}
-            size={420}
-            variant="blue"
-            allowDragging={!solved}
-            onPieceDrop={(from, to) => {
-              if (solved) return false;
-              const uci = buildUci(currentFen, from, to);
-              if (!uci) return false;
-              handleMove(uci);
-              setSelectedSquare(null);
-              return true;
-            }}
-            onSquareClick={(sq) => {
-              if (solved) return;
-              if (!selectedSquare) {
-                // Pick up: only my-coloured pieces.
-                const c = new Chess(currentFen);
-                const board = c.board();
-                const file = "abcdefgh".indexOf(sq[0]);
-                const rank = parseInt(sq[1], 10);
-                const piece = board[8 - rank]?.[file];
-                if (!piece) return;
-                if (piece.color !== c.turn()) return;
-                setSelectedSquare(sq);
-                return;
-              }
-              if (sq === selectedSquare) {
-                setSelectedSquare(null);
-                return;
-              }
-              const uci = buildUci(currentFen, selectedSquare, sq);
-              if (uci) {
-                handleMove(uci);
-              }
-              setSelectedSquare(null);
-            }}
-            squareStyles={
-              selectedSquare
-                ? {
-                    [selectedSquare]: {
-                      background:
-                        "radial-gradient(circle, rgba(0,240,255,0.45) 0%, rgba(0,240,255,0.18) 80%)",
-                      boxShadow: "inset 0 0 0 3px var(--sys-cyan)",
-                    },
-                  }
-                : undefined
-            }
-          />
-        </SystemBoardFrame>
-      </Box>
+          </VStack>
+
+          {/* Right rail */}
+          <VStack align="stretch" gap={4}>
+            <Box p={4} borderRadius="soft" bg="bgCard" borderWidth="1px" borderColor="blackAlpha.200">
+              <HStack justify="space-between" mb={2}>
+                <Text fontSize="2xs" color="textMuted" letterSpacing="0.12em" textTransform="uppercase">Progress</Text>
+                <Text fontSize="sm" fontWeight="800" color="gold">{moves.length} / {solutionLen} ply</Text>
+              </HStack>
+              <Box h="6px" borderRadius="full" bg="blackAlpha.200" overflow="hidden">
+                <Box h="full" bg="gold" w={`${solutionLen > 0 ? Math.min(100, (moves.length / solutionLen) * 100) : 0}%`} transition="width 0.3s ease-out" />
+              </Box>
+              <HStack justify="space-between" mt={3}>
+                <Text fontSize="2xs" color="textMuted" letterSpacing="0.12em" textTransform="uppercase">Misses</Text>
+                <Text fontSize="sm" fontWeight="800" color={misses === 0 ? "textPrimary" : misses < 3 ? "goldDark" : "statusWarning"}>
+                  {misses}
+                </Text>
+              </HStack>
+            </Box>
+
+            <Box p={4} borderRadius="soft" bg="bgWarm" borderWidth="1px" borderColor="blackAlpha.200">
+              <Text fontSize="2xs" color="textMuted" letterSpacing="0.12em" textTransform="uppercase" mb={2}>Your moves</Text>
+              <Text fontSize="sm" color="textPrimary" fontFamily="var(--font-inter), sans-serif" minH="22px">
+                {moves.length > 0 ? moves.join("  ") : <Box as="span" color="textMuted">— make your move on the board</Box>}
+              </Text>
+            </Box>
+
+            <VStack align="stretch" gap={2}>
+              <Button onClick={resetAttempt} bg="gold" color="white" borderRadius="soft" _hover={{ bg: "goldLight" }}>↻ Reset</Button>
+              <Button onClick={goNext} variant="outline" borderColor="blackAlpha.300" color="textPrimary" borderRadius="soft" _hover={{ borderColor: "gold", color: "gold" }}>↷ Skip</Button>
+              <Link href="/learning"><Button w="full" variant="ghost" color="textSecondary" borderRadius="soft" _hover={{ color: "gold" }}>← Back to Learn</Button></Link>
+            </VStack>
+          </VStack>
+        </Box>
+      </VStack>
 
       <AnimatePresence>
-        {solved && (
-          <SolvedOverlay reward={reward} onNext={goNext} onClose={() => setSolved(false)} />
-        )}
+        {solved && <SolvedOverlay reward={reward} onNext={goNext} onClose={() => setSolved(false)} />}
       </AnimatePresence>
     </Box>
   );
 }
 
-/* ─────────── Right rail ─────────── */
-
-function RightRail({
-  moves,
-  misses,
-  solutionLen,
-  onReset,
-  onSkip,
-  onLearn,
-}: {
-  moves: string[];
-  misses: number;
-  solutionLen: number;
-  onReset: () => void;
-  onSkip: () => void;
-  onLearn: () => void;
-}) {
+function Pill({ label, value }: { label: string; value: string }) {
   return (
-    <VStack align="stretch" gap={3}>
-      <SystemPanel accent="cyan" glow="soft" p={4}>
-        <SystemLabel accent="cyan">Progress</SystemLabel>
-        <VStack align="stretch" gap={2.5} mt={2.5}>
-          <HStack justify="space-between">
-            <Text fontSize="xs" color="textMuted" letterSpacing="0.18em" textTransform="uppercase" fontFamily="var(--font-oswald), var(--font-inter), sans-serif">
-              Progress
-            </Text>
-            <Text fontFamily="var(--font-oswald), var(--font-inter), sans-serif" fontSize="md" fontWeight="800" color="sys.cyan" style={{ textShadow: "0 0 6px var(--sys-cyan)" }}>
-              {moves.length} / {solutionLen} ply
-            </Text>
-          </HStack>
-          <Box h="3px" bg="rgba(0,240,255,0.08)" overflow="hidden" position="relative">
-            <Box
-              position="absolute"
-              top={0}
-              bottom={0}
-              left={0}
-              w={`${solutionLen > 0 ? Math.min(100, (moves.length / solutionLen) * 100) : 0}%`}
-              bg="var(--sys-cyan)"
-              style={{ boxShadow: "0 0 6px var(--sys-cyan)", transition: "width 0.3s ease-out" }}
-            />
-          </Box>
-          <HStack justify="space-between" mt={1}>
-            <Text fontSize="xs" color="textMuted" letterSpacing="0.18em" textTransform="uppercase" fontFamily="var(--font-oswald), var(--font-inter), sans-serif">
-              Misses
-            </Text>
-            <Text
-              fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-              fontSize="md"
-              fontWeight="800"
-              color={misses === 0 ? "textPrimary" : misses < 3 ? "sys.epic" : "sys.threat"}
-              style={misses >= 3 ? { textShadow: "0 0 6px var(--sys-threat)" } : undefined}
-            >
-              {misses}
-            </Text>
-          </HStack>
-        </VStack>
-      </SystemPanel>
-
-      <SystemPanel accent="purple" glow="soft" p={4}>
-        <SystemLabel accent="purple">Moves</SystemLabel>
-        <Text
-          mt={2}
-          fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-          fontSize="sm"
-          color="textSecondary"
-          letterSpacing="0.06em"
-          minH="22px"
-        >
-          {moves.length > 0 ? moves.join(" ") : <Box as="span" color="textMuted">— no moves played</Box>}
-        </Text>
-      </SystemPanel>
-
-      <VStack align="stretch" gap={2}>
-        <SystemButton accent="cyan" emphasis="primary" size="lg" glyph="↻" onClick={onReset} full>
-          Reset
-        </SystemButton>
-        <SystemButton accent="threat" emphasis="secondary" size="md" glyph="↷" onClick={onSkip} full>
-          Skip
-        </SystemButton>
-        <SystemButton accent="purple" emphasis="ghost" size="md" glyph="←" onClick={onLearn} full>
-          Back
-        </SystemButton>
-      </VStack>
-    </VStack>
+    <HStack gap={1.5} px={2.5} py={1} borderRadius="full" borderWidth="1px" borderColor="blackAlpha.200" bg="bgCard">
+      <Text fontSize="2xs" color="textMuted" fontWeight="700" letterSpacing="0.1em" textTransform="uppercase">{label}</Text>
+      <Text fontSize="xs" color="textPrimary" fontWeight="800">{value}</Text>
+    </HStack>
   );
 }
 
-/* ─────────── Solved overlay ─────────── */
-
-function SolvedOverlay({
-  reward,
-  onNext,
-  onClose,
-}: {
-  reward: { xp: number; streak: number } | null;
-  onNext: () => void;
-  onClose: () => void;
-}) {
+function SolvedOverlay({ reward, onNext, onClose }: { reward: { xp: number; streak: number } | null; onNext: () => void; onClose: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 90,
-        background: "rgba(2,4,10,0.86)",
-        backdropFilter: "blur(8px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-      }}
+      style={{ position: "fixed", inset: 0, zIndex: 90, background: "rgba(26,37,48,0.55)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
     >
-      <Box maxW="560px" w="full" style={{ animation: "system-modal-in 0.55s cubic-bezier(0.16,1,0.3,1) forwards" }}>
-        <SystemPanel accent="cyan" glow="strong" brackets p={{ base: 5, md: 8 }}>
-          <VStack gap={4}>
-            <Box position="relative" w="120px" h="120px">
-              <Box position="absolute" inset={0} display="flex" alignItems="center" justifyContent="center">
-                <Box position="absolute" left={0} top={0}>
-                  <ManaBurst size={120} color="var(--sys-cyan)" duration={1.1} />
+      <motion.div initial={{ scale: 0.92, y: 8 }} animate={{ scale: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} style={{ maxWidth: 460, width: "100%" }}>
+        <Box bg="bgCard" borderRadius="soft" borderWidth="1px" borderColor="gold" p={{ base: 6, md: 8 }} textAlign="center" boxShadow="0 24px 60px -24px rgba(26,37,48,0.4)">
+          <Box w="76px" h="76px" mx="auto" mb={3} borderRadius="full" bg="rgba(212,175,55,0.14)" display="flex" alignItems="center" justifyContent="center" fontSize="40px" color="gold">
+            ✓
+          </Box>
+          <Text fontSize="2xs" color="gold" letterSpacing="0.18em" textTransform="uppercase" mb={1}>Puzzle solved</Text>
+          <Text fontFamily="var(--font-playfair), Georgia, serif" fontSize="3xl" color="textPrimary" lineHeight="1">Well played!</Text>
+          {reward && (reward.streak > 0 || reward.xp > 0) && (
+            <HStack gap={3} justify="center" mt={4}>
+              {reward.streak > 0 && (
+                <Box px={4} py={2} borderRadius="md" bg="bgWarm" borderWidth="1px" borderColor="blackAlpha.200">
+                  <Text fontSize="2xs" color="textMuted" letterSpacing="0.12em" textTransform="uppercase">Streak</Text>
+                  <Text fontSize="lg" fontWeight="800" color="textPrimary">{reward.streak} 🔥</Text>
                 </Box>
-                <Text
-                  fontFamily="var(--font-playfair), Georgia, serif"
-                  fontSize="6xl"
-                  color="sys.cyan"
-                  style={{ textShadow: "0 0 18px var(--sys-cyan), 0 0 42px rgba(0,240,255,0.55)" }}
-                  zIndex={1}
-                  position="relative"
-                >
-                  ✦
-                </Text>
-              </Box>
-            </Box>
-
-            <VStack gap={1} textAlign="center">
-              <SystemLabel accent="cyan">[ The System ]</SystemLabel>
-              <Text
-                fontFamily="var(--font-playfair), Georgia, serif"
-                fontSize={{ base: "3xl", md: "5xl" }}
-                fontWeight="700"
-                color="sys.cyan"
-                lineHeight="1"
-                letterSpacing="0.04em"
-                style={{
-                  textShadow: "0 0 14px var(--sys-cyan), 0 0 32px rgba(0,240,255,0.55)",
-                  animation: "system-glitch 0.45s ease-out 1",
-                }}
-              >
-                SOLVED
-              </Text>
-              <Text fontSize="sm" color="textSecondary" mt={1}>
-                Position cleared.
-              </Text>
-            </VStack>
-
-            {reward && reward.streak > 0 && (
-              <HStack gap={3} justify="center" mt={2}>
-                <Box px={4} py={2} borderWidth="1px" borderColor="rgba(26,37,48,0.15)" bg="rgba(26,37,48,0.04)" className="sys-clip-panel-sm">
-                  <Text fontSize="2xs" color="textMuted" letterSpacing="0.22em" textTransform="uppercase" fontFamily="var(--font-oswald), var(--font-inter), sans-serif">
-                    Streak
-                  </Text>
-                  <Text fontFamily="var(--font-oswald), var(--font-inter), sans-serif" fontSize="xl" fontWeight="800" color="textPrimary">
-                    {reward.streak} ✦
-                  </Text>
+              )}
+              {reward.xp > 0 && (
+                <Box px={4} py={2} borderRadius="md" bg="bgWarm" borderWidth="1px" borderColor="blackAlpha.200">
+                  <Text fontSize="2xs" color="textMuted" letterSpacing="0.12em" textTransform="uppercase">XP</Text>
+                  <Text fontSize="lg" fontWeight="800" color="textPrimary">+{reward.xp}</Text>
                 </Box>
-              </HStack>
-            )}
-
-            <HStack gap={3} justify="center" flexWrap="wrap" mt={3}>
-              <SystemButton accent="cyan" emphasis="primary" glyph="▶" onClick={onNext}>
-                Next
-              </SystemButton>
-              <SystemButton accent="purple" emphasis="secondary" glyph="←" onClick={onClose}>
-                Review
-              </SystemButton>
-              <SystemButton accent="epic" emphasis="ghost" href="/road-to-master">
-                Road to Master
-              </SystemButton>
+              )}
+            </HStack>
+          )}
+          <VStack gap={2} mt={6} align="stretch">
+            <Button onClick={onNext} bg="gold" color="white" borderRadius="soft" _hover={{ bg: "goldLight" }}>Next puzzle →</Button>
+            <HStack gap={2}>
+              <Button flex={1} onClick={onClose} variant="outline" borderColor="blackAlpha.300" color="textPrimary" borderRadius="soft" _hover={{ borderColor: "gold", color: "gold" }}>Review</Button>
+              <Link href="/road-to-master" style={{ flex: 1 }}><Button w="full" variant="ghost" color="textSecondary" borderRadius="soft" _hover={{ color: "gold" }}>Road to Master</Button></Link>
             </HStack>
           </VStack>
-        </SystemPanel>
-      </Box>
+        </Box>
+      </motion.div>
     </motion.div>
-  );
-}
-
-/* ─────────── Small pills ─────────── */
-
-function MetaPill({
-  label,
-  value,
-  accent,
-}: {
-  label: string;
-  value: string;
-  accent: "cyan" | "purple";
-}) {
-  const c = accent === "cyan" ? "var(--sys-cyan)" : "var(--sys-purple)";
-  const rgb = accent === "cyan" ? "0,240,255" : "138,43,226";
-  return (
-    <Box
-      px={3.5}
-      py={2}
-      borderWidth="1px"
-      borderColor={`rgba(${rgb}, 0.65)`}
-      bg={`rgba(${rgb}, 0.10)`}
-      className="sys-clip-panel-sm"
-      style={{ boxShadow: `0 0 12px rgba(${rgb}, 0.32)` }}
-    >
-      <HStack gap={2}>
-        <Text
-          fontSize="xs"
-          color={`rgba(${rgb}, 0.85)`}
-          fontWeight="800"
-          letterSpacing="0.22em"
-          textTransform="uppercase"
-          fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-        >
-          {label}
-        </Text>
-        <Text
-          fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-          fontWeight="900"
-          fontSize="md"
-          color={c}
-          style={{ textShadow: `0 0 6px ${c}, 0 0 12px rgba(${rgb}, 0.5)` }}
-        >
-          {value}
-        </Text>
-      </HStack>
-    </Box>
-  );
-}
-
-function ThemeTag({ label }: { label: string }) {
-  return (
-    <Box
-      px={3.5}
-      py={2}
-      bg="rgba(177,151,252,0.14)"
-      borderWidth="1px"
-      borderColor="rgba(177,151,252,0.65)"
-      className="sys-clip-panel-sm"
-      style={{ boxShadow: "0 0 12px rgba(177,151,252,0.3)" }}
-    >
-      <Text
-        fontSize="sm"
-        color="var(--sys-epic)"
-        fontWeight="900"
-        letterSpacing="0.22em"
-        textTransform="uppercase"
-        fontFamily="var(--font-oswald), var(--font-inter), sans-serif"
-        style={{ textShadow: "0 0 6px var(--sys-epic), 0 0 12px rgba(177,151,252,0.5)" }}
-      >
-        {label.replace(/_/g, " ")}
-      </Text>
-    </Box>
-  );
-}
-
-function Backdrop() {
-  return (
-    <>
-      <Box
-        position="absolute"
-        inset={0}
-        background="radial-gradient(ellipse at 50% 0%, rgba(0,240,255,0.07) 0%, transparent 55%), radial-gradient(ellipse at 50% 100%, rgba(138,43,226,0.10) 0%, transparent 50%)"
-        pointerEvents="none"
-      />
-      <Box
-        position="absolute"
-        inset={0}
-        opacity={0.04}
-        backgroundImage="linear-gradient(rgba(0,240,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,0.6) 1px, transparent 1px)"
-        backgroundSize="64px 64px"
-        pointerEvents="none"
-      />
-    </>
   );
 }
