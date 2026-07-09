@@ -1,11 +1,11 @@
 /**
  * CCA Game Play API client.
- * Uses chessliveapi (cca) for: startGameSession, makeMove, resign, draw, and gameUpdated subscription.
+ * Uses the live-game API (cca on Render) for: startGameSession, makeMove, resign, draw, and gameUpdated subscription.
  * Game record (create, list, fetch) stays on main GraphQL (ccanext).
  */
 
 const GAME_API_URI =
-  process.env.NEXT_PUBLIC_GAME_API_URI ?? "https://chessliveapi.blacksilvergroups.xyz/graphql";
+  process.env.NEXT_PUBLIC_GAME_API_URI ?? "https://live.dchessacademy.com/graphql";
 
 /** Subscription URL: same host as GAME_API_URI, path /subscriptions, wss if https */
 export function getGameWsUrl(): string {

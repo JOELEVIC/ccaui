@@ -27,7 +27,7 @@ Next.js frontend for the CCA platform. Dark luxury theme with gold accents and C
    Edit `.env.local`:
 
    - `NEXT_PUBLIC_GRAPHQL_URI` — Main API (ccanext): auth, users, create game, game list, etc. (e.g. `http://localhost:3000/api/graphql`)
-   - `NEXT_PUBLIC_GAME_API_URI` — CCA game play API (live session, moves, subscriptions). Production: `https://chessliveapi.blacksilvergroups.xyz/graphql`; dev: `http://localhost:4000/graphql`
+   - `NEXT_PUBLIC_GAME_API_URI` — CCA game play API (live session, moves, subscriptions). Production: `https://live.dchessacademy.com/graphql`; dev: `http://localhost:4000/graphql`
 
 3. Run the main backend (ccanext) and, for Vs Human games, the CCA game API (see `../cca`) so the live API and subscriptions are available.
 
