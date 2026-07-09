@@ -5,7 +5,7 @@
 const GRAPHQL_URI =
   process.env.NEXT_PUBLIC_GRAPHQL_URI ??
   (process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
-    ? "https://blacksilvergroups.xyz/api/graphql"
+    ? "https://api.dchessacademy.com/api/graphql"
     : "http://localhost:3000/api/graphql");
 
 export interface ServerActivity {

@@ -5,7 +5,7 @@ import { onError } from "@apollo/client/link/error";
 
 const defaultUri =
   process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
-    ? "https://blacksilvergroups.xyz/api/graphql"
+    ? "https://api.dchessacademy.com/api/graphql"
     : "http://localhost:3000/api/graphql";
 const uri = process.env.NEXT_PUBLIC_GRAPHQL_URI ?? defaultUri;
 
@@ -14,7 +14,7 @@ const httpLink = createHttpLink({ uri });
 const authLink = setContext((_, { headers }) => {
   // CSRF preflight header is required by Apollo Server's CSRF protection;
   // without it, requests from cross-origin browsers (e.g. cm.dchessacademy.com
-  // hitting blacksilvergroups.xyz/api/graphql) are rejected as BAD_REQUEST.
+  // hitting api.dchessacademy.com/api/graphql) are rejected as BAD_REQUEST.
   const baseHeaders = {
     ...headers,
     "apollo-require-preflight": "true",
