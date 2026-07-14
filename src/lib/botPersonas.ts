@@ -31,7 +31,9 @@ export interface BotPersona {
   tagline: string;
   /** Probability (0–1) of playing a random legal move instead of the engine's
    *  choice — this is what makes weaker bots genuinely beatable (Stockfish can't
-   *  play below ~1320 Elo on its own). */
+   *  play below ~1320 Elo on its own). Must be 0 for bots ≥1800: a random legal
+   *  move reads as a ~300-level blunder and instantly breaks the illusion of a
+   *  strong opponent — UCI_Elo already produces human-like inaccuracies there. */
   mistakeChance: number;
   lines: Record<ChatEvent, string[]>;
 }
@@ -125,13 +127,13 @@ const BOT_DEFS: BotDef[] = [
   { id: "zara", name: "Zara", avatar: "⚡", level: "Intermediate", elo: 1000, tagline: "Fast and fearless — rushes the attack.", mistakeChance: 0.18, voice: "aggressive" },
   { id: "amina", name: "Amina", avatar: "😎", level: "Intermediate", elo: 1200, tagline: "Quick, witty, and loves a good tactic.", mistakeChance: 0.13, voice: "cheeky" },
   { id: "tunde", name: "Tunde", avatar: "🛡️", level: "Intermediate", elo: 1400, tagline: "Solid as a wall — grinds you down.", mistakeChance: 0.09, voice: "stoic" },
-  { id: "nadia", name: "Nadia", avatar: "🎯", level: "Advanced", elo: 1600, tagline: "A sniper for tactics — punishes loose pieces.", mistakeChance: 0.06, voice: "cheeky" },
-  { id: "professor", name: "The Professor", avatar: "🦉", level: "Advanced", elo: 1800, tagline: "Calm, precise, and quietly intimidating.", mistakeChance: 0.04, voice: "precise" },
-  { id: "kwame", name: "Kwame", avatar: "🔥", level: "Advanced", elo: 2000, tagline: "A relentless attacker — hunts the king.", mistakeChance: 0.03, voice: "aggressive" },
-  { id: "mei", name: "Mei", avatar: "🧊", level: "Advanced", elo: 2150, tagline: "Cold positional grind — no weaknesses.", mistakeChance: 0.02, voice: "stoic" },
-  { id: "sofia", name: "Sofia", avatar: "👑", level: "Master", elo: 2300, tagline: "Elegant and deep — calculates the long game.", mistakeChance: 0.015, voice: "precise" },
-  { id: "viktor", name: "Viktor", avatar: "⚔️", level: "Master", elo: 2500, tagline: "A tournament killer — sharp and unforgiving.", mistakeChance: 0.01, voice: "aggressive" },
-  { id: "akin", name: "Akingbade", avatar: "🧠", level: "Master", elo: 2650, tagline: "Calculates everything — near flawless.", mistakeChance: 0.005, voice: "precise" },
+  { id: "nadia", name: "Nadia", avatar: "🎯", level: "Advanced", elo: 1600, tagline: "A sniper for tactics — punishes loose pieces.", mistakeChance: 0.03, voice: "cheeky" },
+  { id: "professor", name: "The Professor", avatar: "🦉", level: "Advanced", elo: 1800, tagline: "Calm, precise, and quietly intimidating.", mistakeChance: 0, voice: "precise" },
+  { id: "kwame", name: "Kwame", avatar: "🔥", level: "Advanced", elo: 2000, tagline: "A relentless attacker — hunts the king.", mistakeChance: 0, voice: "aggressive" },
+  { id: "mei", name: "Mei", avatar: "🧊", level: "Advanced", elo: 2150, tagline: "Cold positional grind — no weaknesses.", mistakeChance: 0, voice: "stoic" },
+  { id: "sofia", name: "Sofia", avatar: "👑", level: "Master", elo: 2300, tagline: "Elegant and deep — calculates the long game.", mistakeChance: 0, voice: "precise" },
+  { id: "viktor", name: "Viktor", avatar: "⚔️", level: "Master", elo: 2500, tagline: "A tournament killer — sharp and unforgiving.", mistakeChance: 0, voice: "aggressive" },
+  { id: "akin", name: "Akingbade", avatar: "🧠", level: "Master", elo: 2650, tagline: "Calculates everything — near flawless.", mistakeChance: 0, voice: "precise" },
   { id: "titan", name: "Titan", avatar: "🤖", level: "Master", elo: 2850, tagline: "Full-strength engine — almost perfect play.", mistakeChance: 0, voice: "stoic" },
 ];
 

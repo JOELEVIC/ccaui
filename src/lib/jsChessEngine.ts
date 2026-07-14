@@ -241,18 +241,20 @@ function negamax(
 interface EngineConfig {
   depth: number;
   topK: number;
+  budgetMs: number;
 }
 
 function configForElo(elo: number): EngineConfig {
-  // Depth scales with Elo so the strength slider actually does something
-  // above 1500 (previously every Elo from 1501–3200 was identical depth 3).
-  // Combined with quiescence search, each extra ply is a real strength jump.
-  if (elo <= 500) return { depth: 1, topK: 6 };
-  if (elo <= 900) return { depth: 2, topK: 4 };
-  if (elo <= 1300) return { depth: 3, topK: 3 };
-  if (elo <= 1700) return { depth: 3, topK: 2 };
-  if (elo <= 2200) return { depth: 4, topK: 1 };
-  return { depth: 5, topK: 1 };
+  // Depth and time budget scale with Elo so the strength slider actually does
+  // something above 1500. Combined with quiescence search, each extra ply is a
+  // real strength jump. High bots get a longer budget — a slower answer beats
+  // a mislabeled weak one; iterative deepening still replies on time.
+  if (elo <= 500) return { depth: 1, topK: 6, budgetMs: 1200 };
+  if (elo <= 900) return { depth: 2, topK: 4, budgetMs: 1200 };
+  if (elo <= 1300) return { depth: 3, topK: 3, budgetMs: 1200 };
+  if (elo <= 1700) return { depth: 4, topK: 2, budgetMs: 1200 };
+  if (elo <= 2200) return { depth: 5, topK: 1, budgetMs: 2500 };
+  return { depth: 6, topK: 1, budgetMs: 3000 };
 }
 
 /**
@@ -260,7 +262,7 @@ function configForElo(elo: number): EngineConfig {
  * legal moves (game over).
  *
  * Time-budgeted via iterative deepening: always returns the deepest fully
- * completed search, capped at ~1.2 s.
+ * completed search, capped per Elo (~1.2–3 s).
  */
 export function getBestMoveJS(fen: string, elo: number = 1600): string | null {
   let c: Chess;
@@ -271,10 +273,10 @@ export function getBestMoveJS(fen: string, elo: number = 1600): string | null {
   }
   if (c.isGameOver()) return null;
 
-  const { depth: maxDepth, topK } = configForElo(elo);
-  // Snappy budget — the bot should answer fast. Iterative deepening below
-  // means we always have a complete result to fall back on if we run out.
-  const deadline = Date.now() + 1200;
+  const { depth: maxDepth, topK, budgetMs } = configForElo(elo);
+  // Iterative deepening below means we always have a complete result to fall
+  // back on if the budget runs out.
+  const deadline = Date.now() + budgetMs;
 
   const allMoves = c.moves({ verbose: true });
 
