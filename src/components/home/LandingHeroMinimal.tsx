@@ -9,9 +9,9 @@ import { ShowcaseBoard } from "./ShowcaseBoard";
 import { staggerContainer, staggerChild } from "@/lib/animations";
 
 const STATS = [
-  { value: "S-Rank", label: "Roadmap to master" },
-  { value: "Live", label: "Engine review · 0 server cost" },
-  { value: "CM", label: "Cameroon · founding chapter" },
+  { value: "Free", label: "Play & learn — no account needed" },
+  { value: "20+", label: "Interactive lessons, from your very first move" },
+  { value: "🇨🇲", label: "Built for Cameroon's chess community" },
 ];
 
 export function LandingHeroMinimal() {
@@ -109,9 +109,9 @@ export function LandingHeroMinimal() {
                 </motion.div>
                 <motion.div variants={staggerChild}>
                   <Text color="textSecondary" fontSize={{ base: "md", md: "lg" }} lineHeight="1.65" maxW="xl">
-                    A complete chess platform for Cameroon — live games, arena tournaments, daily puzzles,
-                    and an in-browser engine that reviews every move. Follow a <strong style={{ color: "var(--chakra-colors-gold)" }}>step-by-step training path</strong> from
-                    beginner to advanced.
+                    Never played chess? <strong style={{ color: "var(--chakra-colors-gold)" }}>Learn from your very first move</strong> with
+                    free interactive lessons. Already play? Live games, real tournaments, daily
+                    puzzles — and clear feedback on every game. All in your browser.
                   </Text>
                 </motion.div>
 
@@ -130,9 +130,9 @@ export function LandingHeroMinimal() {
                         _active={{ transform: "scale(0.97)" }}
                         transition="all 0.15s"
                       >
-                        ♟ Play
+                        ♟ Play now
                       </Button>
-                      <Link href="/road-to-master">
+                      <Link href="/learn">
                         <Button
                           size="lg"
                           variant="outline"
@@ -143,18 +143,7 @@ export function LandingHeroMinimal() {
                           _active={{ transform: "scale(0.97)" }}
                           transition="all 0.15s"
                         >
-                          Start the Road to Master
-                        </Button>
-                      </Link>
-                      <Link href="/tournaments">
-                        <Button
-                          size="lg"
-                          variant="ghost"
-                          color="textSecondary"
-                          borderRadius="soft"
-                          _hover={{ color: "gold" }}
-                        >
-                          See tournaments →
+                          New to chess? Start here
                         </Button>
                       </Link>
                     </HStack>

@@ -5,41 +5,33 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { fadeInUp, staggerContainer, staggerChild, defaultViewport } from "@/lib/animations";
-import { KingIcon, TrophyIcon, KnightIcon, RookIcon } from "./ChessIcons";
+import { KingIcon, TrophyIcon, KnightIcon } from "./ChessIcons";
 import { SectionAtmosphere } from "./SectionAtmosphere";
 
 const FEATURES = [
   {
     Icon: KingIcon,
-    title: "Rated play",
+    title: "Play",
     description:
-      "Bullet, Blitz, Rapid, and Classical with independent ratings. Live evaluation bar in review.",
-    href: "/games",
-    cta: "Find a game",
-  },
-  {
-    Icon: TrophyIcon,
-    title: "Tournaments",
-    description:
-      "Swiss arenas and round-robin events for institutions, schools, and the open community.",
-    href: "/tournaments",
-    cta: "See the calendar",
+      "Games for every mood — against friendly bots or real players, from one-minute thrillers to slow, thoughtful chess.",
+    href: "/play",
+    cta: "Play now",
   },
   {
     Icon: KnightIcon,
-    title: "Tactical training",
+    title: "Learn",
     description:
-      "Daily puzzles, themed packs, and an in-browser engine review of every game you play.",
-    href: "/learning",
-    cta: "Solve puzzles",
+      "Interactive lessons that start at “this is how a pawn moves”, daily puzzles, and clear feedback on every game you finish.",
+    href: "/learn",
+    cta: "Start learning",
   },
   {
-    Icon: RookIcon,
-    title: "Schools & federations",
+    Icon: TrophyIcon,
+    title: "Compete",
     description:
-      "Team rankings, school leagues, regional standings, and printable certificates.",
-    href: "/schools",
-    cta: "Browse schools",
+      "Official tournaments for schools, universities and the open community — with national rankings to climb.",
+    href: "/tournaments",
+    cta: "See tournaments",
   },
 ];
 
@@ -56,9 +48,9 @@ export function LandingIconFeatures() {
             viewport={defaultViewport}
           >
             <SectionHeader
-              label="Inspired by strategy"
-              title="Connect curious minds through board play"
-              subtitle="At Cameroon Chess Academy, every feature is built around the joy of focused play — and the slow, satisfying climb that comes with it."
+              label="What you can do here"
+              title="Play, learn, and compete — at your level"
+              subtitle="Whether you've never touched a pawn or you're chasing a national title, Cameroon Chess Academy has a place for you."
               showDivider={true}
             />
           </motion.div>
@@ -69,7 +61,7 @@ export function LandingIconFeatures() {
             viewport={defaultViewport}
             style={{ width: "100%" }}
           >
-            <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} gap={6} w="full">
+            <SimpleGrid columns={{ base: 1, sm: 3 }} gap={6} w="full">
               {FEATURES.map((f) => (
                 <motion.div key={f.title} variants={staggerChild}>
                   <Link href={f.href}>

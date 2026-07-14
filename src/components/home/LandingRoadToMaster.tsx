@@ -21,10 +21,6 @@ const STEPS = [
 ];
 
 export function LandingRoadToMaster() {
-  const lessonsDone = 1;
-  const lessonsTotal = 30;
-  const pct = Math.round((lessonsDone / lessonsTotal) * 100);
-
   return (
     <Box py={{ base: 12, md: 24 }} bg="bgCard" position="relative" overflow="hidden">
       <Box
@@ -74,7 +70,7 @@ export function LandingRoadToMaster() {
                 feeds into clear progress and a focused plan for what to study next.
               </Text>
               <HStack gap={3} pt={2} flexWrap="wrap" justify={{ base: "center", lg: "flex-start" }}>
-                <Link href="/road-to-master">
+                <Link href="/learn">
                   <Button
                     size="lg"
                     bg="gold"
@@ -83,19 +79,7 @@ export function LandingRoadToMaster() {
                     px={8}
                     _hover={{ bg: "goldLight" }}
                   >
-                    Start training
-                  </Button>
-                </Link>
-                <Link href="/learning">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    borderColor="blackAlpha.300"
-                    color="textPrimary"
-                    borderRadius="soft"
-                    _hover={{ borderColor: "gold", color: "gold" }}
-                  >
-                    Browse lessons
+                    Start learning — free
                   </Button>
                 </Link>
               </HStack>
@@ -154,23 +138,14 @@ export function LandingRoadToMaster() {
                 </VStack>
 
                 <Box mt={5} p={3} borderRadius="md" borderWidth="1px" borderColor="blackAlpha.200">
-                  <HStack justify="space-between" mb={2}>
+                  <HStack justify="space-between">
                     <Text fontSize="xs" color="textMuted" letterSpacing="wider" textTransform="uppercase">
-                      Lesson progress
+                      Entry curriculum
                     </Text>
                     <Text fontSize="xs" color="textMuted">
-                      {lessonsDone} of {lessonsTotal} · {pct}%
+                      20+ lessons · free · no account needed
                     </Text>
                   </HStack>
-                  <Box h="6px" borderRadius="full" bg="blackAlpha.200" overflow="hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${pct}%` }}
-                      viewport={defaultViewport}
-                      transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                      style={{ height: "100%", background: "#C5A059" }}
-                    />
-                  </Box>
                 </Box>
               </Box>
             </motion.div>
@@ -180,9 +155,9 @@ export function LandingRoadToMaster() {
         <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={defaultViewport}>
           <SimpleGrid columns={{ base: 1, md: 3 }} gap={4} mt={{ base: 12, lg: 16 }}>
             {[
-              { tag: "Tactics", body: "A curated puzzle ladder by theme — pins, forks, mating attacks, defense." },
-              { tag: "Endgames", body: "Lucena, Philidor, K+P opposition — drill against the engine until automatic." },
-              { tag: "Theory", body: "Build an opening repertoire grouped around the players you admire." },
+              { tag: "Tactics", body: "A curated puzzle ladder — learn to spot the winning move, one theme at a time." },
+              { tag: "Endgames", body: "Master the endings that decide real games — drilled until they're automatic." },
+              { tag: "Openings", body: "Start your games with confidence, guided by the players you admire." },
             ].map((c) => (
               <Box
                 key={c.tag}

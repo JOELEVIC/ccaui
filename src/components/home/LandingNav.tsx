@@ -95,7 +95,7 @@ function NavLink({ href, label, active }: { href: string; label: string; active:
 export function LandingNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname() || "/";
-  const isActive = (href: string) => href !== "/#legends" && (pathname === href || pathname.startsWith(href + "/"));
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
   const tournamentsActive = pathname === "/tournaments" || pathname.startsWith("/tournaments/");
 
   return (
@@ -140,8 +140,9 @@ export function LandingNav() {
               </HStack>
             </Link>
 
+            <NavLink href="/learn" label="Learn" active={isActive("/learn")} />
             <NavLink href="/community" label="Community" active={isActive("/community")} />
-            <NavLink href="/#legends" label="Legends" active={false} />
+            <NavLink href="/legends" label="Legends" active={isActive("/legends")} />
 
             <Box display={{ base: "none", md: "block" }} w="1px" h="20px" bg="rgba(0,0,0,0.08)" />
 
@@ -214,12 +215,17 @@ export function LandingNav() {
                 </Text>
               </HStack>
             </Link>
+            <Link href="/learn" onClick={() => setMobileMenuOpen(false)}>
+              <Text w="full" py={2} fontSize="sm" fontWeight="600" color="textSecondary" _hover={{ color: "gold" }} cursor="pointer">
+                Learn
+              </Text>
+            </Link>
             <Link href="/community" onClick={() => setMobileMenuOpen(false)}>
               <Text w="full" py={2} fontSize="sm" fontWeight="600" color="textSecondary" _hover={{ color: "gold" }} cursor="pointer">
                 Community
               </Text>
             </Link>
-            <Link href="/#legends" onClick={() => setMobileMenuOpen(false)}>
+            <Link href="/legends" onClick={() => setMobileMenuOpen(false)}>
               <Text w="full" py={2} fontSize="sm" fontWeight="600" color="textSecondary" _hover={{ color: "gold" }} cursor="pointer">
                 Legends
               </Text>
