@@ -5,7 +5,17 @@ import { Box, Text, HStack, Badge } from "@chakra-ui/react";
 import type { ActivityListItem } from "@/graphql/activities";
 import { activityTypeMeta, formatActivityDate } from "@/lib/community/activityHelpers";
 
-function CoverImage({ src, alt, h }: { src: string | null; alt: string; h: string | object }) {
+function CoverImage({
+  src,
+  alt,
+  h,
+  photoCount,
+}: {
+  src: string | null;
+  alt: string;
+  h: string | object;
+  photoCount?: number;
+}) {
   return (
     <Box position="relative" w="full" h={h} overflow="hidden" bg="#EAE3D6">
       {src ? (
@@ -23,6 +33,24 @@ function CoverImage({ src, alt, h }: { src: string | null; alt: string; h: strin
           style={{ background: "linear-gradient(135deg, #1A2530 0%, #3a4a5a 100%)" }}
         />
       )}
+      {photoCount && photoCount > 1 ? (
+        <HStack
+          position="absolute"
+          bottom={2}
+          right={2}
+          zIndex={1}
+          gap={1}
+          px={2}
+          py={1}
+          borderRadius="full"
+          bg="rgba(15,20,28,0.72)"
+          backdropFilter="blur(4px)"
+        >
+          <Text fontSize="2xs" color="white" fontWeight="600" letterSpacing="0.04em">
+            📷 {photoCount} photos
+          </Text>
+        </HStack>
+      ) : null}
     </Box>
   );
 }
@@ -77,7 +105,12 @@ export function ActivityFeatured({
         transition="all 0.25s"
         _hover={{ boxShadow: "var(--shadow-card-soft-hover)", transform: "translateY(-2px)" }}
       >
-        <CoverImage src={activity.coverImageUrl} alt={activity.title} h={{ base: "320px", md: "420px" }} />
+        <CoverImage
+          src={activity.coverImageUrl}
+          alt={activity.title}
+          h={{ base: "320px", md: "420px" }}
+          photoCount={activity.photoCount}
+        />
         <Box
           position="absolute"
           inset={0}
@@ -127,7 +160,7 @@ export function ActivityCard({
         transition="all 0.2s"
         _hover={{ borderColor: "gold", boxShadow: "var(--shadow-card-soft-hover)", transform: "translateY(-2px)" }}
       >
-        <CoverImage src={activity.coverImageUrl} alt={activity.title} h="180px" />
+        <CoverImage src={activity.coverImageUrl} alt={activity.title} h="180px" photoCount={activity.photoCount} />
         <Box p={5}>
           <MetaRow activity={activity} />
           <Text

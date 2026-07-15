@@ -16,6 +16,14 @@ export const ACTIVITIES_FEED = gql`
         featured
         eventDate
         publishedAt
+        photoCount
+        highlights {
+          id
+          url
+          thumbUrl
+          width
+          height
+        }
       }
     }
   }
@@ -37,14 +45,27 @@ export const ACTIVITY_BY_SLUG = gql`
       featured
       eventDate
       publishedAt
+      photoCount
       images {
         id
         url
+        thumbUrl
+        width
+        height
         caption
       }
     }
   }
 `;
+
+export interface ActivityImage {
+  id: string;
+  url: string;
+  thumbUrl: string | null;
+  width: number | null;
+  height: number | null;
+  caption?: string | null;
+}
 
 export interface ActivityListItem {
   id: string;
@@ -58,10 +79,13 @@ export interface ActivityListItem {
   featured: boolean;
   eventDate: string | null;
   publishedAt: string | null;
+  photoCount: number;
+  highlights: ActivityImage[];
 }
 
-export interface ActivityDetail extends ActivityListItem {
+// The detail query selects `images` (full gallery) but not `highlights`.
+export interface ActivityDetail extends Omit<ActivityListItem, "highlights"> {
   bodyJson: string | null;
   videoEmbedUrl: string | null;
-  images: { id: string; url: string; caption: string | null }[];
+  images: ActivityImage[];
 }

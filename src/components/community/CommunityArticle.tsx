@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useQuery } from "@apollo/client/react";
-import { AspectRatio, Box, Container, HStack, SimpleGrid, Text, VStack, Badge } from "@chakra-ui/react";
+import { AspectRatio, Box, Container, HStack, Text, VStack, Badge } from "@chakra-ui/react";
 import { ACTIVITY_BY_SLUG, type ActivityDetail } from "@/graphql/activities";
 import {
   activityTypeMeta,
@@ -12,6 +13,7 @@ import {
   toEmbedUrl,
 } from "@/lib/community/activityHelpers";
 import { ShareBar } from "@/components/community/ShareBar";
+import { Lightbox } from "@/components/community/Lightbox";
 
 /**
  * The community article body — shared by the public and dashboard detail routes.
@@ -29,6 +31,7 @@ export function CommunityArticle({
   const { data, loading, error } = useQuery<{ activity: ActivityDetail | null }>(ACTIVITY_BY_SLUG, {
     variables: { slug },
   });
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const a = data?.activity;
 
@@ -172,24 +175,6 @@ export function CommunityArticle({
             {renderTiptap(parseBody(a.bodyJson))}
           </Box>
 
-          {/* Gallery */}
-          {a.images.length ? (
-            <Box mt={8}>
-              <SimpleGrid columns={{ base: 2, md: 3 }} gap={3}>
-                {a.images.map((img) => (
-                  <Box key={img.id} borderRadius="cca" overflow="hidden" bg="#EAE3D6">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={img.url}
-                      alt={img.caption ?? a.title}
-                      style={{ width: "100%", height: "160px", objectFit: "cover", display: "block" }}
-                    />
-                  </Box>
-                ))}
-              </SimpleGrid>
-            </Box>
-          ) : null}
-
           {a.tags.length ? (
             <HStack mt={8} gap={2} flexWrap="wrap">
               {a.tags.map((t) => (
@@ -201,6 +186,72 @@ export function CommunityArticle({
           ) : null}
         </Box>
       </Container>
+
+      {/* Photo gallery — wider than the article card so the event breathes. */}
+      {a.images.length ? (
+        <Container maxW="5xl" mt={{ base: 10, md: 14 }}>
+          <HStack justify="space-between" align="baseline" mb={5} flexWrap="wrap" gap={2}>
+            <Text
+              fontFamily="var(--font-playfair), Georgia, serif"
+              fontSize={{ base: "2xl", md: "3xl" }}
+              fontWeight="600"
+              color="textPrimary"
+            >
+              Moments
+            </Text>
+            <Text fontSize="sm" color="textMuted">
+              {a.images.length} photo{a.images.length === 1 ? "" : "s"} · tap any to view
+            </Text>
+          </HStack>
+
+          <Box
+            css={{
+              columnCount: 2,
+              columnGap: "12px",
+              "@media (min-width: 768px)": { columnCount: 3 },
+            }}
+          >
+            {a.images.map((img, i) => (
+              <Box
+                key={img.id}
+                as="button"
+                display="block"
+                w="full"
+                mb="12px"
+                borderRadius="cca"
+                overflow="hidden"
+                bg="#EAE3D6"
+                cursor="zoom-in"
+                style={{ breakInside: "avoid" }}
+                transition="transform 0.2s, box-shadow 0.2s"
+                _hover={{ transform: "scale(1.015)", boxShadow: "var(--shadow-card-soft-hover)" }}
+                onClick={() => setLightboxIndex(i)}
+                aria-label={img.caption ?? `Open photo ${i + 1} of ${a.images.length}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={img.thumbUrl ?? img.url}
+                  alt={img.caption ?? a.title}
+                  loading="lazy"
+                  style={{
+                    width: "100%",
+                    display: "block",
+                    aspectRatio: img.width && img.height ? `${img.width} / ${img.height}` : undefined,
+                    objectFit: "cover",
+                  }}
+                />
+              </Box>
+            ))}
+          </Box>
+
+          <Lightbox
+            images={a.images}
+            index={lightboxIndex}
+            onClose={() => setLightboxIndex(null)}
+            onNavigate={setLightboxIndex}
+          />
+        </Container>
+      ) : null}
     </Box>
   );
 }
