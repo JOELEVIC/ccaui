@@ -296,10 +296,14 @@ class EngineDriver {
     if (this.eloApplied === this.elo) return;
     if (this.elo >= 2850) {
       this.send("setoption name UCI_LimitStrength value false");
+      // eslint-disable-next-line no-console
+      console.info("[engine] strength set: full (no limit)");
     } else {
       const clamped = Math.max(1320, Math.min(3190, this.elo));
       this.send("setoption name UCI_LimitStrength value true");
       this.send(`setoption name UCI_Elo value ${clamped}`);
+      // eslint-disable-next-line no-console
+      console.info(`[engine] strength set: UCI_Elo ${clamped}`);
     }
     this.eloApplied = this.elo;
   }
@@ -424,6 +428,13 @@ export type EngineSource = "wasm" | "backend" | "local" | null;
 
 export function useStockfish(elo: number) {
   const driverRef = useRef<EngineDriver | null>(null);
+  // Live elo — the mount effect below creates the driver AFTER an async
+  // preflight, and its closure elo goes stale if the user switches persona
+  // while the WASM is warming. Constructing from this ref (not the closure)
+  // keeps the selected strength; otherwise every level silently plays at the
+  // mount-time default (clamped to UCI_Elo 1320 — a howler machine).
+  const eloRef = useRef(elo);
+  eloRef.current = elo;
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [wasmDead, setWasmDead] = useState(false);
@@ -464,7 +475,7 @@ export function useStockfish(elo: number) {
       }
 
       // 2. Create the driver and run a warmup probe.
-      const driver = new EngineDriver(elo, (reason) => {
+      const driver = new EngineDriver(eloRef.current, (reason) => {
         if (!mounted) return;
         setWasmDead(true);
         setError(reason);
