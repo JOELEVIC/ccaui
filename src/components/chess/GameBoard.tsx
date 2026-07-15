@@ -112,7 +112,10 @@ export function GameBoard({
   reviewArrows,
   variant = "classic",
   boardTheme = "classic",
-  autoQueen = true,
+  // Ask which piece to promote to by default — auto-queen is an opt-in
+  // convenience (the live-game settings expose it as the "Auto-Q" chip).
+  // Underpromotion decides real endgames; silently queening loses games.
+  autoQueen = false,
   premovePromotion = "q",
 }: GameBoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);

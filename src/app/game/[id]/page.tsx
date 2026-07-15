@@ -234,7 +234,9 @@ function GamePageInner() {
     () => readStoredStr(LS_BOARD_THEME, "classic") as BoardThemeKey
   );
   const [confirmMove, setConfirmMove] = useState(() => readStoredBool(LS_CONFIRM, false));
-  const [autoQueen, setAutoQueen] = useState(() => readStoredBool(LS_AUTOQUEEN, true));
+  // Default OFF: promotion asks for the piece unless the player opts into
+  // auto-queen via the "Auto-Q" chip (a stored choice still wins).
+  const [autoQueen, setAutoQueen] = useState(() => readStoredBool(LS_AUTOQUEEN, false));
   const [premovePromotion, setPremovePromotion] = useState(() => readStoredStr(LS_PREMOVE_PROMO, "q"));
   const [bgTheme, setBgTheme] = useState<BgThemeKey>(() => readStoredStr(LS_BG_THEME, "default") as BgThemeKey);
   // A move staged for confirmation (when confirmMove is on): the UCI string awaiting Confirm/Cancel.
