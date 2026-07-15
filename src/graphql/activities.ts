@@ -38,6 +38,7 @@ export const ACTIVITY_BY_SLUG = gql`
       title
       excerpt
       bodyJson
+      bodyText
       coverImageUrl
       videoEmbedUrl
       region
@@ -86,6 +87,7 @@ export interface ActivityListItem {
 // The detail query selects `images` (full gallery) but not `highlights`.
 export interface ActivityDetail extends Omit<ActivityListItem, "highlights"> {
   bodyJson: string | null;
+  bodyText: string | null;
   videoEmbedUrl: string | null;
   images: ActivityImage[];
 }

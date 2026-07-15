@@ -77,9 +77,9 @@ function MetaRow({ activity }: { activity: ActivityListItem }) {
           {activity.region}
         </Text>
       ) : null}
-      {activity.publishedAt ? (
+      {activity.eventDate || activity.publishedAt ? (
         <Text fontSize="xs" color="textMuted">
-          · {formatActivityDate(activity.publishedAt)}
+          · {formatActivityDate(activity.eventDate ?? activity.publishedAt)}
         </Text>
       ) : null}
     </HStack>

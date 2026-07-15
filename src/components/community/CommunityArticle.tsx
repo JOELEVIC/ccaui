@@ -112,9 +112,11 @@ export function CommunityArticle({
                 {a.region}
               </Text>
             ) : null}
-            {a.publishedAt ? (
+            {a.eventDate || a.publishedAt ? (
+              // For event posts the day the event HAPPENED beats the day the
+              // recap was published.
               <Text fontSize="xs" color="textMuted">
-                · {formatActivityDate(a.publishedAt)}
+                · {formatActivityDate(a.eventDate ?? a.publishedAt)}
               </Text>
             ) : null}
           </HStack>
@@ -172,7 +174,14 @@ export function CommunityArticle({
               "& img": { maxWidth: "100%", borderRadius: "8px", margin: "1rem 0" },
             }}
           >
-            {renderTiptap(parseBody(a.bodyJson))}
+            {a.bodyJson
+              ? renderTiptap(parseBody(a.bodyJson))
+              : a.bodyText
+                ? a.bodyText
+                    .split(/\n+/)
+                    .filter((p) => p.trim())
+                    .map((p, i) => <p key={i}>{p.trim()}</p>)
+                : null}
           </Box>
 
           {a.tags.length ? (
